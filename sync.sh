@@ -9,7 +9,12 @@ ska() {
 ska vercel-labs/agent-skills --skill web-design-guidelines
 ska tw93/Waza --skill hunt design think
 ska vercel-labs/skills
+ska anthropics/skills --skill frontend-design
+ska vuejs-ai/skills
+ska slidevjs/slidev
+
 sh install-skills/vp.sh # For vp skills
+
 
 # ====== SKILLS ADDING AREA ENDED =======
 

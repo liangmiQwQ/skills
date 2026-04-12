@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "fmt": "oxfmt",
+    "prepare": "echo '#!/usr/bin/env sh\nnpx oxfmt' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+  },
+  "devDependencies": {
+    "oxfmt": "latest"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

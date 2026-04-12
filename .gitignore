@@ -1,0 +1,4 @@
+# Ignore lockfile to avoid dependency updates
+pnpm-lock.yaml
+
+node_modules

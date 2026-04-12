@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+ska() {
+  skills add "$@" -y -a claude-code
+}
+
+# ====== SKILLS ADDING AREA BEGIN =======
+
+ska vercel-labs/agent-skills
+
+
+# ====== SKILLS ADDING AREA ENDED =======
+
+rm -rf skills/*
+cp -r .claude/skills/* skills/
+cp -r my-skills/* skills/
+rm -rf .claude

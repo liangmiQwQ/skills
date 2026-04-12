@@ -3,6 +3,8 @@
   "license": "MIT",
   "scripts": {
     "fmt": "oxfmt",
+    "skills": "skills -y -a claude-code add ",
+    "sync": "bash sync.sh",
     "prepare": "echo '#!/usr/bin/env sh\nnpx oxfmt' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
   },
   "devDependencies": {

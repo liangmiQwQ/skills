@@ -15,3 +15,4 @@ rm -rf skills/*
 cp -r .claude/skills/* skills/
 cp -r my-skills/* skills/
 rm -rf .claude
+pnpm run fmt

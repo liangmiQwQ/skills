@@ -1,4 +1,10 @@
 # Ignore lockfile to avoid dependency updates
 pnpm-lock.yaml
 
+# Oxfmt binary
 node_modules
+
+# Skills
+.agents
+.claude
+.agent

@@ -6,10 +6,25 @@
       "sourceType": "github",
       "computedHash": "03e0eaaa9bf13ba1e7ffa387f5893de6f324c0868c627001f179395a8feaa7c9"
     },
+    "design": {
+      "source": "tw93/Waza",
+      "sourceType": "github",
+      "computedHash": "4d47c8135cd9f078741c0216659c28cc42106162e9465ebd536018f1d1d4c624"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
-      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
+      "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
+    },
+    "hunt": {
+      "source": "tw93/Waza",
+      "sourceType": "github",
+      "computedHash": "a4bf16254b157ebd5b1edc466db99eccae9aa0962d73a279debc0fa7e5de6134"
+    },
+    "think": {
+      "source": "tw93/Waza",
+      "sourceType": "github",
+      "computedHash": "257fb1fa5bc009a22040757e27e3471e8a6d1f46c5a63651089503bb630b5f71"
     },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",
@@ -35,6 +50,11 @@
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
+    },
+    "vite-plus": {
+      "source": "vite-plus",
+      "sourceType": "node_modules",
+      "computedHash": "1c14d75eb12385511728ebdf2c7e13c2ed8a53068772096b8af4985b7a80a1c3"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",

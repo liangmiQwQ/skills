@@ -11,7 +11,7 @@ cp "$PKG" "$BACKUP"
 pnpm install -D vite-plus
 
 # Run experimental sync
-skills experimental_sync
+skills experimental_sync -y --agent claude-code
 
 # Revert package.json and reinstall
 cp "$BACKUP" "$PKG"

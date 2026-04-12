@@ -6,8 +6,10 @@ ska() {
 
 # ====== SKILLS ADDING AREA BEGIN =======
 
-ska vercel-labs/agent-skills
-
+ska vercel-labs/agent-skills --skill web-design-guidelines
+ska tw93/Waza --skill hunt design think
+ska vercel-labs/skills
+sh install-skills/vp.sh # For vp skills
 
 # ====== SKILLS ADDING AREA ENDED =======
 

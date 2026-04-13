@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "create-adaptable-composable": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "2f215126499d29a733be980ef9ce8f4ffb5f25a8831aec965d86c0cd21b2c5d2"
+    },
     "deploy-to-vercel": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
@@ -9,22 +14,32 @@
     "design": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "4d47c8135cd9f078741c0216659c28cc42106162e9465ebd536018f1d1d4c624"
+      "computedHash": "5a7fed492feacaca1ece7680adb570fa2e644176fa581a1de495006a4569d6f2"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
     "hunt": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "a4bf16254b157ebd5b1edc466db99eccae9aa0962d73a279debc0fa7e5de6134"
+      "computedHash": "d0f4b25408c7215a52cab181901f27c03a477884c02fd293498d96f2f8d310e9"
+    },
+    "slidev": {
+      "source": "slidevjs/slidev",
+      "sourceType": "github",
+      "computedHash": "ae96487f210cf7c082621e28ebb5cd7f867ee0b99d74bf6120ac4085abd4859c"
     },
     "think": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "257fb1fa5bc009a22040757e27e3471e8a6d1f46c5a63651089503bb630b5f71"
+      "computedHash": "9353f5a4232dc0b9c028fe344bf1b7777f1d2e3cc5ddb6fb20d39ebe818eec9e"
     },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",
@@ -55,6 +70,41 @@
       "source": "vite-plus",
       "sourceType": "node_modules",
       "computedHash": "1c14d75eb12385511728ebdf2c7e13c2ed8a53068772096b8af4985b7a80a1c3"
+    },
+    "vue-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "3df585ad31aec78fe55c56c1411262737e6b231677a3153dec512a882fde80cd"
+    },
+    "vue-debug-guides": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "fa7b31c32a6717ae47cd2ea208773e27536225ad053a564effe656bf927fe9ef"
+    },
+    "vue-jsx-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "f78720a9904eb748af26cff651aaf8c0c8e6a72f9ee30e6f0626fc45e33cfd9a"
+    },
+    "vue-options-api-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "b35263a402e34a93e089cdf6d2e714d2dc1670a1f834ce67215552c4a70a864c"
+    },
+    "vue-pinia-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "d4ba913bec21910b8e37b2115cd964df2dc43ad62346b981c7b88d4ddc8cf792"
+    },
+    "vue-router-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "f0745ed318c113e592ab4a9ded57ceadd0db2edab00cdb46b216c83f5ce0799e"
+    },
+    "vue-testing-best-practices": {
+      "source": "vuejs-ai/skills",
+      "sourceType": "github",
+      "computedHash": "58d365899f54be9e5fa2c2e455093f9567620600578ae92aaa2f31d9b19a59ad"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",

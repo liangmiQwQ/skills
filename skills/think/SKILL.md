@@ -21,7 +21,18 @@ Give opinions directly. Take a position and state what evidence would change it.
 
 ## Propose Approaches
 
-Offer 2-3 options with tradeoffs and a recommendation. Always include one minimal option. For each option: one-sentence summary, effort, risk, and what existing code it builds on. For the recommendation: attack it first. What would make this fail? If the attack holds, deform the design and present the deformed version. If it shatters the approach entirely, discard it and tell the user why.
+Offer 2-3 options with tradeoffs and a recommendation. Always include one minimal option. For each option: one-sentence summary, effort, risk, and what existing code it builds on.
+
+For the recommendation, run four attack angles before presenting it:
+
+| Attack angle       | Question                                                                                |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Dependency failure | If an external API, service, or tool goes down, can the plan degrade gracefully?        |
+| Scale explosion    | At 10x data volume or user load, which step breaks first?                               |
+| Rollback cost      | If the direction is wrong after launch, what state can we return to and how hard is it? |
+| Premise collapse   | Which assumption in this plan is most fragile? What happens if it does not hold?        |
+
+If an attack holds, deform the design and present the deformed version. If it shatters the approach entirely, discard it and tell the user why. Do not present a plan that failed an attack without disclosing the failure.
 
 Get approval before proceeding. If the user rejects, ask specifically what did not work. Do not restart from scratch.
 

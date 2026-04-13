@@ -29,6 +29,19 @@ When these surface, stop and re-examine:
 | "It works on my machine"            | Environment difference IS the bug         | Enumerate every env difference before dismissing.                                 |
 | "One more restart should fix it"    | Avoiding the error message                | Read the last error verbatim. Never restart more than twice without new evidence. |
 
+## Progress Signals
+
+When these appear, the diagnosis is moving in the right direction:
+
+| What you're thinking                                 | What it means                       | Next step                                                     |
+| ---------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------- |
+| "This log line matches the hypothesis"               | Positive evidence found             | Find one more independent piece of evidence to cross-validate |
+| "I can predict what the next error will be"          | Mental model is forming             | Run the prediction; if it matches, the model is correct       |
+| "Root cause is in A but symptoms appear in B"        | Propagation path understood         | Trace the call chain from A to B and confirm each link        |
+| "I can write a test that would fail on the old code" | Hypothesis is specific and testable | Write the test before applying the fix                        |
+
+Do not claim progress without observable evidence matching at least one of these signals.
+
 ## Hard Rules
 
 - **Same symptom after a fix is a hard stop.** The previous hypothesis was wrong. Re-read the execution path from scratch.

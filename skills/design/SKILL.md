@@ -47,6 +47,16 @@ For production or multi-page UIs, expand the thesis into the 9-section DESIGN.md
 
 `references/design-reference.md` is already loaded during direction lock. It owns the full rules: typography, OKLCH color, motion timings, layout defaults, CSS-pattern bans, accessibility baseline, and complexity matching. Apply them. Do not restate them here.
 
+## Mid-Build Checkpoint
+
+After every third component or one complete page section (whichever comes first), stop and check:
+
+1. Re-read the visual thesis (mood, material, energy) stated during direction lock.
+2. Ask: does what is on screen right now match that thesis, or has it drifted toward a generic default?
+3. If drifted: identify the specific element that broke first (typeface, color choice, card treatment, spacing) and fix it before continuing.
+
+Do not wait until handoff to run the AI Slop Test. Catching drift early costs one component; catching it at handoff costs the entire build.
+
 ## Gotchas
 
 | What happened                                                               | Rule                                                                                                                                                             |

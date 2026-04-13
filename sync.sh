@@ -6,7 +6,7 @@ ska() {
 
 # ====== SKILLS ADDING AREA BEGIN =======
 
-ska vercel-labs/agent-skills --skill web-design-guidelines
+ska vercel-labs/agent-skills --skill web-design-guidelines react-best-practices
 ska tw93/Waza --skill hunt design think
 ska vercel-labs/skills
 ska anthropics/skills --skill frontend-design

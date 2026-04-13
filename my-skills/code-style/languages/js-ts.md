@@ -74,14 +74,14 @@ Avoid barrel `index.ts` re-exports unless the package has a genuine public API b
 ```ts
 // Not using Promise.all — the second request depends on a side
 // effect from the first, not just its return value.
-await stepOne()
-await stepTwo()
+await stepOne();
+await stepTwo();
 ```
 
 ```ts
 // Delay is intentional: the upstream service rejects requests
 // that arrive within 100ms of each other.
-await sleep(150)
+await sleep(150);
 ```
 
 Never write `@param` entries that restate the parameter name and type — TypeScript already says that.

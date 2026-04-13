@@ -1,6 +1,6 @@
 ---
 name: adding-tests
-description: Guide for writing tests that validate real behavior. Routes to the right approach based on context (bug fix, new feature). Core rule: test what the user sees, not how the code works internally.
+description: Guide for writing tests that validate real behavior. Routes to the right approach based on context (bug fix, new feature). Core rule: test what the user sees, not how the code works internally. Load this skill when you are doing test related works.
 ---
 
 # Adding Tests

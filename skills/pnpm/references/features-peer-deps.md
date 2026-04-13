@@ -28,7 +28,6 @@ strict-peer-dependencies=true
 ```
 
 When strict, pnpm will fail if:
-
 - Peer dependency is missing
 - Installed version doesn't match required range
 
@@ -58,14 +57,17 @@ Suppress warnings for missing peer dependencies:
 {
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["@babel/*", "eslint", "webpack"]
+      "ignoreMissing": [
+        "@babel/*",
+        "eslint",
+        "webpack"
+      ]
     }
   }
 }
 ```
 
 Use patterns:
-
 - `"react"` - exact package name
 - `"@babel/*"` - all packages in scope
 - `"*"` - all packages (not recommended)
@@ -110,20 +112,20 @@ Use `.pnpmfile.cjs` to add missing peer dependencies:
 // .pnpmfile.cjs
 function readPackage(pkg, context) {
   // Add missing peer dependency
-  if (pkg.name === "problematic-package") {
+  if (pkg.name === 'problematic-package') {
     pkg.peerDependencies = {
       ...pkg.peerDependencies,
-      react: "*",
-    };
+      react: '*'
+    }
   }
-  return pkg;
+  return pkg
 }
 
 module.exports = {
   hooks: {
-    readPackage,
-  },
-};
+    readPackage
+  }
+}
 ```
 
 ## Peer Dependencies in Workspaces
@@ -139,7 +141,7 @@ Workspace packages can satisfy peer dependencies:
   }
 }
 
-// packages/components/package.json
+// packages/components/package.json  
 {
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0"
@@ -185,7 +187,10 @@ catalog:
 {
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["eslint", "@typescript-eslint/parser"]
+      "ignoreMissing": [
+        "eslint",
+        "@typescript-eslint/parser"
+      ]
     }
   }
 }
@@ -228,7 +233,6 @@ pnpm list --depth=Infinity
 3. **Document suppressed warnings** explaining why they're safe
 
 4. **Keep peer deps ranges wide** in libraries:
-
    ```json
    {
      "peerDependencies": {
@@ -239,7 +243,7 @@ pnpm list --depth=Infinity
 
 5. **Test with different peer versions** if you support multiple majors
 
-<!--
+<!-- 
 Source references:
 - https://pnpm.io/package_json#pnpmpeerdependencyrules
 - https://pnpm.io/npmrc#auto-install-peers

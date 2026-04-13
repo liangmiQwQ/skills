@@ -15,8 +15,8 @@ Split presentations into multiple files for reusability.
 This is a normal page
 
 ---
-
-## src: ./pages/toc.md
+src: ./pages/toc.md
+---
 
 <!-- Content here is ignored -->
 
@@ -51,8 +51,8 @@ src: ./pages/toc.md
 <!-- later... -->
 
 ---
-
-## src: ./pages/toc.md
+src: ./pages/toc.md
+---
 ```
 
 ## Frontmatter Priority

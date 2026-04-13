@@ -15,9 +15,9 @@ tsdown uses [Rolldown](https://rolldown.rs) as its core bundling engine. You can
 ```ts
 export default defineConfig({
   inputOptions: {
-    cwd: "./custom-directory",
+    cwd: './custom-directory',
   },
-});
+})
 ```
 
 ### Using a Function
@@ -27,10 +27,10 @@ Dynamically modify options based on the output format:
 ```ts
 export default defineConfig({
   inputOptions(inputOptions, format) {
-    inputOptions.cwd = "./custom-directory";
-    return inputOptions;
+    inputOptions.cwd = './custom-directory'
+    return inputOptions
   },
-});
+})
 ```
 
 ## Output Options
@@ -40,9 +40,9 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   outputOptions: {
-    legalComments: "inline",
+    legalComments: 'inline',
   },
-});
+})
 ```
 
 ### Using a Function
@@ -50,12 +50,12 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   outputOptions(outputOptions, format) {
-    if (format === "esm") {
-      outputOptions.legalComments = "inline";
+    if (format === 'esm') {
+      outputOptions.legalComments = 'inline'
     }
-    return outputOptions;
+    return outputOptions
   },
-});
+})
 ```
 
 ## Common Use Cases
@@ -64,37 +64,37 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   outputOptions: {
-    legalComments: "inline",
+    legalComments: 'inline',
   },
-});
+})
 ```
 
 ### Custom Working Directory
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   inputOptions: {
-    cwd: "./packages/my-lib",
+    cwd: './packages/my-lib',
   },
-});
+})
 ```
 
 ### Format-Specific Options
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   outputOptions(outputOptions, format) {
-    if (format === "esm") {
-      outputOptions.legalComments = "inline";
+    if (format === 'esm') {
+      outputOptions.legalComments = 'inline'
     }
-    return outputOptions;
+    return outputOptions
   },
-});
+})
 ```
 
 ## When to Use

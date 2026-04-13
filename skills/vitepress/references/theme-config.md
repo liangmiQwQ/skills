@@ -13,21 +13,21 @@ Configure the default theme via `themeConfig` in your VitePress config.
 export default {
   themeConfig: {
     // Site title in nav (overrides config.title)
-    siteTitle: "My Docs",
-    siteTitle: false, // Hide title
-
+    siteTitle: 'My Docs',
+    siteTitle: false,  // Hide title
+    
     // Logo
-    logo: "/logo.svg",
-    logo: { light: "/light-logo.svg", dark: "/dark-logo.svg", alt: "Logo" },
-
+    logo: '/logo.svg',
+    logo: { light: '/light-logo.svg', dark: '/dark-logo.svg', alt: 'Logo' },
+    
     // Nav links
     nav: [
-      { text: "Guide", link: "/guide/" },
-      { text: "API", link: "/api/" },
-      { text: "GitHub", link: "https://github.com/..." },
-    ],
-  },
-};
+      { text: 'Guide', link: '/guide/' },
+      { text: 'API', link: '/api/' },
+      { text: 'GitHub', link: 'https://github.com/...' }
+    ]
+  }
+}
 ```
 
 ### Dropdown Menu
@@ -35,26 +35,26 @@ export default {
 ```ts
 nav: [
   {
-    text: "Dropdown",
+    text: 'Dropdown',
     items: [
-      { text: "Item A", link: "/item-a" },
-      { text: "Item B", link: "/item-b" },
-    ],
+      { text: 'Item A', link: '/item-a' },
+      { text: 'Item B', link: '/item-b' }
+    ]
   },
   // With sections
   {
-    text: "Versions",
+    text: 'Versions',
     items: [
       {
-        text: "v2.x",
+        text: 'v2.x',
         items: [
-          { text: "v2.0", link: "/v2/" },
-          { text: "v2.1", link: "/v2.1/" },
-        ],
-      },
-    ],
-  },
-];
+          { text: 'v2.0', link: '/v2/' },
+          { text: 'v2.1', link: '/v2.1/' }
+        ]
+      }
+    ]
+  }
+]
 ```
 
 ### Active Match
@@ -64,11 +64,11 @@ Control when nav item shows as active:
 ```ts
 nav: [
   {
-    text: "Guide",
-    link: "/guide/",
-    activeMatch: "/guide/", // Regex pattern
-  },
-];
+    text: 'Guide',
+    link: '/guide/',
+    activeMatch: '/guide/'  // Regex pattern
+  }
+]
 ```
 
 ## Sidebar
@@ -78,13 +78,13 @@ nav: [
 ```ts
 sidebar: [
   {
-    text: "Guide",
+    text: 'Guide',
     items: [
-      { text: "Introduction", link: "/guide/" },
-      { text: "Getting Started", link: "/guide/getting-started" },
-    ],
-  },
-];
+      { text: 'Introduction', link: '/guide/' },
+      { text: 'Getting Started', link: '/guide/getting-started' }
+    ]
+  }
+]
 ```
 
 ### Multiple Sidebars
@@ -154,7 +154,7 @@ sidebar: {
 ```ts
 themeConfig: {
   search: {
-    provider: "local";
+    provider: 'local'
   }
 }
 ```
@@ -192,16 +192,16 @@ search: {
 
 ```ts
 socialLinks: [
-  { icon: "github", link: "https://github.com/..." },
-  { icon: "twitter", link: "https://twitter.com/..." },
-  { icon: "discord", link: "https://discord.gg/..." },
+  { icon: 'github', link: 'https://github.com/...' },
+  { icon: 'twitter', link: 'https://twitter.com/...' },
+  { icon: 'discord', link: 'https://discord.gg/...' },
   // Custom SVG
   {
-    icon: { svg: "<svg>...</svg>" },
-    link: "https://...",
-    ariaLabel: "Custom Link",
-  },
-];
+    icon: { svg: '<svg>...</svg>' },
+    link: 'https://...',
+    ariaLabel: 'Custom Link'
+  }
+]
 ```
 
 ## Footer
@@ -232,8 +232,8 @@ Enable in site config:
 
 ```ts
 export default {
-  lastUpdated: true, // Get timestamp from git
-};
+  lastUpdated: true  // Get timestamp from git
+}
 ```
 
 Customize display:
@@ -262,9 +262,9 @@ outline: {
 Or just the level:
 
 ```ts
-outline: "deep"; // Same as [2, 6]
-outline: 2; // Only h2
-outline: [2, 4]; // h2 through h4
+outline: 'deep'  // Same as [2, 6]
+outline: 2       // Only h2
+outline: [2, 4]  // h2 through h4
 ```
 
 ## Doc Footer Navigation
@@ -284,7 +284,7 @@ docFooter: {
 ## External Link Icon
 
 ```ts
-externalLinkIcon: true; // Show icon on external links
+externalLinkIcon: true  // Show icon on external links
 ```
 
 ## Appearance Toggle Labels

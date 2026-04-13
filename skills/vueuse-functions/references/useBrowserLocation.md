@@ -11,9 +11,9 @@ Reactive browser location
 ## Usage
 
 ```ts
-import { useBrowserLocation } from "@vueuse/core";
+import { useBrowserLocation } from '@vueuse/core'
 
-const location = useBrowserLocation();
+const location = useBrowserLocation()
 ```
 
 ## Component Usage
@@ -29,20 +29,20 @@ const location = useBrowserLocation();
 ```ts
 export interface UseBrowserLocationOptions extends ConfigurableWindow {}
 export interface BrowserLocationState {
-  readonly trigger: string;
-  readonly state?: any;
-  readonly length?: number;
-  readonly origin?: string;
-  hash?: string;
-  host?: string;
-  hostname?: string;
-  href?: string;
-  pathname?: string;
-  port?: string;
-  protocol?: string;
-  search?: string;
+  readonly trigger: string
+  readonly state?: any
+  readonly length?: number
+  readonly origin?: string
+  hash?: string
+  host?: string
+  hostname?: string
+  href?: string
+  pathname?: string
+  port?: string
+  protocol?: string
+  search?: string
 }
-export type UseBrowserLocationReturn = Ref<BrowserLocationState>;
+export type UseBrowserLocationReturn = Ref<BrowserLocationState>
 /**
  * Reactive browser location.
  *
@@ -52,5 +52,5 @@ export type UseBrowserLocationReturn = Ref<BrowserLocationState>;
  */
 export declare function useBrowserLocation(
   options?: UseBrowserLocationOptions,
-): UseBrowserLocationReturn;
+): UseBrowserLocationReturn
 ```

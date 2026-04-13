@@ -14,33 +14,33 @@ Hooks provide a way to inject custom logic at specific stages of the build lifec
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   hooks: {
-    "build:prepare": async (context) => {
-      console.log("Build starting...");
+    'build:prepare': async (context) => {
+      console.log('Build starting...')
     },
-    "build:done": async (context) => {
-      console.log("Build complete!");
+    'build:done': async (context) => {
+      console.log('Build complete!')
     },
   },
-});
+})
 ```
 
 ### Function Syntax
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   hooks(hooks) {
-    hooks.hook("build:prepare", () => {
-      console.log("Preparing build...");
-    });
+    hooks.hook('build:prepare', () => {
+      console.log('Preparing build...')
+    })
 
-    hooks.hook("build:before", (context) => {
-      console.log(`Building format: ${context.format}`);
-    });
+    hooks.hook('build:before', (context) => {
+      console.log(`Building format: ${context.format}`)
+    })
   },
-});
+})
 ```
 
 ## Available Hooks
@@ -52,7 +52,6 @@ Called before the build process starts.
 **When:** Once per build session
 
 **Context:**
-
 ```ts
 {
   options: ResolvedConfig,
@@ -61,13 +60,11 @@ Called before the build process starts.
 ```
 
 **Use cases:**
-
 - Setup tasks
 - Validation
 - Environment preparation
 
 **Example:**
-
 ```ts
 hooks: {
   'build:prepare': async (context) => {
@@ -84,7 +81,6 @@ Called before each Rolldown build.
 **When:** Once per format (ESM, CJS, etc.)
 
 **Context:**
-
 ```ts
 {
   options: ResolvedConfig,
@@ -94,13 +90,11 @@ Called before each Rolldown build.
 ```
 
 **Use cases:**
-
 - Modify build options per format
 - Inject plugins dynamically
 - Format-specific setup
 
 **Example:**
-
 ```ts
 hooks: {
   'build:before': async (context) => {
@@ -121,7 +115,6 @@ Called after the build completes.
 **When:** Once per build session
 
 **Context:**
-
 ```ts
 {
   options: ResolvedConfig,
@@ -131,14 +124,12 @@ Called after the build completes.
 ```
 
 **Use cases:**
-
 - Post-processing
 - Asset copying
 - Notifications
 - Deployment
 
 **Example:**
-
 ```ts
 hooks: {
   'build:done': async (context) => {
@@ -160,15 +151,15 @@ hooks: {
 ```ts
 export default defineConfig({
   hooks: {
-    "build:prepare": () => {
-      console.log("🚀 Starting build...");
+    'build:prepare': () => {
+      console.log('🚀 Starting build...')
     },
-    "build:done": (context) => {
-      const size = context.chunks.reduce((sum, c) => sum + c.code.length, 0);
-      console.log(`✅ Build complete! Total size: ${size} bytes`);
+    'build:done': (context) => {
+      const size = context.chunks.reduce((sum, c) => sum + c.code.length, 0)
+      console.log(`✅ Build complete! Total size: ${size} bytes`)
     },
   },
-});
+})
 ```
 
 ### Conditional Plugin Injection
@@ -176,29 +167,29 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   hooks(hooks) {
-    hooks.hook("build:before", (context) => {
+    hooks.hook('build:before', (context) => {
       // Add minification only for production
-      if (process.env.NODE_ENV === "production") {
-        context.buildOptions.plugins.push(minifyPlugin());
+      if (process.env.NODE_ENV === 'production') {
+        context.buildOptions.plugins.push(minifyPlugin())
       }
-    });
+    })
   },
-});
+})
 ```
 
 ### Custom File Copy
 
 ```ts
-import { copyFile } from "fs/promises";
+import { copyFile } from 'fs/promises'
 
 export default defineConfig({
   hooks: {
-    "build:done": async (context) => {
+    'build:done': async (context) => {
       // Copy README to dist
-      await copyFile("README.md", `${context.options.outDir}/README.md`);
+      await copyFile('README.md', `${context.options.outDir}/README.md`)
     },
   },
-});
+})
 ```
 
 ### Build Metrics
@@ -206,41 +197,41 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   hooks: {
-    "build:prepare": (context) => {
-      context.startTime = Date.now();
+    'build:prepare': (context) => {
+      context.startTime = Date.now()
     },
-    "build:done": (context) => {
-      const duration = Date.now() - context.startTime;
-      console.log(`Build took ${duration}ms`);
+    'build:done': (context) => {
+      const duration = Date.now() - context.startTime
+      console.log(`Build took ${duration}ms`)
 
       // Log chunk sizes
       context.chunks.forEach((chunk) => {
-        console.log(`${chunk.fileName}: ${chunk.code.length} bytes`);
-      });
+        console.log(`${chunk.fileName}: ${chunk.code.length} bytes`)
+      })
     },
   },
-});
+})
 ```
 
 ### Format-Specific Logic
 
 ```ts
 export default defineConfig({
-  format: ["esm", "cjs", "iife"],
+  format: ['esm', 'cjs', 'iife'],
   hooks: {
-    "build:before": (context) => {
-      const format = context.buildOptions.format;
+    'build:before': (context) => {
+      const format = context.buildOptions.format
 
-      if (format === "iife") {
+      if (format === 'iife') {
         // Browser-specific setup
-        context.buildOptions.globalName = "MyLib";
-      } else if (format === "cjs") {
+        context.buildOptions.globalName = 'MyLib'
+      } else if (format === 'cjs') {
         // Node-specific setup
-        context.buildOptions.platform = "node";
+        context.buildOptions.platform = 'node'
       }
     },
   },
-});
+})
 ```
 
 ### Deployment Hook
@@ -248,14 +239,14 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   hooks: {
-    "build:done": async (context) => {
-      if (process.env.DEPLOY === "true") {
-        console.log("Deploying to CDN...");
-        await deployToCDN(context.options.outDir);
+    'build:done': async (context) => {
+      if (process.env.DEPLOY === 'true') {
+        console.log('Deploying to CDN...')
+        await deployToCDN(context.options.outDir)
       }
     },
   },
-});
+})
 ```
 
 ## Advanced Usage
@@ -266,16 +257,16 @@ export default defineConfig({
 export default defineConfig({
   hooks(hooks) {
     // Register multiple hooks
-    hooks.hook("build:prepare", setupEnvironment);
-    hooks.hook("build:prepare", validateConfig);
+    hooks.hook('build:prepare', setupEnvironment)
+    hooks.hook('build:prepare', validateConfig)
 
-    hooks.hook("build:before", injectPlugins);
-    hooks.hook("build:before", logFormat);
+    hooks.hook('build:before', injectPlugins)
+    hooks.hook('build:before', logFormat)
 
-    hooks.hook("build:done", generateManifest);
-    hooks.hook("build:done", notifyComplete);
+    hooks.hook('build:done', generateManifest)
+    hooks.hook('build:done', notifyComplete)
   },
-});
+})
 ```
 
 ### Async Hooks
@@ -283,16 +274,16 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   hooks: {
-    "build:prepare": async (context) => {
-      await fetchRemoteConfig();
-      await initializeDatabase();
+    'build:prepare': async (context) => {
+      await fetchRemoteConfig()
+      await initializeDatabase()
     },
-    "build:done": async (context) => {
-      await uploadToS3(context.chunks);
-      await invalidateCDN();
+    'build:done': async (context) => {
+      await uploadToS3(context.chunks)
+      await invalidateCDN()
     },
   },
-});
+})
 ```
 
 ### Error Handling
@@ -300,16 +291,16 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   hooks: {
-    "build:done": async (context) => {
+    'build:done': async (context) => {
       try {
-        await riskyOperation();
+        await riskyOperation()
       } catch (error) {
-        console.error("Hook failed:", error);
+        console.error('Hook failed:', error)
         // Don't throw - allow build to complete
       }
     },
   },
-});
+})
 ```
 
 ## Hookable API
@@ -320,21 +311,21 @@ tsdown uses [hookable](https://github.com/unjs/hookable) for hooks. Additional m
 export default defineConfig({
   hooks(hooks) {
     // Register hook
-    hooks.hook("build:done", handler);
+    hooks.hook('build:done', handler)
 
     // Register hook once
-    hooks.hookOnce("build:prepare", handler);
+    hooks.hookOnce('build:prepare', handler)
 
     // Remove hook
-    hooks.removeHook("build:done", handler);
+    hooks.removeHook('build:done', handler)
 
     // Clear all hooks for event
-    hooks.removeHooks("build:done");
+    hooks.removeHooks('build:done')
 
     // Call hooks manually
-    await hooks.callHook("build:done", context);
+    await hooks.callHook('build:done', context)
   },
-});
+})
 ```
 
 ## Tips

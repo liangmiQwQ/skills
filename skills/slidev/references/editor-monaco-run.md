@@ -12,9 +12,9 @@ Run code directly in the editor and see results.
 ````md
 ```ts {monaco-run}
 function distance(x: number, y: number) {
-  return Math.sqrt(x ** 2 + y ** 2);
+  return Math.sqrt(x ** 2 + y ** 2)
 }
-console.log(distance(3, 4));
+console.log(distance(3, 4))
 ```
 ````
 
@@ -24,7 +24,7 @@ Shows a "Run" button and displays output below the code.
 
 ````md
 ```ts {monaco-run} {autorun:false}
-console.log("Click the play button to run me");
+console.log('Click the play button to run me')
 ```
 ````
 
@@ -32,7 +32,7 @@ console.log("Click the play button to run me");
 
 ````md
 ```ts {monaco-run} {showOutputAt:'+1'}
-console.log("Shown after 1 click");
+console.log('Shown after 1 click')
 ```
 ````
 

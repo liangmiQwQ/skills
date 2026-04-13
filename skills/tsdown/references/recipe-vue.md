@@ -26,21 +26,23 @@ pnpm add -D unplugin-vue vue-tsc
 
 ```ts
 // tsdown.config.ts
-import { defineConfig } from "tsdown";
-import Vue from "unplugin-vue/rolldown";
+import { defineConfig } from 'tsdown'
+import Vue from 'unplugin-vue/rolldown'
 
 export default defineConfig({
-  entry: ["./src/index.ts"],
-  format: ["esm", "cjs"],
-  platform: "neutral",
+  entry: ['./src/index.ts'],
+  format: ['esm', 'cjs'],
+  platform: 'neutral',
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
-  plugins: [Vue({ isProduction: true })],
+  plugins: [
+    Vue({ isProduction: true }),
+  ],
   dts: {
-    vue: true, // Enable Vue type generation
+    vue: true,  // Enable Vue type generation
   },
-});
+})
 ```
 
 ## How It Works
@@ -48,7 +50,6 @@ export default defineConfig({
 ### unplugin-vue
 
 Compiles `.vue` single-file components:
-
 - Transforms template to render functions
 - Handles scoped styles
 - Processes script setup
@@ -56,7 +57,6 @@ Compiles `.vue` single-file components:
 ### vue-tsc
 
 Generates TypeScript declarations:
-
 - Type-checks Vue components
 - Creates `.d.ts` files
 - Preserves component props types
@@ -70,18 +70,22 @@ Generates TypeScript declarations:
 <!-- src/Button.vue -->
 <script setup lang="ts">
 interface Props {
-  type?: "primary" | "secondary";
-  disabled?: boolean;
+  type?: 'primary' | 'secondary'
+  disabled?: boolean
 }
 
-defineProps<Props>();
+defineProps<Props>()
 defineEmits<{
-  click: [];
-}>();
+  click: []
+}>()
 </script>
 
 <template>
-  <button :class="['btn', `btn-${type}`]" :disabled="disabled" @click="$emit('click')">
+  <button
+    :class="['btn', `btn-${type}`]"
+    :disabled="disabled"
+    @click="$emit('click')"
+  >
     <slot />
   </button>
 </template>
@@ -103,12 +107,12 @@ defineEmits<{
 
 ```ts
 // src/index.ts
-export { default as Button } from "./Button.vue";
-export { default as Input } from "./Input.vue";
-export { default as Modal } from "./Modal.vue";
+export { default as Button } from './Button.vue'
+export { default as Input } from './Input.vue'
+export { default as Modal } from './Modal.vue'
 
 // Re-export types
-export type { ButtonProps } from "./Button.vue";
+export type { ButtonProps } from './Button.vue'
 ```
 
 ## Common Patterns
@@ -117,11 +121,11 @@ export type { ButtonProps } from "./Button.vue";
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
-  platform: "neutral",
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  platform: 'neutral',
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
   plugins: [
     Vue({
@@ -135,7 +139,7 @@ export default defineConfig({
     vue: true,
   },
   clean: true,
-});
+})
 ```
 
 ### Multiple Components
@@ -143,44 +147,44 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   entry: {
-    index: "src/index.ts",
-    Button: "src/Button.vue",
-    Input: "src/Input.vue",
-    Modal: "src/Modal.vue",
+    index: 'src/index.ts',
+    Button: 'src/Button.vue',
+    Input: 'src/Input.vue',
+    Modal: 'src/Modal.vue',
   },
-  format: ["esm", "cjs"],
+  format: ['esm', 'cjs'],
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
   plugins: [Vue({ isProduction: true })],
   dts: { vue: true },
-});
+})
 ```
 
 ### With Composition Utilities
 
 ```ts
 // src/composables/useCounter.ts
-import { ref } from "vue";
+import { ref } from 'vue'
 
 export function useCounter(initial = 0) {
-  const count = ref(initial);
-  const increment = () => count.value++;
-  const decrement = () => count.value--;
-  return { count, increment, decrement };
+  const count = ref(initial)
+  const increment = () => count.value++
+  const decrement = () => count.value--
+  return { count, increment, decrement }
 }
 ```
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
   plugins: [Vue({ isProduction: true })],
   dts: { vue: true },
-});
+})
 ```
 
 ### TypeScript Configuration
@@ -219,7 +223,7 @@ export default defineConfig({
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
   },
   "files": ["dist"],
   "peerDependencies": {
@@ -242,32 +246,32 @@ export default defineConfig({
 Some Vite Vue plugins may work:
 
 ```ts
-import Vue from "unplugin-vue/rolldown";
-import Components from "unplugin-vue-components/rolldown";
+import Vue from 'unplugin-vue/rolldown'
+import Components from 'unplugin-vue-components/rolldown'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
   plugins: [
     Vue({ isProduction: true }),
     Components({
-      dts: "src/components.d.ts",
+      dts: 'src/components.d.ts',
     }),
   ],
   dts: { vue: true },
-});
+})
 ```
 
 ### JSX Support
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   deps: {
-    neverBundle: ["vue"],
+    neverBundle: ['vue'],
   },
   plugins: [
     Vue({
@@ -279,27 +283,27 @@ export default defineConfig({
   ],
   inputOptions: {
     transform: {
-      jsx: "automatic",
-      jsxImportSource: "vue",
+      jsx: 'automatic',
+      jsxImportSource: 'vue',
     },
   },
   dts: { vue: true },
-});
+})
 ```
 
 ### Monorepo Vue Packages
 
 ```ts
 export default defineConfig({
-  workspace: "packages/*",
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  workspace: 'packages/*',
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   deps: {
-    neverBundle: ["vue", /^@mycompany\//],
+    neverBundle: ['vue', /^@mycompany\//],
   },
   plugins: [Vue({ isProduction: true })],
   dts: { vue: true },
-});
+})
 ```
 
 ## Plugin Options
@@ -318,10 +322,10 @@ Vue({
   },
   template: {
     compilerOptions: {
-      isCustomElement: (tag) => tag.startsWith("custom-"),
+      isCustomElement: (tag) => tag.startsWith('custom-'),
     },
   },
-});
+})
 ```
 
 ## Tips
@@ -338,23 +342,18 @@ Vue({
 ### Type Generation Fails
 
 Ensure vue-tsc is installed:
-
 ```bash
 pnpm add -D vue-tsc
 ```
 
 Enable in config:
-
 ```ts
-dts: {
-  vue: true;
-}
+dts: { vue: true }
 ```
 
 ### Component Types Missing
 
 Check TypeScript config:
-
 ```json
 {
   "compilerOptions": {
@@ -367,7 +366,6 @@ Check TypeScript config:
 ### Vue Not Externalized
 
 Add to deps.neverBundle:
-
 ```ts
 deps: {
   neverBundle: ['vue'],
@@ -377,7 +375,6 @@ deps: {
 ### SFC Compilation Errors
 
 Check unplugin-vue version:
-
 ```bash
 pnpm add -D unplugin-vue@latest
 ```

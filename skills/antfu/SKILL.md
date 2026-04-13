@@ -48,15 +48,15 @@ metadata:
 
 ### @antfu/ni Commands
 
-| Command                    | Description                                |
-| -------------------------- | ------------------------------------------ |
-| `ni`                       | Install dependencies                       |
-| `ni <pkg>` / `ni -D <pkg>` | Add dependency / dev dependency            |
-| `nr <script>`              | Run script                                 |
-| `nu`                       | Upgrade dependencies                       |
-| `nun <pkg>`                | Uninstall dependency                       |
-| `nci`                      | Clean install (`pnpm i --frozen-lockfile`) |
-| `nlx <pkg>`                | Execute package (`npx`)                    |
+| Command | Description |
+|---------|-------------|
+| `ni` | Install dependencies |
+| `ni <pkg>` / `ni -D <pkg>` | Add dependency / dev dependency |
+| `nr <script>` | Run script |
+| `nu` | Upgrade dependencies |
+| `nun <pkg>` | Uninstall dependency |
+| `nci` | Clean install (`pnpm i --frozen-lockfile`) |
+| `nlx <pkg>` | Execute package (`npx`) |
 
 ### TypeScript Config
 
@@ -80,10 +80,11 @@ metadata:
 
 ```js
 // eslint.config.mjs
-import antfu from "@antfu/eslint-config";
+import antfu from '@antfu/eslint-config'
 
-export default antfu();
+export default antfu()
 ```
+
 
 When completing tasks, run `pnpm run lint --fix` to format the code and fix coding style.
 
@@ -107,12 +108,12 @@ For detailed configuration options: [antfu-eslint-config](references/antfu-eslin
 
 Use named catalogs in `pnpm-workspace.yaml` for version management:
 
-| Catalog    | Purpose                              |
-| ---------- | ------------------------------------ |
-| `prod`     | Production dependencies              |
-| `inlined`  | Bundler-inlined dependencies         |
-| `dev`      | Dev tools (linter, bundler, testing) |
-| `frontend` | Frontend libraries                   |
+| Catalog | Purpose |
+|---------|---------|
+| `prod` | Production dependencies |
+| `inlined` | Bundler-inlined dependencies |
+| `dev` | Dev tools (linter, bundler, testing) |
+| `frontend` | Frontend libraries |
 
 Avoid the default catalog. Catalog names can be adjusted per project needs.
 
@@ -120,10 +121,10 @@ Avoid the default catalog. Catalog names can be adjusted per project needs.
 
 ## References
 
-| Topic               | Description                                                     | Reference                                                |
-| ------------------- | --------------------------------------------------------------- | -------------------------------------------------------- |
-| ESLint Config       | Framework support, formatters, rule overrides, VS Code settings | [antfu-eslint-config](references/antfu-eslint-config.md) |
-| Project Setup       | .gitignore, GitHub Actions, VS Code extensions                  | [setting-up](references/setting-up.md)                   |
-| App Development     | Vue/Nuxt/UnoCSS conventions and patterns                        | [app-development](references/app-development.md)         |
-| Library Development | tsdown bundling, pure ESM publishing                            | [library-development](references/library-development.md) |
-| Monorepo            | pnpm workspaces, centralized alias, Turborepo                   | [monorepo](references/monorepo.md)                       |
+| Topic | Description | Reference |
+|-------|-------------|-----------|
+| ESLint Config | Framework support, formatters, rule overrides, VS Code settings | [antfu-eslint-config](references/antfu-eslint-config.md) |
+| Project Setup | .gitignore, GitHub Actions, VS Code extensions | [setting-up](references/setting-up.md) |
+| App Development | Vue/Nuxt/UnoCSS conventions and patterns | [app-development](references/app-development.md) |
+| Library Development | tsdown bundling, pure ESM publishing | [library-development](references/library-development.md) |
+| Monorepo | pnpm workspaces, centralized alias, Turborepo | [monorepo](references/monorepo.md) |

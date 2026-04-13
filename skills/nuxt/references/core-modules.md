@@ -16,17 +16,17 @@ Install and add to `nuxt.config.ts`:
 export default defineNuxtConfig({
   modules: [
     // npm package
-    "@nuxt/ui",
+    '@nuxt/ui',
     // Local module
-    "./modules/my-module",
+    './modules/my-module',
     // Inline module
     (options, nuxt) => {
-      console.log("Inline module");
+      console.log('Inline module')
     },
     // With options
-    ["@nuxt/image", { provider: "cloudinary" }],
+    ['@nuxt/image', { provider: 'cloudinary' }],
   ],
-});
+})
 ```
 
 ## Creating Modules
@@ -37,83 +37,83 @@ export default defineNuxtConfig({
 // modules/my-module.ts
 export default defineNuxtModule({
   meta: {
-    name: "my-module",
-    configKey: "myModule",
+    name: 'my-module',
+    configKey: 'myModule',
   },
   defaults: {
     enabled: true,
   },
   setup(options, nuxt) {
-    if (!options.enabled) return;
+    if (!options.enabled) return
 
-    console.log("My module is running!");
+    console.log('My module is running!')
   },
-});
+})
 ```
 
 ### Adding Components
 
 ```ts
 // modules/ui/index.ts
-import { addComponent, createResolver } from "@nuxt/kit";
+import { addComponent, createResolver } from '@nuxt/kit'
 
 export default defineNuxtModule({
   setup(options, nuxt) {
-    const { resolve } = createResolver(import.meta.url);
+    const { resolve } = createResolver(import.meta.url)
 
     // Add single component
     addComponent({
-      name: "MyButton",
-      filePath: resolve("./runtime/components/MyButton.vue"),
-    });
+      name: 'MyButton',
+      filePath: resolve('./runtime/components/MyButton.vue'),
+    })
 
     // Add components directory
     addComponentsDir({
-      path: resolve("./runtime/components"),
-      prefix: "My",
-    });
+      path: resolve('./runtime/components'),
+      prefix: 'My',
+    })
   },
-});
+})
 ```
 
 ### Adding Composables
 
 ```ts
 // modules/utils/index.ts
-import { addImports, createResolver } from "@nuxt/kit";
+import { addImports, createResolver } from '@nuxt/kit'
 
 export default defineNuxtModule({
   setup() {
-    const { resolve } = createResolver(import.meta.url);
+    const { resolve } = createResolver(import.meta.url)
 
     // Add auto-imported composable
     addImports({
-      name: "useMyUtil",
-      from: resolve("./runtime/composables/useMyUtil"),
-    });
+      name: 'useMyUtil',
+      from: resolve('./runtime/composables/useMyUtil'),
+    })
 
     // Add directory for auto-imports
-    addImportsDir(resolve("./runtime/composables"));
+    addImportsDir(resolve('./runtime/composables'))
   },
-});
+})
 ```
 
 ### Adding Plugins
 
 ```ts
 // modules/analytics/index.ts
-import { addPlugin, createResolver } from "@nuxt/kit";
+import { addPlugin, createResolver } from '@nuxt/kit'
 
 export default defineNuxtModule({
   setup() {
-    const { resolve } = createResolver(import.meta.url);
+    const { resolve } = createResolver(import.meta.url)
 
     addPlugin({
-      src: resolve("./runtime/plugin"),
-      mode: "client", // 'client', 'server', or 'all'
-    });
+      src: resolve('./runtime/plugin'),
+      mode: 'client', // 'client', 'server', or 'all'
+    })
   },
-});
+})
 ```
 
 Plugin file:
@@ -121,28 +121,28 @@ Plugin file:
 ```ts
 // modules/analytics/runtime/plugin.ts
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.hook("page:finish", () => {
-    console.log("Page loaded");
-  });
-});
+  nuxtApp.hook('page:finish', () => {
+    console.log('Page loaded')
+  })
+})
 ```
 
 ### Adding Server Routes
 
 ```ts
 // modules/api/index.ts
-import { addServerHandler, createResolver } from "@nuxt/kit";
+import { addServerHandler, createResolver } from '@nuxt/kit'
 
 export default defineNuxtModule({
   setup() {
-    const { resolve } = createResolver(import.meta.url);
+    const { resolve } = createResolver(import.meta.url)
 
     addServerHandler({
-      route: "/api/my-endpoint",
-      handler: resolve("./runtime/server/api/my-endpoint"),
-    });
+      route: '/api/my-endpoint',
+      handler: resolve('./runtime/server/api/my-endpoint'),
+    })
   },
-});
+})
 ```
 
 ### Extending Config
@@ -152,19 +152,19 @@ export default defineNuxtModule({
 export default defineNuxtModule({
   setup(options, nuxt) {
     // Add CSS
-    nuxt.options.css.push("my-module/styles.css");
+    nuxt.options.css.push('my-module/styles.css')
 
     // Add runtime config
     nuxt.options.runtimeConfig.public.myModule = {
       apiUrl: options.apiUrl,
-    };
+    }
 
     // Extend Vite config
-    nuxt.options.vite.optimizeDeps ||= {};
-    nuxt.options.vite.optimizeDeps.include ||= [];
-    nuxt.options.vite.optimizeDeps.include.push("some-package");
+    nuxt.options.vite.optimizeDeps ||= {}
+    nuxt.options.vite.optimizeDeps.include ||= []
+    nuxt.options.vite.optimizeDeps.include.push('some-package')
   },
-});
+})
 ```
 
 ## Module Hooks
@@ -173,27 +173,27 @@ export default defineNuxtModule({
 export default defineNuxtModule({
   setup(options, nuxt) {
     // Build-time hooks
-    nuxt.hook("modules:done", () => {
-      console.log("All modules loaded");
-    });
+    nuxt.hook('modules:done', () => {
+      console.log('All modules loaded')
+    })
 
-    nuxt.hook("components:dirs", (dirs) => {
-      dirs.push({ path: "~/extra-components" });
-    });
+    nuxt.hook('components:dirs', (dirs) => {
+      dirs.push({ path: '~/extra-components' })
+    })
 
-    nuxt.hook("pages:extend", (pages) => {
+    nuxt.hook('pages:extend', (pages) => {
       pages.push({
-        name: "custom-page",
-        path: "/custom",
-        file: resolve("./runtime/pages/custom.vue"),
-      });
-    });
+        name: 'custom-page',
+        path: '/custom',
+        file: resolve('./runtime/pages/custom.vue'),
+      })
+    })
 
-    nuxt.hook("imports:extend", (imports) => {
-      imports.push({ name: "myHelper", from: "my-package" });
-    });
+    nuxt.hook('imports:extend', (imports) => {
+      imports.push({ name: 'myHelper', from: 'my-package' })
+    })
   },
-});
+})
 ```
 
 ## Module Options
@@ -202,27 +202,27 @@ Type-safe options with defaults:
 
 ```ts
 export interface ModuleOptions {
-  apiKey: string;
-  enabled?: boolean;
-  prefix?: string;
+  apiKey: string
+  enabled?: boolean
+  prefix?: string
 }
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: "my-module",
-    configKey: "myModule",
+    name: 'my-module',
+    configKey: 'myModule',
   },
   defaults: {
     enabled: true,
-    prefix: "My",
+    prefix: 'My',
   },
   setup(options, nuxt) {
     // options is typed as ModuleOptions
     if (!options.apiKey) {
-      console.warn("API key not provided");
+      console.warn('API key not provided')
     }
   },
-});
+})
 ```
 
 Usage:
@@ -230,12 +230,12 @@ Usage:
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ["my-module"],
+  modules: ['my-module'],
   myModule: {
-    apiKey: "xxx",
-    prefix: "Custom",
+    apiKey: 'xxx',
+    prefix: 'Custom',
   },
-});
+})
 ```
 
 ## Local Modules
@@ -258,9 +258,9 @@ Auto-registered or manually added:
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: [
-    "~/modules/my-module", // Explicit
+    '~/modules/my-module', // Explicit
   ],
-});
+})
 ```
 
 ## Module Dependencies
@@ -268,23 +268,23 @@ export default defineNuxtConfig({
 ```ts
 export default defineNuxtModule({
   meta: {
-    name: "my-module",
+    name: 'my-module',
   },
   moduleDependencies: {
-    "@nuxt/image": {
-      version: ">=1.0.0",
+    '@nuxt/image': {
+      version: '>=1.0.0',
       defaults: {
-        provider: "ipx",
+        provider: 'ipx',
       },
     },
   },
   setup() {
     // @nuxt/image is guaranteed to be installed
   },
-});
+})
 ```
 
-<!--
+<!-- 
 Source references:
 - https://nuxt.com/docs/guide/modules
 - https://nuxt.com/docs/guide/modules/module-anatomy

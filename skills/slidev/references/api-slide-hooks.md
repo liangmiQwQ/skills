@@ -10,17 +10,17 @@ Lifecycle hooks for slide components.
 ## Available Hooks
 
 ```ts
-import { onSlideEnter, onSlideLeave, useIsSlideActive } from "@slidev/client";
+import { onSlideEnter, onSlideLeave, useIsSlideActive } from '@slidev/client'
 
-const isActive = useIsSlideActive();
+const isActive = useIsSlideActive()
 
 onSlideEnter(() => {
   // Called when slide becomes active
-});
+})
 
 onSlideLeave(() => {
   // Called when slide becomes inactive
-});
+})
 ```
 
 ## Important

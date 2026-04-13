@@ -37,9 +37,9 @@ tsdown --no-minify
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   minify: true,
-});
+})
 ```
 
 ### DCE-Only Mode
@@ -48,9 +48,9 @@ Remove dead code without full minification (keeps readable output):
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  minify: "dce-only",
-});
+  entry: ['src/index.ts'],
+  minify: 'dce-only',
+})
 ```
 
 ## Example Output
@@ -59,25 +59,21 @@ export default defineConfig({
 
 ```js
 // dist/index.mjs
-const x = 1;
+const x = 1
 
 function hello(x$1) {
-  console.log("Hello World");
-  console.log(x$1);
+  console.log('Hello World')
+  console.log(x$1)
 }
 
-hello(x);
+hello(x)
 ```
 
 ### With Minification
 
 ```js
 // dist/index.mjs
-const e = 1;
-function t(e) {
-  (console.log(`Hello World`), console.log(e));
-}
-t(e);
+const e=1;function t(e){console.log(`Hello World`),console.log(e)}t(e);
 ```
 
 ## Common Patterns
@@ -86,33 +82,33 @@ t(e);
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   minify: true,
   clean: true,
-});
+})
 ```
 
 ### Conditional Minification
 
 ```ts
 export default defineConfig((options) => ({
-  entry: ["src/index.ts"],
-  format: ["esm"],
-  minify: !options.watch, // Only minify in production
-}));
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  minify: !options.watch,  // Only minify in production
+}))
 ```
 
 ### Browser Library
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["iife"],
-  platform: "browser",
-  globalName: "MyLib",
+  entry: ['src/index.ts'],
+  format: ['iife'],
+  platform: 'browser',
+  globalName: 'MyLib',
   minify: true,
-});
+})
 ```
 
 ### Multiple Builds
@@ -121,19 +117,19 @@ export default defineConfig({
 export default defineConfig([
   // Development build
   {
-    entry: ["src/index.ts"],
-    format: ["esm"],
+    entry: ['src/index.ts'],
+    format: ['esm'],
     minify: false,
-    outDir: "dist/dev",
+    outDir: 'dist/dev',
   },
   // Production build
   {
-    entry: ["src/index.ts"],
-    format: ["esm"],
+    entry: ['src/index.ts'],
+    format: ['esm'],
     minify: true,
-    outDir: "dist/prod",
+    outDir: 'dist/prod',
   },
-]);
+])
 ```
 
 ## CLI Examples

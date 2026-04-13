@@ -41,8 +41,8 @@ Separate source files from project root:
 ```ts
 // .vitepress/config.ts
 export default {
-  srcDir: "./src", // Markdown files live in ./src/
-};
+  srcDir: './src'  // Markdown files live in ./src/
+}
 ```
 
 With `srcDir: 'src'`:
@@ -61,12 +61,10 @@ Use relative or absolute paths. Omit file extensions:
 
 ```md
 <!-- Recommended -->
-
 [Getting Started](./getting-started)
 [Guide](/guide/)
 
 <!-- Works but not recommended -->
-
 [Getting Started](./getting-started.md)
 [Getting Started](./getting-started.html)
 ```
@@ -77,12 +75,11 @@ Remove `.html` extension from URLs (requires server support):
 
 ```ts
 export default {
-  cleanUrls: true,
-};
+  cleanUrls: true
+}
 ```
 
 **Server requirements:**
-
 - Netlify, GitHub Pages: Supported by default
 - Vercel: Enable `cleanUrls` in `vercel.json`
 - Nginx: Configure `try_files $uri $uri.html $uri/ =404`
@@ -95,13 +92,13 @@ Customize the mapping between source and output paths:
 export default {
   rewrites: {
     // Static mapping
-    "packages/pkg-a/src/index.md": "pkg-a/index.md",
-    "packages/pkg-a/src/foo.md": "pkg-a/foo.md",
-
+    'packages/pkg-a/src/index.md': 'pkg-a/index.md',
+    'packages/pkg-a/src/foo.md': 'pkg-a/foo.md',
+    
     // Dynamic parameters
-    "packages/:pkg/src/:slug*": ":pkg/:slug*",
-  },
-};
+    'packages/:pkg/src/:slug*': ':pkg/:slug*'
+  }
+}
 ```
 
 This maps `packages/pkg-a/src/intro.md` → `/pkg-a/intro.html`.
@@ -113,9 +110,9 @@ Rewrites can also be a function:
 ```ts
 export default {
   rewrites(id) {
-    return id.replace(/^packages\/([^/]+)\/src\//, "$1/");
-  },
-};
+    return id.replace(/^packages\/([^/]+)\/src\//, '$1/')
+  }
+}
 ```
 
 ## Public Directory
@@ -141,15 +138,15 @@ For sub-path deployment (e.g., GitHub Pages):
 
 ```ts
 export default {
-  base: "/repo-name/",
-};
+  base: '/repo-name/'
+}
 ```
 
 All absolute paths are automatically prefixed with base. For dynamic paths in components, use `withBase`:
 
 ```vue
 <script setup>
-import { withBase } from "vitepress";
+import { withBase } from 'vitepress'
 </script>
 
 <template>

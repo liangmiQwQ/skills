@@ -24,9 +24,9 @@ tsdown --no-treeshake
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  treeshake: true, // Default
-});
+  entry: ['src/index.ts'],
+  treeshake: true,  // Default
+})
 ```
 
 ## How It Works
@@ -34,30 +34,28 @@ export default defineConfig({
 ### With Tree Shaking
 
 **Source:**
-
 ```ts
 // src/util.ts
 export function unused() {
-  console.log("I'm unused");
+  console.log("I'm unused")
 }
 
 export function hello(x: number) {
-  console.log("Hello World", x);
+  console.log('Hello World', x)
 }
 
 // src/index.ts
-import { hello } from "./util";
-hello(1);
+import { hello } from './util'
+hello(1)
 ```
 
 **Output:**
-
 ```js
 // dist/index.mjs
 function hello(x) {
-  console.log("Hello World", x);
+  console.log('Hello World', x)
 }
-hello(1);
+hello(1)
 ```
 
 `unused()` function is removed because it's never imported.
@@ -65,17 +63,16 @@ hello(1);
 ### Without Tree Shaking
 
 **Output:**
-
 ```js
 // dist/index.mjs
 function unused() {
-  console.log("I'm unused");
+  console.log("I'm unused")
 }
 
 function hello(x) {
-  console.log("Hello World", x);
+  console.log('Hello World', x)
 }
-hello(1);
+hello(1)
 ```
 
 All code is included, even if unused.
@@ -87,7 +84,7 @@ All code is included, even if unused.
 ```ts
 export default defineConfig({
   treeshake: true,
-});
+})
 ```
 
 Uses Rolldown's default tree shaking.
@@ -101,7 +98,7 @@ export default defineConfig({
     propertyReadSideEffects: false,
     unknownGlobalSideEffects: false,
   },
-});
+})
 ```
 
 See [Rolldown docs](https://rolldown.rs/reference/config-options#treeshake) for all options.
@@ -111,7 +108,7 @@ See [Rolldown docs](https://rolldown.rs/reference/config-options#treeshake) for 
 ```ts
 export default defineConfig({
   treeshake: false,
-});
+})
 ```
 
 ## Side Effects
@@ -141,10 +138,10 @@ export default defineConfig({
   treeshake: {
     moduleSideEffects: (id) => {
       // Preserve side effects for polyfills
-      return id.includes("polyfill");
+      return id.includes('polyfill')
     },
   },
-});
+})
 ```
 
 ## Common Patterns
@@ -153,50 +150,53 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   treeshake: true,
   minify: true,
-});
+})
 ```
 
 ### Development Build
 
 ```ts
 export default defineConfig((options) => ({
-  entry: ["src/index.ts"],
-  treeshake: !options.watch, // Disable in dev
-}));
+  entry: ['src/index.ts'],
+  treeshake: !options.watch,  // Disable in dev
+}))
 ```
 
 ### Library with Side Effects
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   treeshake: {
     moduleSideEffects: (id) => {
-      return id.includes(".css") || id.includes("polyfill") || id.includes("side-effect");
+      return (
+        id.includes('.css') ||
+        id.includes('polyfill') ||
+        id.includes('side-effect')
+      )
     },
   },
-});
+})
 ```
 
 ### Utilities Library
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
+  entry: ['src/index.ts'],
+  format: ['esm'],
   treeshake: true,
   dts: true,
-});
+})
 ```
 
 Users can import only what they need:
-
 ```ts
-import { onlyWhatINeed } from "my-utils";
+import { onlyWhatINeed } from 'my-utils'
 ```
 
 ## Benefits
@@ -228,7 +228,7 @@ During development to see all code:
 ```ts
 export default defineConfig((options) => ({
   treeshake: !options.watch,
-}));
+}))
 ```
 
 ### Side Effect Code
@@ -237,7 +237,7 @@ Code with global side effects:
 
 ```ts
 // This has side effects
-window.myGlobal = {};
+window.myGlobal = {}
 
 export function setup() {
   // ...
@@ -259,7 +259,7 @@ Include all code for coverage:
 ```ts
 export default defineConfig({
   treeshake: false,
-});
+})
 ```
 
 ## Tips
@@ -297,15 +297,15 @@ export default defineConfig({
 ```ts
 // utils.ts - perfect for tree shaking
 export function add(a, b) {
-  return a + b;
+  return a + b
 }
 
 export function multiply(a, b) {
-  return a * b;
+  return a * b
 }
 
 // Only 'add' imported = only 'add' bundled
-import { add } from "./utils";
+import { add } from './utils'
 ```
 
 ### With Side Effects
@@ -313,12 +313,12 @@ import { add } from "./utils";
 ```ts
 // polyfill.ts - has side effects
 if (!Array.prototype.at) {
-  Array.prototype.at = function (index) {
+  Array.prototype.at = function(index) {
     // polyfill implementation
-  };
+  }
 }
 
-export {}; // Need to export something
+export {} // Need to export something
 ```
 
 ```json

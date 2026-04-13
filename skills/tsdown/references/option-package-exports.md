@@ -20,11 +20,11 @@ tsdown --exports
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   dts: true,
   exports: true,
-});
+})
 ```
 
 ## What Gets Generated
@@ -32,18 +32,16 @@ export default defineConfig({
 ### Single Entry
 
 **Config:**
-
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   dts: true,
   exports: true,
-});
+})
 ```
 
 **Generated in package.json:**
-
 ```json
 {
   "main": "./dist/index.cjs",
@@ -62,21 +60,19 @@ export default defineConfig({
 ### Multiple Entries
 
 **Config:**
-
 ```ts
 export default defineConfig({
   entry: {
-    index: "src/index.ts",
-    utils: "src/utils.ts",
+    index: 'src/index.ts',
+    utils: 'src/utils.ts',
   },
-  format: ["esm", "cjs"],
+  format: ['esm', 'cjs'],
   dts: true,
   exports: true,
-});
+})
 ```
 
 **Generated in package.json:**
-
 ```json
 {
   "main": "./dist/index.cjs",
@@ -103,12 +99,12 @@ Include all output files, not just entry points:
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   exports: {
     all: true,
   },
-});
+})
 ```
 
 **Result:** All `.mjs`, `.cjs`, and `.d.ts` files will be added to exports.
@@ -121,20 +117,19 @@ Link to source files during development:
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   exports: {
     devExports: true,
   },
-});
+})
 ```
 
 **Generated:**
-
 ```json
 {
   "exports": {
-    ".": "./src/index.ts" // Points to source
+    ".": "./src/index.ts"  // Points to source
   },
   "publishConfig": {
     "exports": {
@@ -156,13 +151,12 @@ Use specific condition for dev exports:
 ```ts
 export default defineConfig({
   exports: {
-    devExports: "development",
+    devExports: 'development',
   },
-});
+})
 ```
 
 **Generated:**
-
 ```json
 {
   "exports": {
@@ -176,7 +170,6 @@ export default defineConfig({
 ```
 
 **Use with TypeScript customConditions:**
-
 ```json
 // tsconfig.json
 {
@@ -192,19 +185,19 @@ Add custom export mappings:
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   exports: {
     customExports(pkg, context) {
       // Add custom export
-      pkg["./foo"] = "./dist/foo.js";
+      pkg['./foo'] = './dist/foo.js'
 
       // Add package.json export
-      pkg["./package.json"] = "./package.json";
+      pkg['./package.json'] = './package.json'
 
-      return pkg;
+      return pkg
     },
   },
-});
+})
 ```
 
 ## Common Patterns
@@ -213,12 +206,12 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   dts: true,
   exports: true,
   clean: true,
-});
+})
 ```
 
 ### Multiple Exports with Dev Mode
@@ -226,29 +219,29 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   entry: {
-    index: "src/index.ts",
-    client: "src/client.ts",
-    server: "src/server.ts",
+    index: 'src/index.ts',
+    client: 'src/client.ts',
+    server: 'src/server.ts',
   },
-  format: ["esm", "cjs"],
+  format: ['esm', 'cjs'],
   dts: true,
   exports: {
-    all: false, // Only entries
-    devExports: "development",
+    all: false,  // Only entries
+    devExports: 'development',
   },
-});
+})
 ```
 
 ### Monorepo Package
 
 ```ts
 export default defineConfig({
-  workspace: "packages/*",
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
+  workspace: 'packages/*',
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
   dts: true,
-  exports: true, // Generate for each package
-});
+  exports: true,  // Generate for each package
+})
 ```
 
 ## Validation
@@ -266,8 +259,8 @@ Or in config:
 ```ts
 export default defineConfig({
   exports: true,
-  publint: true, // Validate exports
-});
+  publint: true,  // Validate exports
+})
 ```
 
 ## Tips

@@ -31,8 +31,8 @@ class: text-white
 
 ```yaml
 ---
-clicks: 5 # Total clicks for this slide
-clicksStart: 0 # Starting click number
+clicks: 5                   # Total clicks for this slide
+clicksStart: 0              # Starting click number
 ---
 ```
 
@@ -40,7 +40,7 @@ clicksStart: 0 # Starting click number
 
 ```yaml
 ---
-transition: fade # Slide transition
+transition: fade            # Slide transition
 ---
 ```
 
@@ -56,7 +56,7 @@ transition: slide-left | slide-right
 
 ```yaml
 ---
-zoom: 0.8 # Scale content (0.8 = 80%)
+zoom: 0.8                   # Scale content (0.8 = 80%)
 ---
 ```
 
@@ -64,7 +64,7 @@ zoom: 0.8 # Scale content (0.8 = 80%)
 
 ```yaml
 ---
-disabled: true # Hide this slide
+disabled: true              # Hide this slide
 # or
 hide: true
 ---
@@ -74,9 +74,9 @@ hide: true
 
 ```yaml
 ---
-hideInToc: true # Hide from Toc component
-level: 2 # Override heading level
-title: Custom Title # Override slide title
+hideInToc: true             # Hide from Toc component
+level: 2                    # Override heading level
+title: Custom Title         # Override slide title
 ---
 ```
 
@@ -84,7 +84,7 @@ title: Custom Title # Override slide title
 
 ```yaml
 ---
-src: ./slides/intro.md # Import markdown file
+src: ./slides/intro.md      # Import markdown file
 ---
 ```
 
@@ -92,7 +92,7 @@ With specific slides:
 
 ```yaml
 ---
-src: ./other.md#2,5-7 # Import slides 2, 5, 6, 7
+src: ./other.md#2,5-7       # Import slides 2, 5, 6, 7
 ---
 ```
 
@@ -100,7 +100,7 @@ src: ./other.md#2,5-7 # Import slides 2, 5, 6, 7
 
 ```yaml
 ---
-routeAlias: intro # URL: /intro instead of /1
+routeAlias: intro           # URL: /intro instead of /1
 ---
 ```
 
@@ -108,7 +108,7 @@ routeAlias: intro # URL: /intro instead of /1
 
 ```yaml
 ---
-preload: false # Don't mount until entering
+preload: false              # Don't mount until entering
 ---
 ```
 
@@ -117,7 +117,7 @@ preload: false # Don't mount until entering
 ```yaml
 ---
 dragPos:
-  logo: 100,50,200,100,0 # Left,Top,Width,Height,Rotate
+  logo: 100,50,200,100,0    # Left,Top,Width,Height,Rotate
   arrow: 300,200,50,50,45
 ---
 ```
@@ -190,5 +190,6 @@ clicks: 3
 zoom: 0.9
 hideInToc: false
 ---
+
 # Slide Content
 ```

@@ -20,10 +20,8 @@ Import `.css` files from TypeScript/JavaScript — CSS is extracted into separat
 
 ```ts
 // src/index.ts
-import "./style.css";
-export function greet() {
-  return "Hello";
-}
+import './style.css'
+export function greet() { return 'Hello' }
 ```
 
 Output: `index.mjs` + `index.css`
@@ -37,8 +35,8 @@ CSS `@import` statements are resolved and inlined automatically. No separate out
 Append `?inline` to return processed CSS as a JS string instead of emitting a `.css` file:
 
 ```ts
-import "./style.css"; // → .css file
-import css from "./theme.css?inline"; // → JS string
+import './style.css'                   // → .css file
+import css from './theme.css?inline'   // → JS string
 ```
 
 Works with preprocessors too (`./foo.scss?inline`). Goes through full pipeline (preprocessors, @import inlining, lowering, minification). Tree-shakeable (`moduleSideEffects: false`).
@@ -62,9 +60,9 @@ npm install -D stylus
 Then import directly:
 
 ```ts
-import "./style.scss";
-import "./theme.less";
-import "./global.styl";
+import './style.scss'
+import './theme.less'
+import './global.styl'
 ```
 
 ### Preprocessor Options
@@ -77,14 +75,14 @@ export default defineConfig({
         additionalData: `$brand-color: #ff7e17;`,
       },
       less: {
-        math: "always",
+        math: 'always',
       },
       stylus: {
-        define: { "$brand-color": "#ff7e17" },
+        define: { '$brand-color': '#ff7e17' },
       },
     },
   },
-});
+})
 ```
 
 ### `additionalData`
@@ -113,7 +111,7 @@ export default defineConfig({
   css: {
     minify: true,
   },
-});
+})
 ```
 
 Powered by Lightning CSS.
@@ -124,11 +122,11 @@ Override the top-level `target` specifically for CSS:
 
 ```ts
 export default defineConfig({
-  target: "node18",
+  target: 'node18',
   css: {
-    target: "chrome90", // CSS-specific target
+    target: 'chrome90', // CSS-specific target
   },
-});
+})
 ```
 
 Set `css.target: false` to disable CSS syntax lowering entirely.
@@ -143,9 +141,9 @@ Set `css.target: false` to disable CSS syntax lowering entirely.
 ```ts
 export default defineConfig({
   css: {
-    transformer: "postcss",
+    transformer: 'postcss',
   },
-});
+})
 ```
 
 ### PostCSS Options
@@ -153,13 +151,13 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   css: {
-    transformer: "postcss",
+    transformer: 'postcss',
     postcss: {
-      plugins: [require("autoprefixer")],
+      plugins: [require('autoprefixer')],
     },
     // Or: postcss: './config' — path to search for postcss.config.js
   },
-});
+})
 ```
 
 Auto-detects PostCSS config from project root when `transformer` is `'postcss'` and `css.postcss` is omitted.
@@ -176,22 +174,16 @@ When `target` is set (e.g., `target: 'chrome108'`), modern CSS features are auto
 
 ```css
 /* Input */
-.foo {
-  & .bar {
-    color: red;
-  }
-}
+.foo { & .bar { color: red } }
 
 /* Output (chrome108) */
-.foo .bar {
-  color: red;
-}
+.foo .bar { color: red }
 ```
 
 ### Custom Lightning CSS Options
 
 ```ts
-import { Features } from "lightningcss";
+import { Features } from 'lightningcss'
 
 export default defineConfig({
   css: {
@@ -200,7 +192,7 @@ export default defineConfig({
       include: Features.Nesting,
     },
   },
-});
+})
 ```
 
 `css.lightningcss.targets` takes precedence over both `target` and `css.target` for CSS.
@@ -214,9 +206,9 @@ All CSS merged into a single file (default: `style.css`).
 ```ts
 export default defineConfig({
   css: {
-    fileName: "my-library.css", // Custom name (default: 'style.css')
+    fileName: 'my-library.css', // Custom name (default: 'style.css')
   },
-});
+})
 ```
 
 ### Per-Chunk Splitting
@@ -226,7 +218,7 @@ export default defineConfig({
   css: {
     splitting: true, // Each JS chunk gets a corresponding .css file
   },
-});
+})
 ```
 
 ## Preserving CSS Imports (`css.inject`)
@@ -238,22 +230,22 @@ export default defineConfig({
   css: {
     inject: true,
   },
-});
+})
 ```
 
 ## Options Reference
 
-| Option                    | Type                          | Default          | Description                           |
-| ------------------------- | ----------------------------- | ---------------- | ------------------------------------- |
-| `css.transformer`         | `'postcss' \| 'lightningcss'` | `'lightningcss'` | CSS processing pipeline               |
-| `css.splitting`           | `boolean`                     | `false`          | Per-chunk CSS splitting               |
-| `css.fileName`            | `string`                      | `'style.css'`    | Merged CSS file name                  |
-| `css.minify`              | `boolean`                     | `false`          | CSS minification                      |
-| `css.inject`              | `boolean`                     | `false`          | Preserve CSS imports in JS output     |
-| `css.target`              | `string \| string[] \| false` | _from `target`_  | CSS-specific lowering target          |
-| `css.postcss`             | `string \| object`            | —                | PostCSS config path or inline options |
-| `css.preprocessorOptions` | `object`                      | —                | Preprocessor options                  |
-| `css.lightningcss`        | `object`                      | —                | Lightning CSS options                 |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `css.transformer` | `'postcss' \| 'lightningcss'` | `'lightningcss'` | CSS processing pipeline |
+| `css.splitting` | `boolean` | `false` | Per-chunk CSS splitting |
+| `css.fileName` | `string` | `'style.css'` | Merged CSS file name |
+| `css.minify` | `boolean` | `false` | CSS minification |
+| `css.inject` | `boolean` | `false` | Preserve CSS imports in JS output |
+| `css.target` | `string \| string[] \| false` | _from `target`_ | CSS-specific lowering target |
+| `css.postcss` | `string \| object` | — | PostCSS config path or inline options |
+| `css.preprocessorOptions` | `object` | — | Preprocessor options |
+| `css.lightningcss` | `object` | — | Lightning CSS options |
 
 ## Related
 

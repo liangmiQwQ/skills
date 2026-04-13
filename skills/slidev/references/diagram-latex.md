@@ -27,8 +27,7 @@ $$
 ## Line Highlighting
 
 ```md
-$$
-{1|3|all}
+$$ {1|3|all}
 \begin{aligned}
 \nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} \\
 \nabla \cdot \vec{B} &= 0 \\
@@ -42,9 +41,9 @@ $$
 Enable mhchem extension in `vite.config.ts`:
 
 ```ts
-import "katex/contrib/mhchem";
+import 'katex/contrib/mhchem'
 
-export default {};
+export default {}
 ```
 
 Then use:

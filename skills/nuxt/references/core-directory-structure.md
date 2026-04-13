@@ -47,8 +47,8 @@ Contains all application code. Can also be at root level (without `app/` folder)
 ```ts
 // nuxt.config.ts - customize source directory
 export default defineNuxtConfig({
-  srcDir: "src/", // Change from 'app/' to 'src/'
-});
+  srcDir: 'src/', // Change from 'app/' to 'src/'
+})
 ```
 
 ### `app/components/`
@@ -99,7 +99,7 @@ Re-export nested composables:
 
 ```ts
 // composables/index.ts
-export { useHelper } from "./nested/utils";
+export { useHelper } from './nested/utils'
 ```
 
 ### `app/pages/`
@@ -151,9 +151,9 @@ Use in pages:
 ```vue
 <script setup>
 definePageMeta({
-  layout: "admin",
+  layout: 'admin',
   // layout: false // Disable layout
-});
+})
 </script>
 ```
 
@@ -234,34 +234,34 @@ Reference in components:
 </template>
 
 <style>
-@import "~/assets/css/main.css";
+@import '~/assets/css/main.css';
 </style>
 ```
 
 ## Special Files
 
-| File             | Purpose                               |
-| ---------------- | ------------------------------------- |
-| `app.vue`        | Root component (optional with pages/) |
-| `app.config.ts`  | Runtime app configuration             |
-| `error.vue`      | Custom error page                     |
-| `nuxt.config.ts` | Build-time configuration              |
-| `.nuxtignore`    | Ignore files from Nuxt                |
-| `.env`           | Environment variables                 |
+| File | Purpose |
+|------|---------|
+| `app.vue` | Root component (optional with pages/) |
+| `app.config.ts` | Runtime app configuration |
+| `error.vue` | Custom error page |
+| `nuxt.config.ts` | Build-time configuration |
+| `.nuxtignore` | Ignore files from Nuxt |
+| `.env` | Environment variables |
 
 ## File Naming Conventions
 
-| Pattern       | Meaning                  |
-| ------------- | ------------------------ |
-| `[param]`     | Dynamic route parameter  |
-| `[[param]]`   | Optional parameter       |
-| `[...slug]`   | Catch-all route          |
-| `(group)`     | Route group (not in URL) |
-| `.client.vue` | Client-only component    |
-| `.server.vue` | Server-only component    |
-| `.global.ts`  | Global middleware        |
+| Pattern | Meaning |
+|---------|---------|
+| `[param]` | Dynamic route parameter |
+| `[[param]]` | Optional parameter |
+| `[...slug]` | Catch-all route |
+| `(group)` | Route group (not in URL) |
+| `.client.vue` | Client-only component |
+| `.server.vue` | Server-only component |
+| `.global.ts` | Global middleware |
 
-<!--
+<!-- 
 Source references:
 - https://nuxt.com/docs/directory-structure
 - https://nuxt.com/docs/directory-structure/app

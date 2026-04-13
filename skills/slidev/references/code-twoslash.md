@@ -11,9 +11,9 @@ Show TypeScript type information inline or on hover.
 
 ````md
 ```ts twoslash
-import { ref } from "vue";
+import { ref } from 'vue'
 
-const count = ref(0);
+const count = ref(0)
 //            ^?
 ```
 ````
@@ -28,7 +28,7 @@ const count = ref(0);
 ## Annotations
 
 ```ts twoslash
-const count = ref(0);
+const count = ref(0)
 //            ^?
 // Shows: const count: Ref<number>
 ```

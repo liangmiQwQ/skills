@@ -8,11 +8,11 @@ Platform determines the runtime environment and affects module resolution, built
 
 ## Available Platforms
 
-| Platform  | Runtime           | Built-ins              | Use Case                   |
-| --------- | ----------------- | ---------------------- | -------------------------- |
-| `node`    | Node.js (default) | Resolved automatically | Server-side, CLIs, tooling |
-| `browser` | Web browsers      | Warning if used        | Front-end applications     |
-| `neutral` | Platform-agnostic | No assumptions         | Universal libraries        |
+| Platform | Runtime | Built-ins | Use Case |
+|----------|---------|-----------|----------|
+| `node` | Node.js (default) | Resolved automatically | Server-side, CLIs, tooling |
+| `browser` | Web browsers | Warning if used | Front-end applications |
+| `neutral` | Platform-agnostic | No assumptions | Universal libraries |
 
 ## Usage
 
@@ -28,9 +28,9 @@ tsdown --platform neutral
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  platform: "browser",
-});
+  entry: ['src/index.ts'],
+  platform: 'browser',
+})
 ```
 
 ## Platform Details
@@ -41,13 +41,12 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  platform: "node",
-});
+  entry: ['src/index.ts'],
+  platform: 'node',
+})
 ```
 
 **Characteristics:**
-
 - Node.js built-ins (fs, path, etc.) resolved automatically
 - Optimized for Node.js runtime
 - Compatible with Deno and Bun
@@ -59,14 +58,13 @@ For web applications running in browsers.
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  platform: "browser",
-  format: ["esm"],
-});
+  entry: ['src/index.ts'],
+  platform: 'browser',
+  format: ['esm'],
+})
 ```
 
 **Characteristics:**
-
 - Warnings if Node.js built-ins are used
 - May require polyfills for Node APIs
 - Optimized for browser environments
@@ -78,14 +76,13 @@ Platform-agnostic for universal libraries.
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  platform: "neutral",
-  format: ["esm"],
-});
+  entry: ['src/index.ts'],
+  platform: 'neutral',
+  format: ['esm'],
+})
 ```
 
 **Characteristics:**
-
 - No runtime assumptions
 - No automatic built-in resolution
 - Relies on `exports` field only
@@ -98,10 +95,10 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["cjs"],
-  platform: "browser", // Ignored for CJS
-});
+  entry: ['src/index.ts'],
+  format: ['cjs'],
+  platform: 'browser',  // Ignored for CJS
+})
 ```
 
 See [rolldown PR #4693](https://github.com/rolldown/rolldown/pull/4693#issuecomment-2912229545) for details.
@@ -112,11 +109,11 @@ See [rolldown PR #4693](https://github.com/rolldown/rolldown/pull/4693#issuecomm
 
 Different platforms check different `package.json` fields:
 
-| Platform  | mainFields                      | Priority                |
-| --------- | ------------------------------- | ----------------------- |
-| `node`    | `['main', 'module']`            | main → module           |
+| Platform | mainFields | Priority |
+|----------|------------|----------|
+| `node` | `['main', 'module']` | main → module |
 | `browser` | `['browser', 'module', 'main']` | browser → module → main |
-| `neutral` | `[]`                            | Only `exports` field    |
+| `neutral` | `[]` | Only `exports` field |
 
 ### Neutral Platform Resolution
 
@@ -131,13 +128,13 @@ explicitly when using the "neutral" platform.
 
 ```ts
 export default defineConfig({
-  platform: "neutral",
+  platform: 'neutral',
   inputOptions: {
     resolve: {
-      mainFields: ["module", "main"],
+      mainFields: ['module', 'main'],
     },
   },
-});
+})
 ```
 
 ## Common Patterns
@@ -146,51 +143,51 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/cli.ts"],
-  format: ["esm"],
-  platform: "node",
+  entry: ['src/cli.ts'],
+  format: ['esm'],
+  platform: 'node',
   shims: true,
-});
+})
 ```
 
 ### Browser Library (IIFE)
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["iife"],
-  platform: "browser",
-  globalName: "MyLib",
+  entry: ['src/index.ts'],
+  format: ['iife'],
+  platform: 'browser',
+  globalName: 'MyLib',
   minify: true,
-});
+})
 ```
 
 ### Universal Library
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
-  platform: "neutral",
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  platform: 'neutral',
   inputOptions: {
     resolve: {
-      mainFields: ["module", "main"],
+      mainFields: ['module', 'main'],
     },
   },
-});
+})
 ```
 
 ### React Component Library
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.tsx"],
-  format: ["esm", "cjs"],
-  platform: "browser",
+  entry: ['src/index.tsx'],
+  format: ['esm', 'cjs'],
+  platform: 'browser',
   deps: {
-    neverBundle: ["react", "react-dom"],
+    neverBundle: ['react', 'react-dom'],
   },
-});
+})
 ```
 
 ### Node.js + Browser Builds
@@ -198,16 +195,16 @@ export default defineConfig({
 ```ts
 export default defineConfig([
   {
-    entry: ["src/index.ts"],
-    format: ["esm", "cjs"],
-    platform: "node",
+    entry: ['src/index.ts'],
+    format: ['esm', 'cjs'],
+    platform: 'node',
   },
   {
-    entry: ["src/browser.ts"],
-    format: ["esm"],
-    platform: "browser",
+    entry: ['src/browser.ts'],
+    format: ['esm'],
+    platform: 'browser',
   },
-]);
+])
 ```
 
 ## Troubleshooting
@@ -221,7 +218,6 @@ Warning: Module "fs" has been externalized for browser compatibility
 ```
 
 **Solutions:**
-
 1. Use platform: 'node' if not browser-only
 2. Add polyfills for Node APIs
 3. Avoid Node.js built-ins in browser code
@@ -233,14 +229,14 @@ When packages don't resolve with `neutral`:
 
 ```ts
 export default defineConfig({
-  platform: "neutral",
+  platform: 'neutral',
   inputOptions: {
     resolve: {
-      mainFields: ["module", "browser", "main"],
-      conditions: ["import", "require"],
+      mainFields: ['module', 'browser', 'main'],
+      conditions: ['import', 'require'],
     },
   },
-});
+})
 ```
 
 ## Tips

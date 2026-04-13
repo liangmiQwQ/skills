@@ -24,12 +24,20 @@ The `={true}` breaks UnoCSS attributify detection.
 ## Installation
 
 ```ts
-import { defineConfig, presetAttributify, transformerAttributifyJsx } from "unocss";
+import { 
+  defineConfig, 
+  presetAttributify, 
+  transformerAttributifyJsx 
+} from 'unocss'
 
 export default defineConfig({
-  presets: [presetAttributify()],
-  transformers: [transformerAttributifyJsx()],
-});
+  presets: [
+    presetAttributify(),
+  ],
+  transformers: [
+    transformerAttributifyJsx(),
+  ],
+})
 ```
 
 ## How It Works
@@ -52,14 +60,13 @@ Now UnoCSS can properly extract the attributify classes.
 transformerAttributifyJsx({
   // Only transform specific attributes
   // Default: transforms all that match attributify patterns
-  blocklist: ["text", "font"],
-});
+  blocklist: ['text', 'font'],
+})
 ```
 
 ## When to Use
 
 Required when using:
-
 - React
 - Preact
 - Solid
@@ -81,25 +88,35 @@ With valueless attributify syntax:
 
 ```ts
 // vite.config.ts
-import React from "@vitejs/plugin-react";
-import UnoCSS from "unocss/vite";
+import React from '@vitejs/plugin-react'
+import UnoCSS from 'unocss/vite'
 
 export default {
   plugins: [
     UnoCSS(), // Must be before React
     React(),
   ],
-};
+}
 ```
 
 ```ts
 // uno.config.ts
-import { defineConfig, presetAttributify, presetWind3, transformerAttributifyJsx } from "unocss";
+import { 
+  defineConfig, 
+  presetAttributify, 
+  presetWind3,
+  transformerAttributifyJsx 
+} from 'unocss'
 
 export default defineConfig({
-  presets: [presetWind3(), presetAttributify()],
-  transformers: [transformerAttributifyJsx()],
-});
+  presets: [
+    presetWind3(),
+    presetAttributify(),
+  ],
+  transformers: [
+    transformerAttributifyJsx(),
+  ],
+})
 ```
 
 ### Preact
@@ -109,12 +126,15 @@ Same as React, use `@preact/preset-vite` or `@prefresh/vite`.
 ### Solid
 
 ```ts
-import UnoCSS from "unocss/vite";
-import solidPlugin from "vite-plugin-solid";
+import UnoCSS from 'unocss/vite'
+import solidPlugin from 'vite-plugin-solid'
 
 export default {
-  plugins: [UnoCSS(), solidPlugin()],
-};
+  plugins: [
+    UnoCSS(),
+    solidPlugin(),
+  ],
+}
 ```
 
 ## TypeScript Support
@@ -123,14 +143,14 @@ Add type declarations:
 
 ```ts
 // shims.d.ts
-import type { AttributifyAttributes } from "@unocss/preset-attributify";
+import type { AttributifyAttributes } from '@unocss/preset-attributify'
 
-declare module "react" {
+declare module 'react' {
   interface HTMLAttributes<T> extends AttributifyAttributes {}
 }
 ```
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/transformers/attributify-jsx
 -->

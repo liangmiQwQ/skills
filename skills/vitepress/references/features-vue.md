@@ -80,15 +80,15 @@ Register in theme for use everywhere:
 
 ```ts
 // .vitepress/theme/index.ts
-import DefaultTheme from "vitepress/theme";
-import MyGlobalComponent from "./MyGlobalComponent.vue";
+import DefaultTheme from 'vitepress/theme'
+import MyGlobalComponent from './MyGlobalComponent.vue'
 
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
-    app.component("MyGlobalComponent", MyGlobalComponent);
-  },
-};
+    app.component('MyGlobalComponent', MyGlobalComponent)
+  }
+}
 ```
 
 Then use in any markdown:

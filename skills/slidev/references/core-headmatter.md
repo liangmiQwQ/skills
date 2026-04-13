@@ -11,11 +11,11 @@ Deck-wide configuration options in the first frontmatter block.
 
 ```yaml
 ---
-theme: default # Theme package or path
-colorSchema: auto # 'auto' | 'light' | 'dark'
-favicon: /favicon.ico # Favicon URL
-aspectRatio: 16/9 # Slide aspect ratio
-canvasWidth: 980 # Canvas width in px
+theme: default              # Theme package or path
+colorSchema: auto           # 'auto' | 'light' | 'dark'
+favicon: /favicon.ico       # Favicon URL
+aspectRatio: 16/9           # Slide aspect ratio
+canvasWidth: 980            # Canvas width in px
 ---
 ```
 
@@ -27,7 +27,7 @@ fonts:
   sans: Roboto
   serif: Roboto Slab
   mono: Fira Code
-  provider: google # 'google' | 'none'
+  provider: google          # 'google' | 'none'
 ---
 ```
 
@@ -35,11 +35,11 @@ fonts:
 
 ```yaml
 ---
-highlighter: shiki # Code highlighter
-lineNumbers: false # Show line numbers
-monaco: true # Enable Monaco editor ('true' | 'dev' | 'build')
-twoslash: true # Enable TwoSlash
-monacoTypesSource: local # 'local' | 'cdn' | 'none'
+highlighter: shiki          # Code highlighter
+lineNumbers: false          # Show line numbers
+monaco: true                # Enable Monaco editor ('true' | 'dev' | 'build')
+twoslash: true              # Enable TwoSlash
+monacoTypesSource: local    # 'local' | 'cdn' | 'none'
 ---
 ```
 
@@ -48,14 +48,14 @@ monacoTypesSource: local # 'local' | 'cdn' | 'none'
 ```yaml
 ---
 drawings:
-  enabled: true # Enable drawing mode
-  persist: false # Save drawings
-  presenterOnly: false # Only presenter can draw
-  syncAll: true # Sync across instances
-record: dev # Enable recording
-selectable: true # Text selection
-contextMenu: true # Right-click menu
-wakeLock: true # Prevent screen sleep
+  enabled: true             # Enable drawing mode
+  persist: false            # Save drawings
+  presenterOnly: false      # Only presenter can draw
+  syncAll: true             # Sync across instances
+record: dev                 # Enable recording
+selectable: true            # Text selection
+contextMenu: true           # Right-click menu
+wakeLock: true              # Prevent screen sleep
 ---
 ```
 
@@ -63,8 +63,8 @@ wakeLock: true # Prevent screen sleep
 
 ```yaml
 ---
-download: false # PDF download button
-exportFilename: slides # Export filename
+download: false             # PDF download button
+exportFilename: slides      # Export filename
 export:
   format: pdf
   timeout: 30000
@@ -78,7 +78,7 @@ export:
 ```yaml
 ---
 title: My Presentation
-titleTemplate: "%s - Slidev"
+titleTemplate: '%s - Slidev'
 author: Your Name
 keywords: slidev, presentation
 info: |
@@ -110,7 +110,7 @@ seoMeta:
 theme: seriph
 addons:
   - excalidraw
-  - "@slidev/plugin-notes"
+  - '@slidev/plugin-notes'
 ---
 ```
 
@@ -119,7 +119,7 @@ addons:
 ```yaml
 ---
 themeConfig:
-  primary: "#5d8392"
+  primary: '#5d8392'
   # Theme-specific options
 ---
 ```
@@ -150,9 +150,9 @@ htmlAttrs:
 
 ```yaml
 ---
-presenter: true # 'true' | 'dev' | 'build'
-browserExporter: dev # 'true' | 'dev' | 'build'
-routerMode: history # 'history' | 'hash'
+presenter: true             # 'true' | 'dev' | 'build'
+browserExporter: dev        # 'true' | 'dev' | 'build'
+routerMode: history         # 'history' | 'hash'
 ---
 ```
 
@@ -160,7 +160,7 @@ routerMode: history # 'history' | 'hash'
 
 ```yaml
 ---
-remoteAssets: false # Download remote assets locally
+remoteAssets: false         # Download remote assets locally
 plantUmlServer: https://www.plantuml.com/plantuml
 ---
 ```

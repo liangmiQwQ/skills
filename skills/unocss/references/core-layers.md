@@ -13,9 +13,9 @@ Set layer on rules:
 
 ```ts
 rules: [
-  [/^m-(\d)$/, ([, d]) => ({ margin: `${d / 4}rem` }), { layer: "utilities" }],
-  ["btn", { padding: "4px" }], // default layer
-];
+  [/^m-(\d)$/, ([, d]) => ({ margin: `${d / 4}rem` }), { layer: 'utilities' }],
+  ['btn', { padding: '4px' }], // default layer
+]
 ```
 
 ### Layer Ordering
@@ -31,23 +31,23 @@ layers: {
 ### Import Layers Separately
 
 ```ts
-import "uno:components.css";
-import "uno.css";
-import "./my-custom.css";
-import "uno:utilities.css";
+import 'uno:components.css'
+import 'uno.css'
+import './my-custom.css'
+import 'uno:utilities.css'
 ```
 
 ### CSS Cascade Layers
 
 ```ts
-outputToCssLayers: true;
+outputToCssLayers: true
 
 // Or with custom names
 outputToCssLayers: {
   cssLayerName: (layer) => {
-    if (layer === "default") return "utilities";
-    if (layer === "shortcuts") return "utilities.shortcuts";
-  };
+    if (layer === 'default') return 'utilities'
+    if (layer === 'shortcuts') return 'utilities.shortcuts'
+  }
 }
 ```
 
@@ -56,10 +56,9 @@ outputToCssLayers: {
 ```html
 <!-- UnoCSS layer -->
 <p class="uno-layer-my-layer:text-xl">
-  <!-- CSS @layer -->
-</p>
 
-<p class="layer-my-layer:text-xl"></p>
+<!-- CSS @layer -->
+<p class="layer-my-layer:text-xl">
 ```
 
 ## Preflights
@@ -71,12 +70,12 @@ preflights: [
   {
     getCSS: ({ theme }) => `
       * {
-        color: ${theme.colors.gray?.[700] ?? "#333"};
+        color: ${theme.colors.gray?.[700] ?? '#333'};
         margin: 0;
       }
     `,
   },
-];
+]
 ```
 
 With layer:
@@ -84,21 +83,21 @@ With layer:
 ```ts
 preflights: [
   {
-    layer: "base",
+    layer: 'base',
     getCSS: () => `html { font-family: system-ui; }`,
   },
-];
+]
 ```
 
 ## preset-wind4 Layers
 
-| Layer        | Description         | Order |
-| ------------ | ------------------- | ----- |
-| `properties` | CSS @property rules | -200  |
-| `theme`      | Theme CSS variables | -150  |
-| `base`       | Reset styles        | -100  |
+| Layer | Description | Order |
+|-------|-------------|-------|
+| `properties` | CSS @property rules | -200 |
+| `theme` | Theme CSS variables | -150 |
+| `base` | Reset styles | -100 |
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/config/layers
 - https://unocss.dev/config/preflights

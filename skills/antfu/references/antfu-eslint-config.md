@@ -12,19 +12,19 @@ Handles both linting and formatting (no Prettier needed). Auto-detects TypeScrip
 ## Configuration Options
 
 ```js
-import antfu from "@antfu/eslint-config";
+import antfu from '@antfu/eslint-config'
 
 export default antfu({
   // Project type: 'lib' for libraries, 'app' (default) for applications
-  type: "lib",
+  type: 'lib',
 
   // Global ignores (extends defaults, doesn't override)
-  ignores: ["**/fixtures", "**/dist"],
+  ignores: ['**/fixtures', '**/dist'],
 
   // Stylistic options
   stylistic: {
-    indent: 2, // 2, 4, or 'tab'
-    quotes: "single", // or 'double'
+    indent: 2,        // 2, 4, or 'tab'
+    quotes: 'single', // or 'double'
   },
 
   // Framework support (auto-detected, but can be explicit)
@@ -34,7 +34,7 @@ export default antfu({
   // Disable specific language support
   jsonc: false,
   yaml: false,
-});
+})
 ```
 
 ## Framework Support
@@ -46,9 +46,9 @@ Vue accessibility:
 ```js
 export default antfu({
   vue: {
-    a11y: true,
+    a11y: true
   },
-});
+})
 // Requires: pnpm add -D eslint-plugin-vuejs-accessibility
 ```
 
@@ -57,7 +57,7 @@ export default antfu({
 ```js
 export default antfu({
   react: true,
-});
+})
 // Requires: pnpm add -D @eslint-react/eslint-plugin eslint-plugin-react-hooks eslint-plugin-react-refresh
 ```
 
@@ -66,7 +66,7 @@ export default antfu({
 ```js
 export default antfu({
   nextjs: true,
-});
+})
 // Requires: pnpm add -D @next/eslint-plugin-next
 ```
 
@@ -75,7 +75,7 @@ export default antfu({
 ```js
 export default antfu({
   svelte: true,
-});
+})
 // Requires: pnpm add -D eslint-plugin-svelte
 ```
 
@@ -84,7 +84,7 @@ export default antfu({
 ```js
 export default antfu({
   astro: true,
-});
+})
 // Requires: pnpm add -D eslint-plugin-astro
 ```
 
@@ -93,7 +93,7 @@ export default antfu({
 ```js
 export default antfu({
   solid: true,
-});
+})
 // Requires: pnpm add -D eslint-plugin-solid
 ```
 
@@ -102,7 +102,7 @@ export default antfu({
 ```js
 export default antfu({
   unocss: true,
-});
+})
 // Requires: pnpm add -D @unocss/eslint-plugin
 ```
 
@@ -113,11 +113,11 @@ For files ESLint doesn't handle natively:
 ```js
 export default antfu({
   formatters: {
-    css: true, // Format CSS, LESS, SCSS (uses Prettier)
-    html: true, // Format HTML (uses Prettier)
-    markdown: "prettier", // or 'dprint'
-  },
-});
+    css: true,      // Format CSS, LESS, SCSS (uses Prettier)
+    html: true,     // Format HTML (uses Prettier)
+    markdown: 'prettier' // or 'dprint'
+  }
+})
 // Requires: pnpm add -D eslint-plugin-format
 ```
 
@@ -133,10 +133,10 @@ export default antfu(
   // Additional arguments: ESLint flat configs
   {
     rules: {
-      "style/semi": ["error", "never"],
+      'style/semi': ['error', 'never'],
     },
-  },
-);
+  }
+)
 ```
 
 ### Per-integration overrides
@@ -145,15 +145,15 @@ export default antfu(
 export default antfu({
   vue: {
     overrides: {
-      "vue/operator-linebreak": ["error", "before"],
+      'vue/operator-linebreak': ['error', 'before'],
     },
   },
   typescript: {
     overrides: {
-      "ts/consistent-type-definitions": ["error", "interface"],
+      'ts/consistent-type-definitions': ['error', 'interface'],
     },
   },
-});
+})
 ```
 
 ### File-specific overrides
@@ -162,33 +162,33 @@ export default antfu({
 export default antfu(
   { vue: true, typescript: true },
   {
-    files: ["**/*.vue"],
+    files: ['**/*.vue'],
     rules: {
-      "vue/operator-linebreak": ["error", "before"],
+      'vue/operator-linebreak': ['error', 'before'],
     },
-  },
-);
+  }
+)
 ```
 
 ## Plugin Prefix Renaming
 
 The config renames plugin prefixes for consistency:
 
-| New Prefix | Original               |
-| ---------- | ---------------------- |
-| `ts/*`     | `@typescript-eslint/*` |
-| `style/*`  | `@stylistic/*`         |
-| `import/*` | `import-lite/*`        |
-| `node/*`   | `n/*`                  |
-| `yaml/*`   | `yml/*`                |
-| `test/*`   | `vitest/*`             |
-| `next/*`   | `@next/next`           |
+| New Prefix | Original |
+|------------|----------|
+| `ts/*` | `@typescript-eslint/*` |
+| `style/*` | `@stylistic/*` |
+| `import/*` | `import-lite/*` |
+| `node/*` | `n/*` |
+| `yaml/*` | `yml/*` |
+| `test/*` | `vitest/*` |
+| `next/*` | `@next/next` |
 
 Use the new prefix when overriding or disabling rules:
 
 ```ts
 // eslint-disable-next-line ts/consistent-type-definitions
-type Foo = { bar: 2 };
+type Foo = { bar: 2 }
 ```
 
 ## Type-Aware Rules
@@ -198,9 +198,9 @@ Enable TypeScript type checking:
 ```js
 export default antfu({
   typescript: {
-    tsconfigPath: "tsconfig.json",
+    tsconfigPath: 'tsconfig.json',
   },
-});
+})
 ```
 
 ## Config Composer API
@@ -210,14 +210,14 @@ Chain methods for flexible composition:
 ```js
 export default antfu()
   .prepend(/* configs before main */)
-  .override("antfu/stylistic/rules", {
+  .override('antfu/stylistic/rules', {
     rules: {
-      "style/generator-star-spacing": ["error", { after: true, before: false }],
-    },
+      'style/generator-star-spacing': ['error', { after: true, before: false }],
+    }
   })
   .renamePlugins({
-    "old-prefix": "new-prefix",
-  });
+    'old-prefix': 'new-prefix',
+  })
 ```
 
 ## Less Opinionated Mode
@@ -226,8 +226,8 @@ Disable Anthony's most opinionated rules:
 
 ```js
 export default antfu({
-  lessOpinionated: true,
-});
+  lessOpinionated: true
+})
 ```
 
 ## Lint-Staged Setup
@@ -258,7 +258,7 @@ Add to `.vscode/settings.json`:
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "never",
+    "source.organizeImports": "never"
   },
   "eslint.rules.customizations": [
     { "rule": "style/*", "severity": "off", "fixable": true },
@@ -270,7 +270,7 @@ Add to `.vscode/settings.json`:
     { "rule": "*-dangle", "severity": "off", "fixable": true },
     { "rule": "*-newline", "severity": "off", "fixable": true },
     { "rule": "*quotes", "severity": "off", "fixable": true },
-    { "rule": "*semi", "severity": "off", "fixable": true },
+    { "rule": "*semi", "severity": "off", "fixable": true }
   ],
   "eslint.validate": [
     "javascript",
@@ -289,12 +289,12 @@ Add to `.vscode/settings.json`:
     "svelte",
     "css",
     "less",
-    "scss",
-  ],
+    "scss"
+  ]
 }
 ```
 
-<!--
+<!-- 
 Source references:
 - https://github.com/antfu/eslint-config
 - https://raw.githubusercontent.com/antfu/eslint-config/refs/heads/main/README.md

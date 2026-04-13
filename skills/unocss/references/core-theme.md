@@ -27,13 +27,11 @@ Access theme values in dynamic rules:
 
 ```ts
 rules: [
-  [
-    /^text-(.*)$/,
-    ([, c], { theme }) => {
-      if (theme.colors[c]) return { color: theme.colors[c] };
-    },
-  ],
-];
+  [/^text-(.*)$/, ([, c], { theme }) => {
+    if (theme.colors[c])
+      return { color: theme.colors[c] }
+  }],
+]
 ```
 
 ## Using Theme in Variants
@@ -41,25 +39,23 @@ rules: [
 ```ts
 variants: [
   {
-    name: "variant-name",
+    name: 'variant-name',
     match(matcher, { theme }) {
       // Access theme.breakpoints, theme.colors, etc.
     },
   },
-];
+]
 ```
 
 ## Using Theme in Shortcuts
 
 ```ts
 shortcuts: [
-  [
-    /^badge-(.*)$/,
-    ([, c], { theme }) => {
-      if (Object.keys(theme.colors).includes(c)) return `bg-${c}4:10 text-${c}5 rounded`;
-    },
-  ],
-];
+  [/^badge-(.*)$/, ([, c], { theme }) => {
+    if (Object.keys(theme.colors).includes(c))
+      return `bg-${c}4:10 text-${c}5 rounded`
+  }],
+]
 ```
 
 ## Breakpoints
@@ -87,11 +83,11 @@ extendTheme: (theme) => {
     ...theme,
     breakpoints: {
       ...theme.breakpoints,
-      sm: "320px",
-      md: "640px",
+      sm: '320px',
+      md: '640px',
     },
-  };
-};
+  }
+}
 ```
 
 **Note:** `verticalBreakpoints` works the same for vertical layout.
@@ -120,11 +116,11 @@ theme: {
 
 ```ts
 extendTheme: (theme) => {
-  theme.colors.veryCool = "#0000ff";
+  theme.colors.veryCool = '#0000ff'
   theme.colors.brand = {
-    primary: "hsl(var(--hue, 217) 78% 51%)",
-  };
-};
+    primary: 'hsl(var(--hue, 217) 78% 51%)',
+  }
+}
 ```
 
 ### Replace Theme
@@ -137,27 +133,27 @@ extendTheme: (theme) => {
     ...theme,
     colors: {
       ...theme.colors,
-      veryCool: "#0000ff",
+      veryCool: '#0000ff',
     },
-  };
-};
+  }
+}
 ```
 
 ## Theme Differences in Presets
 
 ### preset-wind3 vs preset-wind4
 
-| preset-wind3         | preset-wind4                       |
-| -------------------- | ---------------------------------- |
-| `fontFamily`         | `font`                             |
-| `fontSize`           | `text.fontSize`                    |
-| `lineHeight`         | `text.lineHeight` or `leading`     |
-| `letterSpacing`      | `text.letterSpacing` or `tracking` |
-| `borderRadius`       | `radius`                           |
-| `easing`             | `ease`                             |
-| `breakpoints`        | `breakpoint`                       |
-| `boxShadow`          | `shadow`                           |
-| `transitionProperty` | `property`                         |
+| preset-wind3 | preset-wind4 |
+|--------------|--------------|
+| `fontFamily` | `font` |
+| `fontSize` | `text.fontSize` |
+| `lineHeight` | `text.lineHeight` or `leading` |
+| `letterSpacing` | `text.letterSpacing` or `tracking` |
+| `borderRadius` | `radius` |
+| `easing` | `ease` |
+| `breakpoints` | `breakpoint` |
+| `boxShadow` | `shadow` |
+| `transitionProperty` | `property` |
 
 ## Common Theme Keys
 
@@ -170,7 +166,7 @@ extendTheme: (theme) => {
 - `boxShadow` - Shadow definitions
 - `animation` - Animation keyframes and timing
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/config/theme
 -->

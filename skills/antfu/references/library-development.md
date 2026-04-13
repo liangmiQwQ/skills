@@ -5,11 +5,11 @@ description: Building and publishing TypeScript libraries with tsdown. Use when 
 
 # Library Development
 
-| Aspect  | Choice                    |
-| ------- | ------------------------- |
-| Bundler | tsdown                    |
-| Output  | Pure ESM only (no CJS)    |
-| DTS     | Generated via tsdown      |
+| Aspect | Choice |
+|--------|--------|
+| Bundler | tsdown |
+| Output | Pure ESM only (no CJS) |
+| DTS | Generated via tsdown |
 | Exports | Auto-generated via tsdown |
 
 ## tsdown Configuration
@@ -18,31 +18,34 @@ Use tsdown with these options enabled:
 
 ```ts
 // tsdown.config.ts
-import { defineConfig } from "tsdown";
+import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
+  entry: ['src/index.ts'],
+  format: ['esm'],
   dts: true,
   exports: true,
-});
+})
 ```
 
-| Option    | Value     | Purpose                                       |
-| --------- | --------- | --------------------------------------------- |
-| `format`  | `['esm']` | Pure ESM, no CommonJS                         |
-| `dts`     | `true`    | Generate `.d.ts` files                        |
-| `exports` | `true`    | Auto-update `exports` field in `package.json` |
+| Option | Value | Purpose |
+|--------|-------|---------|
+| `format` | `['esm']` | Pure ESM, no CommonJS |
+| `dts` | `true` | Generate `.d.ts` files |
+| `exports` | `true` | Auto-update `exports` field in `package.json` |
 
 ### Multiple Entry Points
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts", "src/utils.ts"],
-  format: ["esm"],
+  entry: [
+    'src/index.ts',
+    'src/utils.ts',
+  ],
+  format: ['esm'],
   dts: true,
   exports: true,
-});
+})
 ```
 
 The `exports: true` option auto-generates the `exports` field in `package.json` when running `tsdown`.

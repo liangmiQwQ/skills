@@ -9,6 +9,7 @@ metadata:
 
 Prefix your first line with 🥷 inline, not as its own paragraph.
 
+
 Turn a rough idea into an approved plan. No code, no scaffolding, no pseudo-code until the user approves.
 
 Give opinions directly. Take a position and state what evidence would change it. Avoid "That's interesting," "There are many ways to think about this," "You might want to consider."
@@ -25,12 +26,12 @@ Offer 2-3 options with tradeoffs and a recommendation. Always include one minima
 
 For the recommendation, run four attack angles before presenting it:
 
-| Attack angle       | Question                                                                                |
-| ------------------ | --------------------------------------------------------------------------------------- |
-| Dependency failure | If an external API, service, or tool goes down, can the plan degrade gracefully?        |
-| Scale explosion    | At 10x data volume or user load, which step breaks first?                               |
-| Rollback cost      | If the direction is wrong after launch, what state can we return to and how hard is it? |
-| Premise collapse   | Which assumption in this plan is most fragile? What happens if it does not hold?        |
+| Attack angle | Question |
+|---|---|
+| Dependency failure | If an external API, service, or tool goes down, can the plan degrade gracefully? |
+| Scale explosion | At 10x data volume or user load, which step breaks first? |
+| Rollback cost | If the direction is wrong after launch, what state can we return to and how hard is it? |
+| Premise collapse | Which assumption in this plan is most fragile? What happens if it does not hold? |
 
 If an attack holds, deform the design and present the deformed version. If it shatters the approach entirely, discard it and tell the user why. Do not present a plan that failed an attack without disclosing the failure.
 
@@ -49,21 +50,20 @@ Get approval before proceeding. If the user rejects, ask specifically what did n
 
 ## Gotchas
 
-| What happened                                           | Rule                                                                                                                                        |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Moved files to `~/project`, repo was at `~/www/project` | Run `pwd` before the first filesystem operation                                                                                             |
-| Asked for API key after 3 implementation steps          | List every dependency before handing off                                                                                                    |
-| User said "帮我做" and got 3 options                    | Stay in planning mode. Lead with the recommended option, and treat user acceptance as plan approval, not implementation approval.           |
-| Planned MCP workflow without checking if MCP was loaded | Verify tool availability before handing off, not mid-implementation                                                                         |
-| Rejected design restarted from scratch                  | Ask what specifically failed, re-enter with narrowed constraints                                                                            |
-| Built against wrong regional API (Shengwang vs Agora)   | List all regional differences before writing integration code                                                                               |
-| Added FastAPI backend to a Next.js project              | Never add a new language or runtime without explicit approval                                                                               |
-| User said "just do it" before approving the design      | Treat it as approval of the last option presented. State which option was selected, then finish the plan. Do not implement inside `/think`. |
+| What happened | Rule |
+|---------------|------|
+| Moved files to `~/project`, repo was at `~/www/project` | Run `pwd` before the first filesystem operation |
+| Asked for API key after 3 implementation steps | List every dependency before handing off |
+| User said "帮我做" and got 3 options | Stay in planning mode. Lead with the recommended option, and treat user acceptance as plan approval, not implementation approval. |
+| Planned MCP workflow without checking if MCP was loaded | Verify tool availability before handing off, not mid-implementation |
+| Rejected design restarted from scratch | Ask what specifically failed, re-enter with narrowed constraints |
+| Built against wrong regional API (Shengwang vs Agora) | List all regional differences before writing integration code |
+| Added FastAPI backend to a Next.js project | Never add a new language or runtime without explicit approval |
+| User said "just do it" before approving the design | Treat it as approval of the last option presented. State which option was selected, then finish the plan. Do not implement inside `/think`. |
 
 ## Output
 
 **Approved design summary:**
-
 - **Building**: what this is (1 paragraph)
 - **Not building**: explicit out-of-scope list
 - **Approach**: chosen option with rationale

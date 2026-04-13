@@ -10,11 +10,13 @@ Enables `@apply`, `@screen`, `theme()`, and `icon()` directives in CSS.
 ## Installation
 
 ```ts
-import { defineConfig, transformerDirectives } from "unocss";
+import { defineConfig, transformerDirectives } from 'unocss'
 
 export default defineConfig({
-  transformers: [transformerDirectives()],
-});
+  transformers: [
+    transformerDirectives(),
+  ],
+})
 ```
 
 ## @apply
@@ -48,9 +50,9 @@ Configure aliases:
 
 ```ts
 transformerDirectives({
-  applyVariable: ["--at-apply", "--uno-apply", "--uno"],
+  applyVariable: ['--at-apply', '--uno-apply', '--uno'],
   // or disable: applyVariable: false
-});
+})
 ```
 
 ## @screen
@@ -81,16 +83,12 @@ Create breakpoint media queries:
 ```css
 /* Less than breakpoint */
 @screen lt-sm {
-  .item {
-    display: none;
-  }
+  .item { display: none; }
 }
 
 /* At specific breakpoint only */
 @screen at-md {
-  .item {
-    width: 50%;
-  }
+  .item { width: 50%; }
 }
 ```
 
@@ -100,9 +98,9 @@ Access theme values in CSS:
 
 ```css
 .btn-blue {
-  background-color: theme("colors.blue.500");
-  padding: theme("spacing.4");
-  border-radius: theme("borderRadius.lg");
+  background-color: theme('colors.blue.500');
+  padding: theme('spacing.4');
+  border-radius: theme('borderRadius.lg');
 }
 ```
 
@@ -114,17 +112,17 @@ Convert icon utility to SVG (requires preset-icons):
 
 ```css
 .icon-sun {
-  background-image: icon("i-carbon-sun");
+  background-image: icon('i-carbon-sun');
 }
 
 /* With custom color */
 .icon-moon {
-  background-image: icon("i-carbon-moon", "#fff");
+  background-image: icon('i-carbon-moon', '#fff');
 }
 
 /* Using theme color */
 .icon-alert {
-  background-image: icon("i-carbon-warning", 'theme("colors.red.500")');
+  background-image: icon('i-carbon-warning', 'theme("colors.red.500")');
 }
 ```
 
@@ -133,12 +131,12 @@ Convert icon utility to SVG (requires preset-icons):
 ```css
 .card {
   @apply rounded-lg shadow-md p-4;
-  background-color: theme("colors.white");
+  background-color: theme('colors.white');
 }
 
 .card-header {
   @apply 'font-bold text-lg border-b';
-  padding-bottom: theme("spacing.2");
+  padding-bottom: theme('spacing.2');
 }
 
 @screen md {
@@ -148,12 +146,12 @@ Convert icon utility to SVG (requires preset-icons):
 }
 
 .card-icon {
-  background-image: icon("i-carbon-document");
+  background-image: icon('i-carbon-document');
   @apply w-6 h-6;
 }
 ```
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/transformers/directives
 -->

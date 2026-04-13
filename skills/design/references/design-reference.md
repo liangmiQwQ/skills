@@ -4,15 +4,15 @@
 
 These combinations produce silent failures or incoherent output. Never combine them:
 
-| Never combine                                              | Why                                                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tailwind + CSS Modules on the same element                 | Specificity conflicts, unpredictable cascade                                                                                                                                                                                                                                                                                                |
-| Framer Motion + CSS transitions on the same element        | Double-animating the same property causes jank                                                                                                                                                                                                                                                                                              |
-| styled-components or emotion + Tailwind                    | Two competing class systems fighting for the same DOM node                                                                                                                                                                                                                                                                                  |
-| Heroicons + Lucide + Font Awesome in one project           | Visual inconsistency, size mismatches, bundle bloat                                                                                                                                                                                                                                                                                         |
-| Multiple Google Font families as display fonts             | Competing personalities cancel each other out                                                                                                                                                                                                                                                                                               |
-| Glassmorphism backdrop-filter + solid `border: 1px solid`  | Solid borders shatter the layered depth illusion                                                                                                                                                                                                                                                                                            |
-| Dark background + `#ffffff` text at full opacity           | Too harsh; use `rgba(255,255,255,0.85)` or `#f0f0f0`                                                                                                                                                                                                                                                                                        |
+| Never combine | Why |
+|---|---|
+| Tailwind + CSS Modules on the same element | Specificity conflicts, unpredictable cascade |
+| Framer Motion + CSS transitions on the same element | Double-animating the same property causes jank |
+| styled-components or emotion + Tailwind | Two competing class systems fighting for the same DOM node |
+| Heroicons + Lucide + Font Awesome in one project | Visual inconsistency, size mismatches, bundle bloat |
+| Multiple Google Font families as display fonts | Competing personalities cancel each other out |
+| Glassmorphism backdrop-filter + solid `border: 1px solid` | Solid borders shatter the layered depth illusion |
+| Dark background + `#ffffff` text at full opacity | Too harsh; use `rgba(255,255,255,0.85)` or `#f0f0f0` |
 | Tailwind v4 `@theme` + dynamically constructed class names | `@theme` tokens generate utility classes JIT; if class names are built from variables or not present in scanned source, the class is purged and styles silently disappear. Fix: use static class names in source files, add to `safelist`, or define custom colors in `:root` + `extend.colors` in `tailwind.config.js` instead of `@theme` |
 
 Before writing the first component, name the single CSS strategy for the project: Tailwind only, CSS Modules only, or CSS-in-JS only. Do not drift from it.
@@ -40,14 +40,12 @@ Check before handoff. These are not aesthetic choices, they are non-negotiable.
 > Treat the sections below as craft details, not defaults. Only apply them when they serve the locked visual direction. If removing a detail changes nothing about how the interface feels, leave it out.
 
 ### Accessibility
-
 - Icon-only buttons need `aria-label`
 - Actions use `<button>`, navigation uses `<a>` (not `<div onClick>`)
 - Images need `alt` (or `alt=""` if decorative)
 - Visible focus states: `focus-visible:ring-*` or equivalent; never `outline: none` without replacement
 
 ### Animation
-
 - Honor `prefers-reduced-motion`: disable or reduce animations when set
 - Animate `transform`/`opacity` only (compositor-friendly, no layout thrash)
 - Never `transition: all`; list properties explicitly
@@ -59,7 +57,6 @@ Check before handoff. These are not aesthetic choices, they are non-negotiable.
 - Page-load guard: use `initial={false}` on animated presence wrappers for toggles, tabs, and icon swaps to prevent enter animations on first render; do not use it for intentional page-load entrance sequences
 
 ### Performance
-
 - Transition specificity: never `transition: all`; list exact properties (e.g., `transition-property: scale, opacity`). Tailwind's `transition-transform` covers `transform, translate, scale, rotate`; use `transition-[scale,opacity,filter]` for mixed properties
 - GPU compositing: only use `will-change` for `transform`, `opacity`, or `filter`. Never `will-change: all`. Add only when you notice first-frame stutter; do not apply preemptively to every element
 - Images: explicit `width` and `height` (prevents layout shift)
@@ -67,21 +64,18 @@ Check before handoff. These are not aesthetic choices, they are non-negotiable.
 - Critical fonts: `font-display: swap`
 
 ### Touch and Mobile
-
 - `touch-action: manipulation` (prevents double-tap zoom delay)
 - Full-bleed layouts: `env(safe-area-inset-*)` for notch devices
 - Modals and drawers: `overscroll-behavior: contain`
 - Hover guard: wrap interactive hover states with `@media(hover:hover)` so they only apply on pointer devices, not touch screens. Tailwind: `[@media(hover:hover)]:hover:bg-...`. Without this, a tapped element on mobile gets a permanent hover state until the next tap elsewhere.
 
 ### Typography Details
-
 - Text wrapping: `text-wrap: balance` on headings and short text blocks (≤6 lines in Chromium, ≤10 in Firefox); `text-wrap: pretty` on body paragraphs and longer text; leave default on code blocks and pre-formatted text
 - Font smoothing: apply `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale` once on the root layout (macOS only)
 - Tabular numbers: use `font-variant-numeric: tabular-nums` for counters, timers, prices, number columns, or any dynamically updating numbers
 - Letter-spacing scales with font size: display type needs negative tracking to look engineered rather than stretched. Two tiers: roughly -0.022em for display sizes (32px and above), -0.012em for mid-range (20–28px), normal at 16px and below. Apply to any display-weight typeface, not just geometric sans. Positive letter-spacing on large headlines is always wrong.
 
 ### Surfaces
-
 - Concentric border radius: calculate `outerRadius = innerRadius + padding` so nested rounded corners feel intentional, not mechanical; if padding exceeds `24px`, treat layers as separate surfaces and choose each radius independently
 - Optical alignment: nudge icons by eye, not just by math, so buttons feel centered; buttons with text and an icon use slightly less padding on the icon side (e.g., `pl-4 pr-3.5`); play triangles and asymmetric icons should shift `1px`-`2px` toward the heavier side, or fix the SVG directly
 - Shadows over borders: use layered `box-shadow` for depth on cards, buttons, and elevated elements so the surface feels lifted, not fenced in; reserve actual `border` for dividers, table cells, and layout separation (applies primarily to light mode; on dark surfaces see the dark-mode surface hierarchy rule below)
@@ -116,15 +110,15 @@ Reject: Inter, DM Sans, DM Serif Display, DM Serif Text, Outfit, Plus Jakarta Sa
 
 Choose light or dark deliberately based on audience and context. Neither is a default.
 
-| Context                                         | Direction        | Reason                                                                  |
-| ----------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
-| Trading or analytics dashboard, night-shift use | Dark             | High data density; reduced glare during long sessions                   |
-| Children's reading or learning app              | Light            | Welcoming, low fatigue for eyes still developing contrast sensitivity   |
-| Enterprise SRE or observability tool            | Dark             | Operator context; dark surfaces read at a glance in low-light NOC rooms |
-| Weekend planning, recipes, journaling           | Light            | Ambient daytime use; light feels casual and approachable                |
-| Music player or media browser                   | Dark             | Content-forward; dark surfaces recede and let media pop                 |
-| Hospital or clinical patient portal             | Light            | Trust and legibility are paramount; clinical associations favor light   |
-| Vintage or artisanal brand site                 | Cream/warm light | Dark would clash with the analog material references                    |
+| Context | Direction | Reason |
+|---|---|---|
+| Trading or analytics dashboard, night-shift use | Dark | High data density; reduced glare during long sessions |
+| Children's reading or learning app | Light | Welcoming, low fatigue for eyes still developing contrast sensitivity |
+| Enterprise SRE or observability tool | Dark | Operator context; dark surfaces read at a glance in low-light NOC rooms |
+| Weekend planning, recipes, journaling | Light | Ambient daytime use; light feels casual and approachable |
+| Music player or media browser | Dark | Content-forward; dark surfaces recede and let media pop |
+| Hospital or clinical patient portal | Light | Trust and legibility are paramount; clinical associations favor light |
+| Vintage or artisanal brand site | Cream/warm light | Dark would clash with the analog material references |
 
 If the answer is not obvious from the context, default to light. If the user's context implies both modes, ship light first and layer dark-mode tokens on top.
 
@@ -132,15 +126,15 @@ If the answer is not obvious from the context, default to light. If the user's c
 
 These patterns appear in the majority of AI-generated interfaces. Each one has a specific rewrite.
 
-| Pattern                                                              | Why                                                                                                                               | Rewrite                                                                                                                          |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `border-left` or `border-right` wider than 1px as a section accent   | The single most overused "design touch" in admin and dashboard UIs; it looks like a mistake at anything beyond a hairline divider | Change element structure: use a colored dot, a short horizontal rule, a background swatch, or a typographic weight shift instead |
-| `background-clip: text` gradient text                                | Decorative rather than meaningful; one of the top AI design tells; illegible when printed or in high-contrast mode                | Use a solid brand color, a tinted neutral, or typographic weight for emphasis                                                    |
-| `backdrop-filter: blur` glassmorphism as the default card surface    | Expensive on low-power devices; overused; the layered-depth illusion breaks with a solid border                                   | Use elevated surfaces via background color steps and `box-shadow` instead                                                        |
-| Purple-to-blue gradients or cyan-on-dark accent systems              | The canonical "AI design" color palette; communicates nothing about the brand                                                     | Pick a palette from the brand words via the OKLCH rules above                                                                    |
-| Generic rounded-rect card with `box-shadow` as the default container | Template thinking; applies the same container to every content type regardless of hierarchy                                       | Default to cardless sections; only add card treatment when the content type requires it                                          |
-| Modals as a lazy escape for overflow UI                              | Interrupts flow and breaks browser back navigation; used when an inline expansion, drawer, or separate page would be better       | Inline expand, detail panel, or dedicated route; modals only when the action truly requires focus-lock                           |
-| `transition: all` or animating width/height/padding/margin           | Forces the browser into layout recalculation on every frame                                                                       | List exact properties (`transition-property: transform, opacity`); use `grid-template-rows: 0fr to 1fr` for height reveals       |
+| Pattern | Why | Rewrite |
+|---|---|---|
+| `border-left` or `border-right` wider than 1px as a section accent | The single most overused "design touch" in admin and dashboard UIs; it looks like a mistake at anything beyond a hairline divider | Change element structure: use a colored dot, a short horizontal rule, a background swatch, or a typographic weight shift instead |
+| `background-clip: text` gradient text | Decorative rather than meaningful; one of the top AI design tells; illegible when printed or in high-contrast mode | Use a solid brand color, a tinted neutral, or typographic weight for emphasis |
+| `backdrop-filter: blur` glassmorphism as the default card surface | Expensive on low-power devices; overused; the layered-depth illusion breaks with a solid border | Use elevated surfaces via background color steps and `box-shadow` instead |
+| Purple-to-blue gradients or cyan-on-dark accent systems | The canonical "AI design" color palette; communicates nothing about the brand | Pick a palette from the brand words via the OKLCH rules above |
+| Generic rounded-rect card with `box-shadow` as the default container | Template thinking; applies the same container to every content type regardless of hierarchy | Default to cardless sections; only add card treatment when the content type requires it |
+| Modals as a lazy escape for overflow UI | Interrupts flow and breaks browser back navigation; used when an inline expansion, drawer, or separate page would be better | Inline expand, detail panel, or dedicated route; modals only when the action truly requires focus-lock |
+| `transition: all` or animating width/height/padding/margin | Forces the browser into layout recalculation on every frame | List exact properties (`transition-property: transform, opacity`); use `grid-template-rows: 0fr to 1fr` for height reveals |
 
 ## Motion Specifics
 
@@ -174,4 +168,4 @@ Would a stranger glancing at the first viewport say "an AI made this" immediatel
 
 ---
 
-_Rules in Reflex Fonts, Font Selection, OKLCH, Theme Matrix, Absolute Bans, Motion Specifics, and AI Slop Test adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0). DESIGN.md Scaffold adapted from [getdesign.md](https://getdesign.md) (MIT); concept credited to Google Stitch._
+*Rules in Reflex Fonts, Font Selection, OKLCH, Theme Matrix, Absolute Bans, Motion Specifics, and AI Slop Test adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0). DESIGN.md Scaffold adapted from [getdesign.md](https://getdesign.md) (MIT); concept credited to Google Stitch.*

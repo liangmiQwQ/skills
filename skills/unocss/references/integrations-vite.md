@@ -15,30 +15,34 @@ pnpm add -D unocss
 
 ```ts
 // vite.config.ts
-import UnoCSS from "unocss/vite";
-import { defineConfig } from "vite";
+import UnoCSS from 'unocss/vite'
+import { defineConfig } from 'vite'
 
 export default defineConfig({
-  plugins: [UnoCSS()],
-});
+  plugins: [
+    UnoCSS(),
+  ],
+})
 ```
 
 Create config file:
 
 ```ts
 // uno.config.ts
-import { defineConfig, presetWind3 } from "unocss";
+import { defineConfig, presetWind3 } from 'unocss'
 
 export default defineConfig({
-  presets: [presetWind3()],
-});
+  presets: [
+    presetWind3(),
+  ],
+})
 ```
 
 Add to entry:
 
 ```ts
 // main.ts
-import "virtual:uno.css";
+import 'virtual:uno.css'
 ```
 
 ## Modes
@@ -48,7 +52,7 @@ import "virtual:uno.css";
 Standard mode - generates global CSS injected via `uno.css` import.
 
 ```ts
-import "virtual:uno.css";
+import 'virtual:uno.css'
 ```
 
 ### vue-scoped
@@ -57,8 +61,8 @@ Injects generated CSS into Vue SFC `<style scoped>`.
 
 ```ts
 UnoCSS({
-  mode: "vue-scoped",
-});
+  mode: 'vue-scoped',
+})
 ```
 
 ### shadow-dom
@@ -67,21 +71,21 @@ For Web Components using Shadow DOM:
 
 ```ts
 UnoCSS({
-  mode: "shadow-dom",
-});
+  mode: 'shadow-dom',
+})
 ```
 
 Add placeholder in component styles:
 
 ```ts
-const template = document.createElement("template");
+const template = document.createElement('template')
 template.innerHTML = `
 <style>
   :host { ... }
   @unocss-placeholder
 </style>
 <div class="m-1em">...</div>
-`;
+`
 ```
 
 ### per-module (experimental)
@@ -97,8 +101,8 @@ Generates CSS per chunk on build for MPA.
 Edit classes directly in browser DevTools:
 
 ```ts
-import "virtual:uno.css";
-import "virtual:unocss-devtools";
+import 'virtual:uno.css'
+import 'virtual:unocss-devtools'
 ```
 
 **Warning:** Uses MutationObserver to detect changes. Dynamic classes from scripts will also be included.
@@ -109,15 +113,15 @@ import "virtual:unocss-devtools";
 
 ```ts
 // vite.config.ts
-import React from "@vitejs/plugin-react";
-import UnoCSS from "unocss/vite";
+import React from '@vitejs/plugin-react'
+import UnoCSS from 'unocss/vite'
 
 export default {
   plugins: [
     UnoCSS(), // Must be before React when using attributify
     React(),
   ],
-};
+}
 ```
 
 **Note:** Remove `tsc` from build script if using `@unocss/preset-attributify`.
@@ -129,9 +133,9 @@ Works out of the box with `@vitejs/plugin-vue`.
 ### Svelte
 
 ```ts
-import { svelte } from "@sveltejs/vite-plugin-svelte";
-import extractorSvelte from "@unocss/extractor-svelte";
-import UnoCSS from "unocss/vite";
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import extractorSvelte from '@unocss/extractor-svelte'
+import UnoCSS from 'unocss/vite'
 
 export default {
   plugins: [
@@ -140,7 +144,7 @@ export default {
     }),
     svelte(),
   ],
-};
+}
 ```
 
 Supports `class:foo` and `class:foo={bar}` syntax.
@@ -152,53 +156,64 @@ Same as Svelte, use `sveltekit()` from `@sveltejs/kit/vite`.
 ### Solid
 
 ```ts
-import UnoCSS from "unocss/vite";
-import solidPlugin from "vite-plugin-solid";
+import UnoCSS from 'unocss/vite'
+import solidPlugin from 'vite-plugin-solid'
 
 export default {
-  plugins: [UnoCSS(), solidPlugin()],
-};
+  plugins: [
+    UnoCSS(),
+    solidPlugin(),
+  ],
+}
 ```
 
 ### Preact
 
 ```ts
-import Preact from "@preact/preset-vite";
-import UnoCSS from "unocss/vite";
+import Preact from '@preact/preset-vite'
+import UnoCSS from 'unocss/vite'
 
 export default {
-  plugins: [UnoCSS(), Preact()],
-};
+  plugins: [
+    UnoCSS(),
+    Preact(),
+  ],
+}
 ```
 
 ### Elm
 
 ```ts
-import Elm from "vite-plugin-elm";
-import UnoCSS from "unocss/vite";
+import Elm from 'vite-plugin-elm'
+import UnoCSS from 'unocss/vite'
 
 export default {
-  plugins: [Elm(), UnoCSS()],
-};
+  plugins: [
+    Elm(),
+    UnoCSS(),
+  ],
+}
 ```
 
 ### Web Components (Lit)
 
 ```ts
 UnoCSS({
-  mode: "shadow-dom",
-  shortcuts: [{ "cool-blue": "bg-blue-500 text-white" }],
-});
+  mode: 'shadow-dom',
+  shortcuts: [
+    { 'cool-blue': 'bg-blue-500 text-white' },
+  ],
+})
 ```
 
 ```ts
 // my-element.ts
-@customElement("my-element")
+@customElement('my-element')
 export class MyElement extends LitElement {
   static styles = css`
     :host { ... }
     @unocss-placeholder
-  `;
+  `
 }
 ```
 
@@ -217,8 +232,8 @@ Visit `http://localhost:5173/__unocss` in dev mode to:
 With `@vitejs/plugin-legacy`:
 
 ```ts
-import legacy from "@vitejs/plugin-legacy";
-import UnoCSS from "unocss/vite";
+import legacy from '@vitejs/plugin-legacy'
+import UnoCSS from 'unocss/vite'
 
 export default {
   plugins: [
@@ -228,11 +243,11 @@ export default {
       },
     }),
     legacy({
-      targets: ["defaults", "not IE 11"],
+      targets: ['defaults', 'not IE 11'],
       renderModernChunks: false,
     }),
   ],
-};
+}
 ```
 
 ## VanillaJS / TypeScript
@@ -244,10 +259,13 @@ By default, `.js` and `.ts` files are not extracted. Configure to include:
 export default defineConfig({
   content: {
     pipeline: {
-      include: [/\.(vue|svelte|[jt]sx|html)($|\?)/, "src/**/*.{js,ts}"],
+      include: [
+        /\.(vue|svelte|[jt]sx|html)($|\?)/,
+        'src/**/*.{js,ts}',
+      ],
     },
   },
-});
+})
 ```
 
 Or use magic comment in files:
@@ -255,11 +273,11 @@ Or use magic comment in files:
 ```ts
 // @unocss-include
 export const classes = {
-  active: "bg-primary text-white",
-};
+  active: 'bg-primary text-white',
+}
 ```
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/integrations/vite
 -->

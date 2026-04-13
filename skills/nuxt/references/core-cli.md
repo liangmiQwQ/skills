@@ -76,7 +76,6 @@ npx nuxt dev --tunnel
 | `--clear` | Clear console on restart |
 
 **Environment Variables:**
-
 - `NUXT_PORT` or `PORT` - Default port
 - `NUXT_HOST` or `HOST` - Default host
 
@@ -255,7 +254,7 @@ npx nuxt dev --extends ./base-layer
 npx nuxt build --extends ./base-layer
 ```
 
-<!--
+<!-- 
 Source references:
 - https://nuxt.com/docs/api/commands/dev
 - https://nuxt.com/docs/api/commands/build

@@ -23,9 +23,9 @@ tsdown -d lib
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: "build",
-});
+  entry: ['src/index.ts'],
+  outDir: 'build',
+})
 ```
 
 ## Common Patterns
@@ -34,15 +34,14 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
-  outDir: "dist", // Default
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  outDir: 'dist',  // Default
   dts: true,
-});
+})
 ```
 
 **Output:**
-
 ```
 dist/
 ├── index.mjs
@@ -55,20 +54,19 @@ dist/
 ```ts
 export default defineConfig([
   {
-    entry: ["src/index.ts"],
-    format: ["esm"],
-    outDir: "dist/esm",
+    entry: ['src/index.ts'],
+    format: ['esm'],
+    outDir: 'dist/esm',
   },
   {
-    entry: ["src/index.ts"],
-    format: ["cjs"],
-    outDir: "dist/cjs",
+    entry: ['src/index.ts'],
+    format: ['cjs'],
+    outDir: 'dist/cjs',
   },
-]);
+])
 ```
 
 **Output:**
-
 ```
 dist/
 ├── esm/
@@ -81,20 +79,20 @@ dist/
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: "lib", // Custom directory
+  entry: ['src/index.ts'],
+  outDir: 'lib',  // Custom directory
   clean: true,
-});
+})
 ```
 
 ### Build to Root
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  outDir: ".", // Output to project root (not recommended)
-  clean: false, // Don't clean root!
-});
+  entry: ['src/index.ts'],
+  outDir: '.',  // Output to project root (not recommended)
+  clean: false,  // Don't clean root!
+})
 ```
 
 **Warning:** Be careful when outputting to root to avoid deleting important files.
@@ -107,34 +105,34 @@ Use `outExtensions` to control file extensions:
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm", "cjs"],
-  outDir: "dist",
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  outDir: 'dist',
   outExtensions({ format }) {
     return {
-      js: format === "esm" ? ".mjs" : ".cjs",
-    };
+      js: format === 'esm' ? '.mjs' : '.cjs',
+    }
   },
-});
+})
 ```
 
 ### Default Extensions
 
 | Format | Default Extension | With `type: "module"` |
-| ------ | ----------------- | --------------------- |
-| `esm`  | `.mjs`            | `.js`                 |
-| `cjs`  | `.cjs`            | `.js`                 |
-| `iife` | `.global.js`      | `.global.js`          |
-| `umd`  | `.umd.js`         | `.umd.js`             |
+|--------|-------------------|----------------------|
+| `esm` | `.mjs` | `.js` |
+| `cjs` | `.cjs` | `.js` |
+| `iife` | `.global.js` | `.global.js` |
+| `umd` | `.umd.js` | `.umd.js` |
 
 ### ESM with .js Extension
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
-  outExtensions: () => ({ js: ".js" }),
-});
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  outExtensions: () => ({ js: '.js' }),
+})
 ```
 
 Requires `"type": "module"` in package.json.
@@ -148,15 +146,14 @@ Control output filenames based on entry names:
 ```ts
 export default defineConfig({
   entry: {
-    index: "src/index.ts",
-    utils: "src/utils.ts",
+    index: 'src/index.ts',
+    utils: 'src/utils.ts',
   },
-  outDir: "dist",
-});
+  outDir: 'dist',
+})
 ```
 
 **Output:**
-
 ```
 dist/
 ├── index.mjs
@@ -167,14 +164,13 @@ dist/
 
 ```ts
 export default defineConfig({
-  entry: ["src/**/*.ts", "!**/*.test.ts"],
-  outDir: "dist",
-  unbundle: true, // Preserve structure
-});
+  entry: ['src/**/*.ts', '!**/*.test.ts'],
+  outDir: 'dist',
+  unbundle: true,  // Preserve structure
+})
 ```
 
 **Output:**
-
 ```
 dist/
 ├── index.mjs
@@ -191,16 +187,16 @@ dist/
 ```ts
 export default defineConfig([
   {
-    entry: ["src/index.ts"],
-    outDir: "dist",
-    clean: true, // Clean first
+    entry: ['src/index.ts'],
+    outDir: 'dist',
+    clean: true,  // Clean first
   },
   {
-    entry: ["src/cli.ts"],
-    outDir: "dist",
-    clean: false, // Don't clean again
+    entry: ['src/cli.ts'],
+    outDir: 'dist',
+    clean: false,  // Don't clean again
   },
-]);
+])
 ```
 
 ### Different Output Directories
@@ -208,16 +204,16 @@ export default defineConfig([
 ```ts
 export default defineConfig([
   {
-    entry: ["src/index.ts"],
-    format: ["esm", "cjs"],
-    outDir: "dist/lib",
+    entry: ['src/index.ts'],
+    format: ['esm', 'cjs'],
+    outDir: 'dist/lib',
   },
   {
-    entry: ["src/cli.ts"],
-    format: ["esm"],
-    outDir: "dist/bin",
+    entry: ['src/cli.ts'],
+    format: ['esm'],
+    outDir: 'dist/bin',
   },
-]);
+])
 ```
 
 ## CLI Examples

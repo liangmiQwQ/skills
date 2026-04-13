@@ -10,11 +10,14 @@ Converts `rem` units to `px` in generated utilities.
 ## Installation
 
 ```ts
-import { defineConfig, presetRemToPx, presetWind3 } from "unocss";
+import { defineConfig, presetRemToPx, presetWind3 } from 'unocss'
 
 export default defineConfig({
-  presets: [presetWind3(), presetRemToPx()],
-});
+  presets: [
+    presetWind3(),
+    presetRemToPx(),
+  ],
+})
 ```
 
 ## What It Does
@@ -22,23 +25,17 @@ export default defineConfig({
 Transforms all rem values to px:
 
 ```html
-<div class="p-4"></div>
+<div class="p-4">
 ```
 
 Without preset:
-
 ```css
-.p-4 {
-  padding: 1rem;
-}
+.p-4 { padding: 1rem; }
 ```
 
 With preset:
-
 ```css
-.p-4 {
-  padding: 16px;
-}
+.p-4 { padding: 16px; }
 ```
 
 ## Use Cases
@@ -54,7 +51,7 @@ With preset:
 presetRemToPx({
   // Base font size for conversion (default: 16)
   baseFontSize: 16,
-});
+})
 ```
 
 Custom base:
@@ -62,7 +59,7 @@ Custom base:
 ```ts
 presetRemToPx({
   baseFontSize: 14, // 1rem = 14px
-});
+})
 ```
 
 ## With Preset Wind4
@@ -70,7 +67,7 @@ presetRemToPx({
 **Note:** `presetRemToPx` is not needed with `preset-wind4`. Use the built-in processor instead:
 
 ```ts
-import { createRemToPxProcessor } from "@unocss/preset-wind4/utils";
+import { createRemToPxProcessor } from '@unocss/preset-wind4/utils'
 
 export default defineConfig({
   presets: [
@@ -78,13 +75,13 @@ export default defineConfig({
       preflights: {
         theme: {
           process: createRemToPxProcessor(),
-        },
+        }
       },
     }),
   ],
   // Also apply to utilities
   postprocess: [createRemToPxProcessor()],
-});
+})
 ```
 
 ## Important Notes
@@ -93,7 +90,7 @@ export default defineConfig({
 - Affects all utilities with rem units
 - Theme values in rem are also converted
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/presets/rem-to-px
 - https://unocss.dev/presets/wind4

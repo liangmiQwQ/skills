@@ -16,17 +16,18 @@ pnpm add -D @unocss/preset-icons @iconify-json/[collection-name]
 Example: `@iconify-json/mdi` for Material Design Icons, `@iconify-json/carbon` for Carbon icons.
 
 ```ts
-import { defineConfig, presetIcons } from "unocss";
+import { defineConfig, presetIcons } from 'unocss'
 
 export default defineConfig({
-  presets: [presetIcons()],
-});
+  presets: [
+    presetIcons(),
+  ],
+})
 ```
 
 ## Usage
 
 Two naming conventions:
-
 - `<prefix><collection>-<icon>` → `i-ph-anchor-simple-thin`
 - `<prefix><collection>:<icon>` → `i-ph:anchor-simple-thin`
 
@@ -70,17 +71,17 @@ Icons automatically choose between `mask` (monochrome) and `background-img` (col
 
 ```ts
 presetIcons({
-  scale: 1.2, // Scale relative to font size
-  prefix: "i-", // Class prefix (default)
-  mode: "auto", // 'auto' | 'mask' | 'bg'
+  scale: 1.2,              // Scale relative to font size
+  prefix: 'i-',            // Class prefix (default)
+  mode: 'auto',            // 'auto' | 'mask' | 'bg'
   extraProperties: {
-    display: "inline-block",
-    "vertical-align": "middle",
+    'display': 'inline-block',
+    'vertical-align': 'middle',
   },
-  warn: true, // Warn on missing icons
-  autoInstall: true, // Auto-install missing icon sets
-  cdn: "https://esm.sh/", // CDN for browser usage
-});
+  warn: true,              // Warn on missing icons
+  autoInstall: true,       // Auto-install missing icon sets
+  cdn: 'https://esm.sh/',  // CDN for browser usage
+})
 ```
 
 ## Custom Icon Collections
@@ -93,8 +94,8 @@ presetIcons({
     custom: {
       circle: '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"></circle></svg>',
     },
-  },
-});
+  }
+})
 ```
 
 Usage: `<span class="i-custom:circle"></span>`
@@ -102,27 +103,28 @@ Usage: `<span class="i-custom:circle"></span>`
 ### File System Loader
 
 ```ts
-import { FileSystemIconLoader } from "@iconify/utils/lib/loader/node-loaders";
+import { FileSystemIconLoader } from '@iconify/utils/lib/loader/node-loaders'
 
 presetIcons({
   collections: {
-    "my-icons": FileSystemIconLoader("./assets/icons", (svg) =>
-      svg.replace(/#fff/, "currentColor"),
+    'my-icons': FileSystemIconLoader(
+      './assets/icons',
+      svg => svg.replace(/#fff/, 'currentColor')
     ),
-  },
-});
+  }
+})
 ```
 
 ### Dynamic Import (Browser)
 
 ```ts
-import presetIcons from "@unocss/preset-icons/browser";
+import presetIcons from '@unocss/preset-icons/browser'
 
 presetIcons({
   collections: {
-    carbon: () => import("@iconify-json/carbon/icons.json").then((i) => i.default),
-  },
-});
+    carbon: () => import('@iconify-json/carbon/icons.json').then(i => i.default),
+  }
+})
 ```
 
 ## Icon Customization
@@ -132,22 +134,22 @@ presetIcons({
   customizations: {
     // Transform SVG
     transform(svg, collection, icon) {
-      return svg.replace(/#fff/, "currentColor");
+      return svg.replace(/#fff/, 'currentColor')
     },
     // Global sizing
     customize(props) {
-      props.width = "2em";
-      props.height = "2em";
-      return props;
+      props.width = '2em'
+      props.height = '2em'
+      return props
     },
     // Per-collection
     iconCustomizer(collection, icon, props) {
-      if (collection === "mdi") {
-        props.width = "2em";
+      if (collection === 'mdi') {
+        props.width = '2em'
       }
-    },
-  },
-});
+    }
+  }
+})
 ```
 
 ## CSS Directive
@@ -156,10 +158,10 @@ Use `icon()` in CSS (requires transformer-directives):
 
 ```css
 .icon {
-  background-image: icon("i-carbon-sun");
+  background-image: icon('i-carbon-sun');
 }
 .icon-colored {
-  background-image: icon("i-carbon-moon", "#fff");
+  background-image: icon('i-carbon-moon', '#fff');
 }
 ```
 
@@ -176,7 +178,7 @@ Use `icon()` in CSS (requires transformer-directives):
 </a>
 ```
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/presets/icons
 -->

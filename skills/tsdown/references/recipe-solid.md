@@ -11,15 +11,15 @@ npx create-tsdown@latest -t solid
 ## Configuration
 
 ```ts
-import solid from "rolldown-plugin-solid"; // or 'unplugin-solid/rolldown'
-import { defineConfig } from "tsdown";
+import solid from 'rolldown-plugin-solid' // or 'unplugin-solid/rolldown'
+import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ["./src/index.ts"],
-  platform: "neutral",
+  entry: ['./src/index.ts'],
+  platform: 'neutral',
   dts: true,
   plugins: [solid()],
-});
+})
 ```
 
 ## Dependencies

@@ -28,9 +28,9 @@ tsdown --watch ./src/index.ts
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   watch: true,
-});
+})
 ```
 
 ## Watch Options
@@ -45,11 +45,11 @@ tsdown --watch --ignore-watch test --ignore-watch '**/*.test.ts'
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   watch: {
-    exclude: ["test/**", "**/*.test.ts"],
+    exclude: ['test/**', '**/*.test.ts'],
   },
-});
+})
 ```
 
 ### On Success Command
@@ -63,10 +63,10 @@ tsdown --watch --on-success "node dist/index.mjs"
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   watch: true,
-  onSuccess: "node dist/index.mjs",
-});
+  onSuccess: 'node dist/index.mjs',
+})
 ```
 
 ## Watch Behavior
@@ -74,7 +74,6 @@ export default defineConfig({
 ### Default Watch Targets
 
 By default, tsdown watches:
-
 - All entry files
 - All imported files
 - Config file (triggers restart)
@@ -88,7 +87,6 @@ By default, tsdown watches:
 ### Keyboard Shortcuts
 
 During watch mode:
-
 - `r` - Manual rebuild
 - `q` - Quit watch mode
 
@@ -98,22 +96,22 @@ During watch mode:
 
 ```ts
 export default defineConfig((options) => ({
-  entry: ["src/index.ts"],
-  format: ["esm"],
+  entry: ['src/index.ts'],
+  format: ['esm'],
   watch: options.watch,
   sourcemap: options.watch,
   minify: !options.watch,
-}));
+}))
 ```
 
 ### With Post-Build Script
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   watch: true,
-  onSuccess: "npm run test",
-});
+  onSuccess: 'npm run test',
+})
 ```
 
 ### Multiple Entry Points
@@ -121,12 +119,12 @@ export default defineConfig({
 ```ts
 export default defineConfig({
   entry: {
-    main: "src/index.ts",
-    cli: "src/cli.ts",
+    main: 'src/index.ts',
+    cli: 'src/cli.ts',
   },
   watch: true,
-  clean: false, // Don't clean on each rebuild
-});
+  clean: false,  // Don't clean on each rebuild
+})
 ```
 
 ### Test Runner Integration
@@ -143,13 +141,13 @@ tsdown --watch --on-success "node dist/server.mjs"
 
 ```ts
 export default defineConfig({
-  workspace: "packages/*",
-  entry: ["src/index.ts"],
+  workspace: 'packages/*',
+  entry: ['src/index.ts'],
   watch: true,
   watch: {
-    exclude: ["**/test/**", "**/*.spec.ts"],
+    exclude: ['**/test/**', '**/*.spec.ts'],
   },
-});
+})
 ```
 
 ## Advanced Configuration
@@ -158,29 +156,29 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   watch: {
-    include: ["src/**"],
-    exclude: ["**/*.test.ts", "**/fixtures/**"],
+    include: ['src/**'],
+    exclude: ['**/*.test.ts', '**/fixtures/**'],
     skipWrite: false,
   },
-});
+})
 ```
 
 ### Conditional Watch
 
 ```ts
 export default defineConfig((options) => {
-  const isDev = options.watch;
+  const isDev = options.watch
 
   return {
-    entry: ["src/index.ts"],
-    format: ["esm"],
-    dts: !isDev, // Skip DTS in watch mode
+    entry: ['src/index.ts'],
+    format: ['esm'],
+    dts: !isDev,        // Skip DTS in watch mode
     sourcemap: isDev,
     clean: !isDev,
-  };
-});
+  }
+})
 ```
 
 ## CLI Examples
@@ -232,9 +230,14 @@ Add ignore patterns:
 ```ts
 export default defineConfig({
   watch: {
-    exclude: ["**/node_modules/**", "**/.git/**", "**/dist/**", "**/*.test.ts"],
+    exclude: [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/dist/**',
+      '**/*.test.ts',
+    ],
   },
-});
+})
 ```
 
 ### Slow Rebuilds

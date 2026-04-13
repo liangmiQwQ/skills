@@ -11,7 +11,7 @@ Turn code blocks into fully-featured editors.
 
 ````md
 ```ts {monaco}
-console.log("HelloWorld");
+console.log('HelloWorld')
 ```
 ````
 
@@ -21,8 +21,9 @@ Compare two code versions:
 
 ````md
 ```ts {monaco-diff}
-console.log("Original text");
-~~~console.log("Modified text");
+console.log('Original text')
+~~~
+console.log('Modified text')
 ```
 ````
 
@@ -32,7 +33,7 @@ Auto-grow as you type:
 
 ````md
 ```ts {monaco} {height:'auto'}
-console.log("Hello, World!");
+console.log('Hello, World!')
 ```
 ````
 

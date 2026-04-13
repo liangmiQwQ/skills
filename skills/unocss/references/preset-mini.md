@@ -10,11 +10,13 @@ The minimal preset with only essential rules and variants. Good starting point f
 ## Installation
 
 ```ts
-import { defineConfig, presetMini } from "unocss";
+import { defineConfig, presetMini } from 'unocss'
 
 export default defineConfig({
-  presets: [presetMini()],
-});
+  presets: [
+    presetMini(),
+  ],
+})
 ```
 
 ## What's Included
@@ -33,7 +35,6 @@ Subset of `preset-wind3` with essential utilities aligned to CSS properties:
 ## What's NOT Included
 
 Opinionated or complex Tailwind utilities:
-
 - `container`
 - Complex animations
 - Gradients
@@ -52,8 +53,8 @@ Same as preset-wind3:
 
 ```ts
 presetMini({
-  dark: "class", // or 'media'
-});
+  dark: 'class' // or 'media'
+})
 ```
 
 ```html
@@ -61,7 +62,6 @@ presetMini({
 ```
 
 Class-based:
-
 ```css
 .dark .dark\:bg-red\:10 {
   background-color: rgb(248 113 113 / 0.1);
@@ -69,7 +69,6 @@ Class-based:
 ```
 
 Media query:
-
 ```css
 @media (prefers-color-scheme: dark) {
   .dark\:bg-red\:10 {
@@ -100,13 +99,13 @@ Native CSS layer support:
 presetMini({
   theme: {
     colors: {
-      veryCool: "#0000ff",
+      veryCool: '#0000ff',
       brand: {
-        primary: "hsl(var(--hue, 217) 78% 51%)",
-      },
+        primary: 'hsl(var(--hue, 217) 78% 51%)',
+      }
     },
-  },
-});
+  }
+})
 ```
 
 **Note:** `breakpoints` property is overridden, not merged.
@@ -116,20 +115,20 @@ presetMini({
 ```ts
 presetMini({
   // Dark mode: 'class' | 'media' | { light: string, dark: string }
-  dark: "class",
-
+  dark: 'class',
+  
   // Generate [group=""] instead of .group for attributify
   attributifyPseudo: false,
-
+  
   // CSS variable prefix (default: 'un-')
-  variablePrefix: "un-",
-
+  variablePrefix: 'un-',
+  
   // Utility prefix
   prefix: undefined,
-
+  
   // Preflight generation: true | false | 'on-demand'
   preflight: true,
-});
+})
 ```
 
 ## Building on Mini
@@ -137,23 +136,23 @@ presetMini({
 Create custom preset extending mini:
 
 ```ts
-import { presetMini } from "unocss";
-import type { Preset } from "unocss";
+import { presetMini } from 'unocss'
+import type { Preset } from 'unocss'
 
 export const myPreset: Preset = {
-  name: "my-preset",
+  name: 'my-preset',
   presets: [presetMini()],
   rules: [
     // Add custom rules
-    ["card", { "border-radius": "8px", "box-shadow": "0 2px 8px rgba(0,0,0,0.1)" }],
+    ['card', { 'border-radius': '8px', 'box-shadow': '0 2px 8px rgba(0,0,0,0.1)' }],
   ],
   shortcuts: {
-    btn: "px-4 py-2 rounded bg-blue-500 text-white",
+    'btn': 'px-4 py-2 rounded bg-blue-500 text-white',
   },
-};
+}
 ```
 
-<!--
+<!-- 
 Source references:
 - https://unocss.dev/presets/mini
 -->

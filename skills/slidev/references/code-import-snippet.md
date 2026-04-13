@@ -43,7 +43,7 @@ Combine with line highlighting, Monaco editor:
 Use `{*}` for line highlighting placeholder:
 
 ```md
-<<< @/snippets/snippet.js {\*}{lines:true}
+<<< @/snippets/snippet.js {*}{lines:true}
 ```
 
 ## Monaco Write

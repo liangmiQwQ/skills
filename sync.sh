@@ -12,6 +12,7 @@ ska vercel-labs/skills
 ska anthropics/skills --skill frontend-design
 ska vuejs-ai/skills
 ska slidevjs/slidev
+ska antfu
 
 sh install-skills/vp.sh # For vp skills
 

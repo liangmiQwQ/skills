@@ -21,3 +21,7 @@ skills add liangmiQwQ/skills -g --yes
 ### Third Party Skills
 
 <!-- PLACEHOLDER -->
+
+## License
+
+[MIT](./LICENSE) © Liang Mi

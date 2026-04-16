@@ -19,7 +19,7 @@
     "design": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "5a7fed492feacaca1ece7680adb570fa2e644176fa581a1de495006a4569d6f2"
+      "computedHash": "5c0256d7f8250407f38949cc9f5b71067ecbe7b70551ebcd4597d35c622aec0e"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -34,7 +34,7 @@
     "hunt": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "d0f4b25408c7215a52cab181901f27c03a477884c02fd293498d96f2f8d310e9"
+      "computedHash": "6943b280a5b7ee2fb8e129caeccb2453725ba160e4527ea5736737294f370436"
     },
     "nuxt": {
       "source": "antfu/skills",
@@ -59,7 +59,7 @@
     "think": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "9353f5a4232dc0b9c028fe344bf1b7777f1d2e3cc5ddb6fb20d39ebe818eec9e"
+      "computedHash": "b71ca08dd14a57c99fb07ac781c1991523d208a917c2ddbc2876fbc3e2044822"
     },
     "tsdown": {
       "source": "antfu/skills",
@@ -109,7 +109,7 @@
     "vite-plus": {
       "source": "vite-plus",
       "sourceType": "node_modules",
-      "computedHash": "1c14d75eb12385511728ebdf2c7e13c2ed8a53068772096b8af4985b7a80a1c3"
+      "computedHash": "796663dcf6fa4605df3285aae862aa6fc5869cbfc80f319ce20ffa4e8f4a19e8"
     },
     "vitepress": {
       "source": "antfu/skills",

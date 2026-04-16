@@ -2,7 +2,7 @@
 name: design
 description: Invoke when building any UI, component, page, or visual interface. Produces distinctive design with a committed aesthetic, not generic defaults. Not for backend logic or data pipelines.
 metadata:
-  version: "3.8.0"
+  version: "3.9.0"
 ---
 
 # Design: Build It With a Point of View
@@ -83,7 +83,7 @@ Run these litmus checks before writing the handoff summary:
 - Are cards actually necessary, or just default styling?
 - Does motion improve hierarchy or atmosphere, or is it ornamental?
 - Would the design still feel premium if all decorative shadows were removed?
-- AI Slop Test: would a stranger glancing at the first screen say "AI made this"? If yes, the committed direction was not committed enough. Fix the typography, color, or layout until the answer flips.
+- AI Slop Test: scan the first screen for default patterns that scream "AI made this." Examples (not exhaustive): reflex font (Inter, DM Sans, Outfit...), purple-to-blue gradient, centered hero with two CTAs side by side, three identical cards, top nav logo-left-links-center-action-right, decorative gradient with no real imagery. If any appear unintentionally, the direction is not committed enough. Fix typography, color, or layout until none remain.
 
 If any check fails, fix it first. Then revisit the common traps list from `references/design-reference.md` (already loaded during direction lock; do not re-read the file). Then ask the user to open the result in a browser and confirm it looks right at full width. Also check at 375px width: resize the browser or use DevTools device emulation. If the layout breaks, content overflows, or text is unreadable at mobile width, fix it before handing off. Do not hand off until both checks pass.
 

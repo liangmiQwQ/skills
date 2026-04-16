@@ -87,7 +87,7 @@ Check before handoff. These are not aesthetic choices, they are non-negotiable.
 
 ## Reflex Fonts to Reject
 
-LLMs default to these because they dominate training data. Using them signals "no decision was made." Pick from foundries with a clear voice instead. The ban is on reflex use as a display face; informed product-UI use (e.g. Inter for a dense data table) is allowed when justified.
+LLMs default to these because they dominate training data. Using them signals "no decision was made." Pick from foundries with a clear voice instead. The ban is on reflex use as a display face; informed product-UI use (e.g. Inter for a dense data table) is allowed when justified. This list is not exhaustive -- any font used reflexively without a stated reason qualifies.
 
 Reject: Inter, DM Sans, DM Serif Display, DM Serif Text, Outfit, Plus Jakarta Sans, Instrument Sans, Instrument Serif, Space Grotesk, Space Mono, IBM Plex Sans, IBM Plex Serif, IBM Plex Mono, Syne, Fraunces, Newsreader, Lora, Crimson Pro, Crimson Text, Playfair Display, Cormorant, Cormorant Garamond.
 
@@ -124,7 +124,7 @@ If the answer is not obvious from the context, default to light. If the user's c
 
 ## Absolute Bans (CSS-Pattern Level)
 
-These patterns appear in the majority of AI-generated interfaces. Each one has a specific rewrite.
+These patterns appear in the majority of AI-generated interfaces. Each one has a specific rewrite. Not exhaustive -- any CSS pattern applied as a mindless default rather than an intentional choice belongs in the same category.
 
 | Pattern | Why | Rewrite |
 |---|---|---|

@@ -2,7 +2,7 @@
 name: think
 description: Invoke before writing any code for a new feature, design, or architecture decision. Turns rough ideas into approved plans with validated structure. Not for bug fixes or small edits.
 metadata:
-  version: "3.8.0"
+  version: "3.9.0"
 ---
 
 # Think: Design and Validate Before You Build
@@ -24,7 +24,7 @@ Give opinions directly. Take a position and state what evidence would change it.
 
 Offer 2-3 options with tradeoffs and a recommendation. Always include one minimal option. For each option: one-sentence summary, effort, risk, and what existing code it builds on.
 
-For the recommendation, run four attack angles before presenting it:
+For the recommendation, run attack angles before presenting it. Four common ones (not exhaustive):
 
 | Attack angle | Question |
 |---|---|
@@ -54,12 +54,11 @@ Get approval before proceeding. If the user rejects, ask specifically what did n
 |---------------|------|
 | Moved files to `~/project`, repo was at `~/www/project` | Run `pwd` before the first filesystem operation |
 | Asked for API key after 3 implementation steps | List every dependency before handing off |
-| User said "帮我做" and got 3 options | Stay in planning mode. Lead with the recommended option, and treat user acceptance as plan approval, not implementation approval. |
+| User said "帮我做" or "just do it" | Treat as approval of the recommended option. State which option was selected, finish the plan. Do not implement inside `/think`. |
 | Planned MCP workflow without checking if MCP was loaded | Verify tool availability before handing off, not mid-implementation |
 | Rejected design restarted from scratch | Ask what specifically failed, re-enter with narrowed constraints |
 | Built against wrong regional API (Shengwang vs Agora) | List all regional differences before writing integration code |
 | Added FastAPI backend to a Next.js project | Never add a new language or runtime without explicit approval |
-| User said "just do it" before approving the design | Treat it as approval of the last option presented. State which option was selected, then finish the plan. Do not implement inside `/think`. |
 
 ## Output
 

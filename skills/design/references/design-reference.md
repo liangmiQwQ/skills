@@ -146,6 +146,30 @@ Complements the motion timing in the main SKILL.md constraints.
 - Icon swaps: use a 120ms cross-fade with `opacity` and a subtle `scale(0.9)` to `scale(1)`. No rotation unless rotation is semantically meaningful (e.g. a chevron indicating direction change).
 - Do not use `transition: all` even as a quick prototype shortcut. It animates layout, color, and font-size simultaneously, causing visible jank.
 
+## Reference-site Brand Presets (awesome-design-md)
+
+`VoltAgent/awesome-design-md` maintains 66+ curated DESIGN.md files extracted from real-world brand sites. Running `npx getdesign@latest add <brand>` drops the file into the project root, giving the agent concrete token values to decompose rather than reasoning from memory.
+
+**Usage rule:** never auto-run the command. Offer it as an option during direction lock, run it only with explicit user approval, and treat the result as seed decomposition material, not a finished direction.
+
+**Brands in the catalog** (recognize these when a user names a reference):
+
+| Category | Brands |
+|---|---|
+| AI & LLM | Claude, Cohere, ElevenLabs, Mistral, Ollama, Replicate, RunwayML, Together AI, xAI |
+| Dev Tools & IDEs | Cursor, Expo, Lovable, Raycast, Superhuman, Vercel, Warp |
+| Backend / DB / DevOps | ClickHouse, Composio, HashiCorp, MongoDB, PostHog, Sanity, Sentry, Supabase |
+| Productivity & SaaS | Cal.com, Intercom, Linear, Mintlify, Notion, Resend, Zapier |
+| Design & Creative | Airtable, Clay, Figma, Framer, Miro, Webflow |
+| Fintech & Crypto | Binance, Coinbase, Kraken, Revolut, Stripe, Wise |
+| E-commerce & Retail | Airbnb, Meta, Nike, Shopify |
+| Media & Consumer | Apple, IBM, NVIDIA, Pinterest, PlayStation, SpaceX, Spotify, Uber |
+| Automotive | BMW, Bugatti, Ferrari, Lamborghini, Tesla |
+
+**Conflict resolution:** this skill's rules always win. If the preset recommends a font on the Reflex Fonts blocklist (e.g. Inter as a display face), discard it and apply the Font Selection Procedure. If it proposes a pattern in the Absolute Bans table (e.g. purple-to-blue gradient), discard it. State the override in the handoff summary.
+
+Source: [github.com/VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md)
+
 ## DESIGN.md Scaffold (Optional, Production UIs)
 
 For a multi-page or production UI, emit a short `DESIGN.md`-style summary before writing the first component. This forces enumeration of decisions that would otherwise be left implicit and lets the user correct direction early. The nine sections:
@@ -168,4 +192,4 @@ Would a stranger glancing at the first viewport say "an AI made this" immediatel
 
 ---
 
-*Rules in Reflex Fonts, Font Selection, OKLCH, Theme Matrix, Absolute Bans, Motion Specifics, and AI Slop Test adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0). DESIGN.md Scaffold adapted from [getdesign.md](https://getdesign.md) (MIT); concept credited to Google Stitch.*
+*Rules in Reflex Fonts, Font Selection, OKLCH, Theme Matrix, Absolute Bans, Motion Specifics, and AI Slop Test adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0). DESIGN.md Scaffold adapted from [getdesign.md](https://getdesign.md) (MIT); concept credited to Google Stitch. Brand preset catalog from [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) (MIT).*

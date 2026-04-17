@@ -19,7 +19,7 @@
     "design": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "5c0256d7f8250407f38949cc9f5b71067ecbe7b70551ebcd4597d35c622aec0e"
+      "computedHash": "e870dd165100ed456f9ff682454690af074639fd365312cc27e2d2894102ef4e"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -34,7 +34,7 @@
     "hunt": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "6943b280a5b7ee2fb8e129caeccb2453725ba160e4527ea5736737294f370436"
+      "computedHash": "3b718ae5e0037663b30213109dfc55a13cd63c65418c77b2e197343326b793ae"
     },
     "nuxt": {
       "source": "antfu/skills",
@@ -59,7 +59,7 @@
     "think": {
       "source": "tw93/Waza",
       "sourceType": "github",
-      "computedHash": "b71ca08dd14a57c99fb07ac781c1991523d208a917c2ddbc2876fbc3e2044822"
+      "computedHash": "a26e9682d2e817ab357af70812ffcd720ef0346df7261440a8387c1a5c768f06"
     },
     "tsdown": {
       "source": "antfu/skills",

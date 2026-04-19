@@ -2,7 +2,7 @@
 name: hunt
 description: Invoke when debugging any error, crash, unexpected behavior, or failing test. Finds root cause before applying any fix. Not for code review or new features.
 metadata:
-  version: "3.10.1"
+  version: "3.12.0"
 ---
 
 # Hunt: Diagnose Before You Fix
@@ -52,6 +52,18 @@ Do not claim progress without observable evidence matching at least one of these
 - **Visual/rendering bugs: static analysis first.** Trace paint layers, stacking contexts, and layer order in DevTools before adding console.log or visual debug overlays. Logs cannot capture what the compositor does. Only add instrumentation after static analysis fails.
 - **Fix the cause, not the symptom.** If the fix touches more than 5 files, pause and confirm scope with the user.
 
+## Bisect Mode
+
+Activate when the symptom is "used to work, now broken" or "broke after an update". Random-walking forward from the current state wastes context and produces random fixes.
+
+**Flow:**
+
+1. Find `last-known-good`: use the most recent tag where the behavior was correct (`git tag --sort=-version:refname | head -5`). Do not use a date or a raw SHA as the anchor.
+2. Define a pass/fail test command before starting. The command must be runnable non-interactively and produce an unambiguous exit code. Write it down once; reuse it at every step.
+3. Run `git bisect start`, `git bisect bad` (current), `git bisect good <tag>`. Let bisect drive; do not jump ahead.
+4. Context conservation: do not re-read large files at each step. Read once, note the key function or line, reference from notes. Bisect output is the state; keep it in the terminal, not in context.
+5. When bisect names the culprit commit: read only that commit's diff, not surrounding history. Identify the specific line that introduced the regression.
+
 ## Confirm or Discard
 
 Add one targeted instrument: a log line, a failing assertion, or the smallest test that would fail if the hypothesis is correct. Run it. If the evidence contradicts the hypothesis, discard it completely and re-orient with what was just learned. Do not preserve a hypothesis the evidence disproves.
@@ -72,13 +84,19 @@ Add one targeted instrument: a log line, a failing assertion, or the smallest te
 ### Success Format
 
 ```
-Root cause:  [what was wrong, file:line]
-Fix:         [what changed, file:line]
-Confirmed:   [evidence or test that proves the fix]
-Tests:       [pass/fail count, regression test location]
+Root cause:        [what was wrong, file:line]
+Fix:               [what changed, file:line]
+Confirmed:         [evidence or test that proves the fix]
+Tests:             [pass/fail count, regression test location]
+Regression guard:  [test file:line] or [none, reason]
 ```
 
 Status: **resolved**, **resolved with caveats** (state them), or **blocked** (state what is unknown).
+
+**Regression guard rule**: for any bug that recurred or was previously "fixed", the fix is not done until:
+1. A regression test exists that fails on the unfixed code and passes on the fixed code.
+2. The test lives in the project's test suite, not a temporary file.
+3. The commit message states why the bug recurred and why this fix prevents it.
 
 ### Handoff Format (after 3 failed hypotheses)
 

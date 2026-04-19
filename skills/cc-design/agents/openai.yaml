@@ -1,0 +1,4 @@
+interface:
+  display_name: "CC Design"
+  short_description: "High-fidelity HTML design and prototype guidance"
+  default_prompt: "Use $cc-design to explore three strong HTML-based design directions for this feature, grounded in the existing product style."

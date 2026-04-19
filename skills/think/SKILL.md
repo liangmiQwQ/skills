@@ -2,7 +2,7 @@
 name: think
 description: Invoke before writing any code for a new feature, design, or architecture decision. Turns rough ideas into approved plans with validated structure. Not for bug fixes or small edits.
 metadata:
-  version: "3.10.1"
+  version: "3.12.0"
 ---
 
 # Think: Design and Validate Before You Build
@@ -13,6 +13,19 @@ Prefix your first line with 🥷 inline, not as its own paragraph.
 Turn a rough idea into an approved plan. No code, no scaffolding, no pseudo-code until the user approves.
 
 Give opinions directly. Take a position and state what evidence would change it. Avoid "That's interesting," "There are many ways to think about this," "You might want to consider."
+
+## Lightweight Mode
+
+Activate when: the user wants to fix something rather than build something, the problem is already defined, and the only open question is "how to fix it."
+
+**Flow:**
+
+1. One recommended fix: 2-3 sentences. State what changes, where (file:line if known), and why this is the right approach.
+2. Which files are involved. If more than 5 files, note this explicitly.
+3. One risk: what could go wrong with this fix and how to verify it didn't.
+4. Wait for one round of approval. Then stop; implementation starts when the user requests it.
+
+**Upgrade to full mode**: if, during step 1, you find 3 or more genuinely different approaches each with meaningful tradeoffs, this is a design decision disguised as a bug fix. Tell the user and switch to the full flow.
 
 ## Before Reading Any Code
 
@@ -74,6 +87,7 @@ Get approval before proceeding. If the user rejects, ask specifically what did n
 | User said "just do it" or equivalent approval | Treat as approval of the recommended option. State which option was selected, finish the plan. Do not implement inside `/think`. |
 | Planned MCP workflow without checking if MCP was loaded | Verify tool availability before handing off, not mid-implementation |
 | Rejected design restarted from scratch | Ask what specifically failed, re-enter with narrowed constraints |
+| User said "just fix X" and skipped /think | If the fix touches 3+ files or needs a method choice, pause and run Lightweight Mode |
 | Built against wrong regional API (Shengwang vs Agora) | List all regional differences before writing integration code |
 | Added FastAPI backend to a Next.js project | Never add a new language or runtime without explicit approval |
 

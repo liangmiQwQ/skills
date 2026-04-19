@@ -2,7 +2,7 @@
 name: think
 description: Invoke before writing any code for a new feature, design, or architecture decision. Turns rough ideas into approved plans with validated structure. Not for bug fixes or small edits.
 metadata:
-  version: "3.10.0"
+  version: "3.10.1"
 ---
 
 # Think: Design and Validate Before You Build

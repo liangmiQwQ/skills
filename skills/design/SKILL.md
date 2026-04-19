@@ -2,7 +2,7 @@
 name: design
 description: Invoke when building any UI, component, page, or visual interface. Produces distinctive design with a committed aesthetic, not generic defaults. Not for backend logic or data pipelines.
 metadata:
-  version: "3.10.0"
+  version: "3.11.0"
 ---
 
 # Design: Build It With a Point of View
@@ -25,6 +25,17 @@ Before writing any code, ask the user directly, using the environment's native q
 5. **What is the signature micro-interaction?** Scale on press, staggered reveal, or contextual icon animation. Pick one and know exactly how it's implemented.
 
 Do not proceed until all five are answered.
+
+### Source repo as reference
+
+When the user provides a repository URL or pastes source code of an existing product to recreate or extend: the file tree is a menu, not the meal. Do not reconstruct the UI from memory or training data. Instead, read the actual source:
+- Theme and token files: `theme.ts`, `colors.ts`, `tokens.css`, `_variables.scss`, or equivalent
+- Global stylesheets and layout scaffolds
+- The specific components the user mentioned
+
+Lift exact values: hex codes, spacing scale entries, font stacks, border radii. A rough approximation is not pixel fidelity.
+
+Only attach the target component folder or package. Exclude `.git`, `node_modules`, `dist`, and lock files. Dragging in an entire monorepo pollutes the context with irrelevant code and degrades output quality.
 
 ### App shell exception (sidebar + main workspace)
 
@@ -58,6 +69,15 @@ After every third component or one complete page section (whichever comes first)
 
 Do not wait until handoff to run the AI Slop Test. Catching drift early costs one component; catching it at handoff costs the entire build.
 
+## When Asked For Options
+
+Give at least 3 variations, spread across genuinely different dimensions:
+
+- **Dimensions to vary**: visual density, typographic personality, color temperature, layout structure, motion character, amount of decoration, level of abstraction
+- **Mix approaches**: one option that follows existing conventions closely, one that remixes the brand DNA in a new way, one that is deliberately unexpected
+- **Progress from basic to bold**: the first option is safe and understandable; later options push further
+- Three options that differ only by accent color are not three variations. Vary the layout, the typeface, the motion, the surface treatment.
+
 ## Gotchas
 
 | What happened | Rule |
@@ -74,6 +94,8 @@ Do not wait until handoff to run the AI Slop Test. Catching drift early costs on
 | Every project ended up with the same look | Vary light/dark, serif/sans, dense/spacious. If it could have been the last project, it is not designed for this one. |
 | Heavy `border: 1px solid` on every container, flat buttons, no depth | This is 2015 UI kit default. Replace with shadow-step depth, `active:scale-95` on buttons, translucent borders (`border/30`). |
 | Light-mode app: white panel on white background, visually indistinguishable | Adjacent nested surfaces must differ visually. Either background step (sidebar vs main ≥4% lightness difference) or shadow minimum `0 1px 3px rgba(0,0,0,0.10)`. |
+| Added an extra section because it "felt incomplete" | Ask first. The user knows their audience; you do not. If you think more content would help, surface the suggestion as a question, do not ship it unilaterally. |
+| Tried to generate a logo, app icon, or brand illustration | Icons, naming, and brand identity require human taste and judgment. Use a labeled placeholder and ask the user to supply the real asset. |
 
 ## Handoff
 

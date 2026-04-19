@@ -2,7 +2,7 @@
 name: hunt
 description: Invoke when debugging any error, crash, unexpected behavior, or failing test. Finds root cause before applying any fix. Not for code review or new features.
 metadata:
-  version: "3.10.0"
+  version: "3.10.1"
 ---
 
 # Hunt: Diagnose Before You Fix

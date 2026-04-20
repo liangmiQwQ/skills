@@ -1,5 +1,10 @@
 # Tweaks System
 
+> **Load when:** Generating multiple design variants or enabling real-time in-page adjustments
+> **Skip when:** Producing a single static design with no variations
+> **Why it matters:** Provides a unified, self-contained adjustment UI so users can toggle variants without file proliferation
+> **Typical failure it prevents:** Creating separate HTML files per variant instead of one file with toggleable options; losing user adjustments on refresh
+
 Tweaks let the user toggle in-page controls to adjust design aspects — colors, fonts, spacing, copy, layout variants, etc. You design the Tweaks UI; it lives inside the prototype as a self-contained panel.
 
 ## Implementation

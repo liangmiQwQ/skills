@@ -1,10 +1,17 @@
 # Starter Components
 
+> **Load when:** Needing device frames, slide deck shells, presentation grids, or animation scaffolds
+> **Skip when:** Designing from scratch with existing components, or building something none of the templates cover
+> **Why it matters:** Avoids hand-rolling scaling logic, device bezels, and animation engines — these are tricky to get right
+> **Typical failure it prevents:** Hand-written scale transforms that break on resize, slide decks without proper letterboxing, animation timing drift
+
 Starter components are ready-made scaffolds in the `templates/` directory. Copy them to your project instead of hand-drawing device bezels, deck shells, or presentation grids.
 
 Kinds include the file extension — some are plain JS (load with `<script src>`), some are JSX (load with `<script type="text/babel" src>`).
 
 ## How to use
+
+If your Codex host exposes a built-in starter-component tool, you can use that. Otherwise use the same file-copy flow described for Claude Code.
 
 ```bash
 # Copy a template to your project
@@ -17,7 +24,7 @@ Or use `Read` to read the template, then `Write` to create a customized version 
 |---|---|---|---|
 | `deck_stage` | `templates/deck_stage.js` | Plain JS | ANY slide presentation — handles scaling, keyboard nav, slide-count overlay, speaker-notes postMessage, localStorage persistence, print-to-PDF |
 | `design_canvas` | `templates/design_canvas.jsx` | JSX (React) | Presenting 2+ static options side-by-side — a grid layout with labeled cells for variations |
-| `ios_frame` | `templates/ios_frame.jsx` | JSX (React) | Design needs to look like a real iPhone screen — includes device bezel with status bar and keyboard |
+| `ios_frame` | `templates/ios_frame.jsx` | JSX (React) | Design needs to look like a real iPhone screen — includes device bezel with status bar |
 | `android_frame` | `templates/android_frame.jsx` | JSX (React) | Design needs to look like a real Android phone screen — includes device bezel with status bar and keyboard |
 | `macos_window` | `templates/macos_window.jsx` | JSX (React) | Desktop window chrome with traffic lights |
 | `browser_window` | `templates/browser_window.jsx` | JSX (React) | Desktop window chrome with tab bar |

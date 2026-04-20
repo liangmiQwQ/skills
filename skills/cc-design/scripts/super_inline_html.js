@@ -10,15 +10,7 @@
 
 const fs = require("fs");
 const path = require("path");
-
-function parseArgs(args) {
-  const opts = { input: "", output: "" };
-  for (let i = 2; i < args.length; i++) {
-    if (args[i] === "--input" && args[i + 1]) opts.input = args[++i];
-    else if (args[i] === "--output" && args[i + 1]) opts.output = args[++i];
-  }
-  return opts;
-}
+const parseArgs = require("./lib/parse_args");
 
 function fileToDataUrl(filePath, mimeType) {
   const data = fs.readFileSync(filePath);
@@ -82,21 +74,37 @@ function inlineHtml(html, baseDir) {
     return match.replace(src, dataUrl);
   });
 
-  // Inline url() in style attributes and <style> blocks
-  result = result.replace(/url\(["']?([^"')]+)["']?\)/gi, (match, urlPath) => {
-    if (urlPath.startsWith("http") || urlPath.startsWith("data:")) return match;
-    const filePath = path.resolve(baseDir, urlPath);
-    if (!fs.existsSync(filePath)) return match;
-    const ext = path.extname(filePath);
-    const dataUrl = fileToDataUrl(filePath, getMimeType(ext));
-    return `url("${dataUrl}")`;
+  // Inline url() only within <style> blocks and style="" attributes (avoid matching JS strings)
+  // Process <style> blocks first
+  result = result.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (match, cssContent) => {
+    const inlined = cssContent.replace(/url\(["']?([^"')]+)["']?\)/gi, (urlMatch, urlPath) => {
+      if (urlPath.startsWith("http") || urlPath.startsWith("data:")) return urlMatch;
+      const filePath = path.resolve(baseDir, urlPath);
+      if (!fs.existsSync(filePath)) return urlMatch;
+      const ext = path.extname(filePath);
+      const dataUrl = fileToDataUrl(filePath, getMimeType(ext));
+      return `url("${dataUrl}")`;
+    });
+    return `<style>${inlined}</style>`;
+  });
+
+  // Process style="" attributes
+  result = result.replace(/style=["']([^"']*url\([^"']*?)[^"']*["']/gi, (match) => {
+    return match.replace(/url\(["']?([^"')]+)["']?\)/gi, (urlMatch, urlPath) => {
+      if (urlPath.startsWith("http") || urlPath.startsWith("data:")) return urlMatch;
+      const filePath = path.resolve(baseDir, urlPath);
+      if (!fs.existsSync(filePath)) return urlMatch;
+      const ext = path.extname(filePath);
+      const dataUrl = fileToDataUrl(filePath, getMimeType(ext));
+      return `url("${dataUrl}")`;
+    });
   });
 
   return result;
 }
 
 function main() {
-  const opts = parseArgs(process.argv);
+  const opts = parseArgs(process.argv, { input: "", output: "" });
   if (!opts.input) {
     console.error("Usage: node super_inline_html.js --input page.html --output page-inline.html");
     process.exit(1);

@@ -14,19 +14,10 @@
 const fs = require("fs");
 const path = require("path");
 const PptxGenJS = require("pptxgenjs");
-
-function parseArgs(args) {
-  const opts = { input: "", output: "output.pptx", mode: "editable" };
-  for (let i = 2; i < args.length; i++) {
-    if (args[i] === "--input" && args[i + 1]) opts.input = args[++i];
-    else if (args[i] === "--output" && args[i + 1]) opts.output = args[++i];
-    else if (args[i] === "--mode" && args[i + 1]) opts.mode = args[++i];
-  }
-  return opts;
-}
+const parseArgs = require("./lib/parse_args");
 
 async function main() {
-  const opts = parseArgs(process.argv);
+  const opts = parseArgs(process.argv, { input: "", output: "output.pptx", mode: "editable" });
 
   if (!opts.input) {
     console.error(
@@ -44,27 +35,10 @@ async function main() {
   const pptx = new PptxGenJS();
   pptx.layout = "LAYOUT_WIDE"; // 13.33 x 7.5 inches (16:9)
 
-  const html = fs.readFileSync(inputPath, "utf-8");
-
-  // Extract slides from <section> elements
-  const slideRegex = /<section[^>]*>([\s\S]*?)<\/section>/gi;
-  const slides = [];
-  let match;
-  while ((match = slideRegex.exec(html)) !== null) {
-    slides.push(match[1]);
-  }
-
-  if (slides.length === 0) {
-    console.error(
-      "No <section> elements found in HTML. Make sure slides are wrapped in <section> tags.",
-    );
-    process.exit(1);
-  }
-
   if (opts.mode === "screenshots") {
-    await exportScreenshots(pptx, slides, inputPath, html);
+    await exportScreenshots(pptx, inputPath);
   } else {
-    exportEditable(pptx, slides);
+    await exportEditable(pptx, inputPath);
   }
 
   const outputPath = path.resolve(opts.output);
@@ -72,7 +46,91 @@ async function main() {
   console.log(`PPTX saved to: ${outputPath}`);
 }
 
-function exportEditable(pptx, slides) {
+async function exportEditable(pptx, inputPath) {
+  let chromium;
+  try {
+    const { chromium: pw } = require("playwright");
+    chromium = pw;
+  } catch {
+    // Fallback to regex parsing if Playwright is not installed
+    const html = fs.readFileSync(inputPath, "utf-8");
+    const slideRegex = /<section[^>]*>([\s\S]*?)<\/section>/gi;
+    const slides = [];
+    let match;
+    while ((match = slideRegex.exec(html)) !== null) slides.push(match[1]);
+    if (slides.length === 0) {
+      console.error(
+        "No <section> elements found. Install Playwright for DOM-based parsing: npm install playwright",
+      );
+      process.exit(1);
+    }
+    exportEditableRegex(pptx, slides);
+    return;
+  }
+
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+  await page.goto(`file://${inputPath}`);
+
+  const slideData = await page.evaluate(() => {
+    const sections = document.querySelectorAll("section");
+    return Array.from(sections).map((sec) => {
+      const bg = sec.style.background || sec.style.backgroundColor || "";
+      const headings = Array.from(sec.querySelectorAll("h1,h2,h3,h4,h5,h6")).map((h) => ({
+        level: parseInt(h.tagName[1]),
+        text: h.textContent.trim(),
+      }));
+      const paragraphs = Array.from(sec.querySelectorAll("p")).map((p) => ({
+        text: p.textContent.trim(),
+      }));
+      return { bg, headings, paragraphs };
+    });
+  });
+
+  for (const slideInfo of slideData) {
+    const slide = pptx.addSlide();
+    if (slideInfo.bg) {
+      const bgColor = slideInfo.bg
+        .replace("#", "")
+        .replace(/^rgb\(/, "")
+        .replace(/\)$/, "");
+      slide.background = { color: bgColor };
+    }
+    let y = 0.5;
+    for (const h of slideInfo.headings) {
+      if (!h.text) continue;
+      const fontSize = Math.max(18, 44 - (h.level - 1) * 6);
+      slide.addText(h.text, {
+        x: 0.5,
+        y,
+        w: "90%",
+        h: 1,
+        fontSize,
+        bold: h.level <= 2,
+        color: "333333",
+        fontFace: "system-ui",
+      });
+      y += 0.8;
+    }
+    for (const p of slideInfo.paragraphs) {
+      if (!p.text) continue;
+      slide.addText(p.text, {
+        x: 0.5,
+        y,
+        w: "90%",
+        h: 0.6,
+        fontSize: 18,
+        color: "555555",
+        fontFace: "system-ui",
+      });
+      y += 0.5;
+    }
+  }
+
+  await browser.close();
+}
+
+function exportEditableRegex(pptx, slides) {
   for (const slideHtml of slides) {
     const slide = pptx.addSlide();
 
@@ -132,7 +190,7 @@ function exportEditable(pptx, slides) {
   }
 }
 
-async function exportScreenshots(pptx, slides, inputPath, html) {
+async function exportScreenshots(pptx, inputPath) {
   // Check if playwright is available
   let chromium;
   try {
@@ -149,15 +207,8 @@ async function exportScreenshots(pptx, slides, inputPath, html) {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   await page.goto(`file://${inputPath}`);
 
-  // Get all section elements
-  const sections = await page.$$eval("section", (els) => els.length);
-  if (sections === 0) {
-    console.error("No <section> elements found.");
-    await browser.close();
-    process.exit(1);
-  }
-
   // Navigate through slides and screenshot each
+  const sections = await page.$$eval("section", (els) => els.length);
   for (let i = 0; i < sections; i++) {
     await page.evaluate((idx) => {
       const secs = document.querySelectorAll("section");

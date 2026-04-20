@@ -9,6 +9,17 @@
  */
 
 function AndroidFrame({ children, color = "#000" }) {
+  // Auto-compute text contrast
+  const isLight = color.match(/^#[0-9a-f]{6}$/i)
+    ? (() => {
+        const r = parseInt(color.slice(1, 3), 16),
+          g = parseInt(color.slice(3, 5), 16),
+          b = parseInt(color.slice(5, 7), 16);
+        return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+      })()
+    : false;
+  const textColor = isLight ? "#000" : "#fff";
+
   const frameStyles = {
     width: "393px",
     height: "851px",
@@ -29,7 +40,7 @@ function AndroidFrame({ children, color = "#000" }) {
     fontFamily: "system-ui, sans-serif",
     fontSize: "13px",
     fontWeight: 500,
-    color: "#fff",
+    color: textColor,
   };
 
   const cameraCutoutStyles = {
@@ -67,7 +78,7 @@ function AndroidFrame({ children, color = "#000" }) {
     width: "18px",
     height: "18px",
     borderRadius: "50%",
-    border: "2px solid rgba(255,255,255,0.5)",
+    border: `2px solid ${isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)"}`,
   };
 
   const time = new Date().toLocaleTimeString("en-US", {
@@ -88,7 +99,7 @@ function AndroidFrame({ children, color = "#000" }) {
         "div",
         { style: { display: "flex", gap: "6px", alignItems: "center" } },
         React.createElement("span", { style: { fontSize: "11px" } }, "LTE"),
-        React.createElement("span", null, "🔋"),
+        React.createElement("span", null, "87%"),
       ),
     ),
     React.createElement("div", { style: contentStyles }, children),

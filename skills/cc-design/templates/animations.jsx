@@ -12,14 +12,14 @@
  *   </Stage>
  */
 
-const AnimationsContext = React.createContext({ time: 0, duration: 1, sprites: [] });
+const AnimationsContext = React.createContext({ time: 0, duration: 1, sprite: null });
 
 function useTime() {
   return React.useContext(AnimationsContext).time;
 }
 
 function useSprite() {
-  return React.useContext(AnimationsContext).sprite;
+  return React.useContext(AnimationsContext).sprite ?? { start: 0, end: 1, progress: 0 };
 }
 
 const Easing = {
@@ -49,31 +49,47 @@ function interpolate(start, end, progress, easing = Easing.linear) {
 function Sprite({ children, start = 0, end = 1, easing = "linear", style = {} }) {
   const { time } = React.useContext(AnimationsContext);
   const duration = end - start;
+  const easingFn = Easing[easing] || Easing.linear;
 
   let opacity = 1;
   if (time < start) opacity = 0;
   else if (time > end) opacity = 0;
-  else if (time < start + 0.3) opacity = Easing.easeOut((time - start) / 0.3);
-  else if (time > end - 0.3) opacity = Easing.easeIn((time - end + 0.3) / 0.3);
+  else if (time < start + 0.3) opacity = easingFn((time - start) / 0.3);
+  else if (time > end - 0.3) opacity = easingFn((time - end + 0.3) / 0.3);
 
   const progress = duration > 0 ? Math.max(0, Math.min(1, (time - start) / duration)) : 0;
+  const sprite = { start, end, progress, easing };
 
   return React.createElement(
-    "div",
-    {
-      style: { ...style, opacity, position: "absolute", inset: 0 },
-      "data-sprite-start": start,
-      "data-sprite-end": end,
-    },
-    children,
+    AnimationsContext.Provider,
+    { value: { ...React.useContext(AnimationsContext), sprite } },
+    React.createElement(
+      "div",
+      {
+        style: { ...style, opacity, position: "absolute", inset: 0 },
+        "data-sprite-start": start,
+        "data-sprite-end": end,
+      },
+      children,
+    ),
   );
 }
 
 function Stage({ children, duration = 5, width = 1920, height = 1080 }) {
   const [playing, setPlaying] = React.useState(false);
   const [time, setTime] = React.useState(0);
+  const [scale, setScale] = React.useState(
+    Math.min(window.innerWidth / width, window.innerHeight / height) * 0.9,
+  );
   const rafRef = React.useRef(null);
   const startRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const onResize = () =>
+      setScale(Math.min(window.innerWidth / width, window.innerHeight / height) * 0.9);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [width, height]);
 
   const play = React.useCallback(() => {
     setPlaying(true);
@@ -102,9 +118,6 @@ function Stage({ children, duration = 5, width = 1920, height = 1080 }) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [playing, duration]);
-
-  // Scale to viewport
-  const scale = Math.min(window.innerWidth / width, window.innerHeight / height) * 0.9;
 
   return React.createElement(
     "div",

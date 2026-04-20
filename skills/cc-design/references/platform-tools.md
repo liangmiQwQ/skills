@@ -1,20 +1,21 @@
-# Platform Tool Reference (Claude Code)
+# Platform Tool Reference
 
-This reference documents the tools available in the Claude Code environment for design work.
+> **Load when:** Needing to export output (PPTX/PDF/inline HTML), confirming exact Playwright MCP tool names, or verifying the preview workflow
+> **Skip when:** Only building and previewing designs — no export needed
+> **Why it matters:** Tool names are non-obvious and export scripts require specific setup; wrong tool names break the verification flow
+> **Typical failure it prevents:** Using wrong Playwright tool names, missing `npm install` for export scripts, failing to verify console errors
 
-## File Operations
+## Tool Mapping
 
-| Need | Tool | Notes |
+Claude Code is the primary target and uses Playwright MCP directly. Codex-style hosts may expose differently named tools for the same jobs.
+
+| Need | Claude Code Path | Codex-Style Equivalent |
 |---|---|---|
-| Read file | `Read` | Up to 2000 lines; use offset/limit to paginate. Supports images, PDFs, HTML. |
-| Write file | `Write` | Creates or overwrites. For edits to existing files, prefer `Edit`. |
-| Edit file | `Edit` | Replaces unique strings. Always prefer over `Write` for modifications. |
-| List files | `Glob` | Pattern matching (e.g., `**/*.html`, `templates/*.js`) |
-| Find in files | `Grep` | Regex search across files. Supports glob filters. |
-| Copy files | `Bash` | `cp <src> <dst>` for files, `cp -r <src> <dst>` for directories |
-| Delete files | `Bash` | `rm <file>` for files, `rm -rf <dir>` for directories |
-| Move/rename | `Bash` | `mv <src> <dst>` |
-| Run commands | `Bash` | Shell commands, Node.js scripts, npm, etc. |
+| Copy a starter scaffold | `Bash` + `cp` from `templates/` | Host scaffold-copy tool if provided, otherwise file read/write or shell copy |
+| Open preview | Playwright navigate to `file://...` | Host HTML preview/open tool |
+| Check console output | Playwright console messages | Host preview log tool |
+| Capture screenshots | Playwright screenshot | Host screenshot tool |
+| Export PPTX / PDF / self-contained HTML | Local scripts in `scripts/` | Equivalent built-in export tools, or the local scripts |
 
 ## Preview & Screenshots (Playwright MCP)
 
@@ -42,26 +43,18 @@ This reference documents the tools available in the Claude Code environment for 
 4. Fix any issues, repeat
 ```
 
-## Starter Components
-
-Templates live in the skill's `templates/` directory. Copy to your project:
-
-```bash
-# Copy a single template
-cp templates/deck_stage.js ./deck_stage.js
-
-# Or read and write for customization
-# Read templates/deck_stage.js, then Write to your project with modifications
-```
-
-See `references/starter-components.md` for the full catalog.
-
 ## Export Scripts
 
 Scripts live in the skill's `scripts/` directory. First run requires `npm install`:
 
 ```bash
 cd scripts && npm install && cd ..
+```
+
+For Playwright-backed export flows, also install the browser binary:
+
+```bash
+npx playwright install chromium
 ```
 
 ### PPTX export
@@ -85,10 +78,3 @@ node scripts/super_inline_html.js --input page.html --output page-inline.html
 node scripts/open_for_print.js --input page.html --output page.pdf
 # Uses Playwright to render and export as PDF
 ```
-
-## Image Operations
-
-| Need | Tool | Notes |
-|---|---|---|
-| View image | `Read` | Supports PNG, JPG, JPEG natively |
-| Image metadata | `Bash` | `file <path>` for type/dims; `sips -g all <path>` on macOS |

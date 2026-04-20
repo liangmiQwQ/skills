@@ -1,5 +1,10 @@
 # React + Babel Setup for Inline JSX
 
+> **Load when:** Building React prototypes with inline JSX
+> **Skip when:** Working with plain HTML/CSS only
+> **Why it matters:** Pinned versions and integrity hashes prevent runtime breakage; scope rules prevent global variable collisions between component files
+> **Typical failure it prevents:** React version mismatch, `styles` object overwrites across components, Babel scope isolation breaking component sharing
+
 Use these exact script tags with pinned versions and integrity hashes when writing React prototypes with inline JSX. Do not use unpinned versions (e.g. react@18) or omit the integrity attributes.
 
 ```html

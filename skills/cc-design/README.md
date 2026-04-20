@@ -2,7 +2,7 @@
 
 A Claude Code skill that provides high-fidelity HTML design and prototype creation capabilities — covering slide decks, interactive prototypes, landing pages, UI mockups, animations, and visual design explorations.
 
-Adapted from the Claude Artifacts design environment to work natively with Claude Code, using Playwright MCP for preview and verification, and local template files for starter components.
+Adapted from the Claude Artifacts design environment to work in Claude Code and Codex-style coding agents, using Playwright MCP where available and local scripts for export fallback paths.
 
 ## Overview
 
@@ -18,12 +18,13 @@ The skill is designed around two core principles:
 | Category | Capabilities |
 |---|---|
 | **Output formats** | Interactive prototypes, slide decks, landing pages, UI mockups, animated motion studies, design explorations |
+| **Brand style cloning** | Progressive loading of 68+ brand design systems from [getdesign.md](https://getdesign.md) (Stripe, Vercel, Notion, Linear, Apple, etc.) |
 | **Design systems** | Auto-discovers and reuses existing tokens, components, typography, spacing, and color patterns |
 | **Variations** | Generates 3+ design directions across layout, interaction, visual intensity, and motion axes |
 | **Prototyping** | React + Babel inline JSX with pinned versions, component scope management, starter scaffolds |
 | **Tweaks system** | Self-contained in-page design controls with real-time preview and localStorage persistence |
-| **Verification** | Playwright-based console error checks, visual screenshot verification |
-| **Export** | PPTX (editable or screenshot mode), PDF, standalone self-contained HTML |
+| **Verification** | Playwright-based verification in Claude Code; equivalent preview/screenshot flows in Codex-style hosts |
+| **Export** | Local PPTX/PDF/inline export scripts, or equivalent host-provided export tools |
 
 ## Installation
 
@@ -47,14 +48,22 @@ For PPTX, PDF, and inline HTML export features:
 cd ~/.claude/skills/cc-design/scripts && npm install && cd -
 ```
 
+This installs both `pptxgenjs` and `playwright`. Playwright-backed export paths may also require:
+
+```bash
+npx playwright install chromium
+```
+
 ## Project Structure
 
 ```
 cc-design/
 ├── SKILL.md                          # Skill definition with YAML frontmatter
+├── EXAMPLES.md                       # Usage examples including brand style cloning
 ├── agents/
 │   └── openai.yaml                   # Interface configuration for Codex-compatible platforms
 ├── references/
+│   ├── getdesign-loader.md           # Brand style loading from getdesign.md
 │   ├── platform-tools.md             # Claude Code + Playwright tool reference
 │   ├── react-babel-setup.md          # React/Babel pinned versions and scope rules
 │   ├── starter-components.md         # Starter component catalog and usage
@@ -112,6 +121,21 @@ Once installed, the skill activates automatically when Claude Code encounters de
 "Make the onboarding screens look good on mobile"
 ```
 
+### Brand Style Cloning (New)
+
+Mention a brand name to automatically load its design system from [getdesign.md](https://getdesign.md):
+
+```
+"Create a pricing page with Stripe's aesthetic"
+"Notion-style kanban board"
+"Mix Vercel's minimalism with Linear's purple accents"
+"Show me this dashboard in Apple style vs Tesla style"
+```
+
+Supports 68+ brands including Stripe, Vercel, Notion, Linear, Apple, Tesla, Figma, GitHub, Airbnb, and more.
+
+See [EXAMPLES.md](./EXAMPLES.md) for detailed usage patterns and advanced workflows.
+
 ## Design Workflow
 
 ```
@@ -128,9 +152,8 @@ Understand → Explore → Plan → Build → Verify → Deliver
 
 | Platform | Status | Notes |
 |---|---|---|
-| Claude Code (CLI) | **Primary target** | Playwright MCP for preview |
-| Claude.ai (Web) | Partial | No Playwright; use `open` command |
-| Codex / OpenAI-compatible | Supported | Via `agents/openai.yaml` |
+| Claude Code (CLI) | **Primary target** | Playwright MCP plus local scripts |
+| Codex / OpenAI-compatible | Supported | Prompt metadata is included; exact tool mapping depends on the host |
 
 ## Contributing
 

@@ -5,7 +5,7 @@ description: Provide void's document path locally. Load it when you are in a pro
 
 Void is a new kind of framework for web development built on top of Vite. It now only provides private preview, do not try to search for it on the internet or your database.
 
-The Void's document is in `~/code/void-sdk/void/docs/` and other related things in `~/code/void-sdk/void/README.md`. Do not read the other part of the repo as it's useless and wastes lots of tokens.
+The Void's document is in `~/code/void-sdk/void/docs/` and other related things in `~/code/void-sdk/void/README.md`. Do not read the other part of the repo as it's useless and wastes lots of tokens. You should run `git pull origin main` in `~/code/void-sdk/void` before reading the document.
 
 Void is currently not stable, report to me if you found things that are not working as expected or complex (worth having features).
 

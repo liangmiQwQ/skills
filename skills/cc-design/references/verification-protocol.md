@@ -5,6 +5,24 @@
 > **Why it matters:** Platform-native design tools run two-phase verification automatically. Without this protocol, defects slip through to delivery.
 > **Typical failure it prevents:** Delivering artifacts with console errors, broken scaling, invisible text, or misaligned elements
 
+---
+
+## Relationship to 8-Layer Framework
+
+This verification protocol implements **Layer 8 (Validation)** of the design thinking framework (`design-thinking-framework.md`).
+
+**Mapping:**
+
+| Verification Phase | 8-Layer Framework | What It Validates |
+|--------------------|-------------------|-------------------|
+| **Phase 1: Structural** | Layer 3 (Structure) + Layer 4 (Interaction) | Technical feasibility, layout structure, interaction functionality |
+| **Phase 2: Visual** | Layer 5 (Visual) + Layer 6 (Brand) | Visual hierarchy, typography, spacing, brand consistency |
+| **Phase 3: Design Excellence** | Layer 2 (Information) + Layer 7 (System) | Information clarity, system consistency, anti-slop compliance |
+
+**Complete validation requires all 3 phases.** Phase 1-2 are defined here. Phase 3 uses `design-checklist.md` for objective quality checks.
+
+---
+
 ## Phase 1: Structural Verification
 
 Run these checks first. Any failure = stop and fix before proceeding to Phase 2.
@@ -29,10 +47,13 @@ If Phase 1 has any failure: fix the issue, re-navigate the page, re-run Phase 1.
 ## Phase 2: Visual Verification
 
 Run these after Phase 1 passes. Requires human judgment via screenshot review.
+This is a **maker self-check**. The person who made the change must inspect the screenshots after the final edit.
 
 | Check | Method | Pass criteria |
 |-------|--------|---------------|
 | Screenshot taken | `browser_take_screenshot` | Screenshot captured successfully |
+| Coverage | Full-page screenshot + targeted section screenshots for touched areas | Every changed region inspected, not just first screen |
+| Viewport coverage | Additional screenshot at narrow/mobile viewport for responsive work | Layout and typography remain coherent across target widths |
 | Typography | Visual check on screenshot | Headings distinct from body, no text < 12pt (print) or < 24px (1080p slides) |
 | Alignment | Visual check on screenshot | Elements aligned to grid, no drift, consistent margins |
 | Contrast | Visual check on screenshot | Text readable against background, no low-contrast pairs |
@@ -43,10 +64,12 @@ Run these after Phase 1 passes. Requires human judgment via screenshot review.
 ### Visual review flow
 
 ```
-1. browser_take_screenshot → capture full page
-2. Review screenshot against criteria above
-3. If any criterion fails → fix in Build step, re-verify from Phase 1
-4. If all pass → proceed to Deliver step
+1. browser_take_screenshot → capture full page after the final edit
+2. Capture targeted screenshots for every changed section / component / slide
+3. For responsive work, capture at least one narrow/mobile viewport
+4. Review all screenshots against criteria above
+5. If any criterion fails → fix in Build step, re-verify from Phase 1
+6. If all pass → proceed to Deliver step
 ```
 
 ## Fix Loop

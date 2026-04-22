@@ -3,43 +3,82 @@
 This file supports `SKILL.md`. It does not define an independent product workflow.
 
 The runtime contract lives in `SKILL.md`:
-- new ambiguous tasks start with one batch of clarifying questions
+- new ambiguous tasks start with structured step-by-step confirmation
 - richly specified briefs can skip to explicit assumptions
 - follow-up iterations and minor fixes act directly unless scope changes
 
-Use this file to structure the question batch and the follow-through after that decision has already been made.
+Use this file to structure the step-by-step confirmation flow and the follow-through after that decision has already been made.
+
+---
+
+## Relationship to 8-Layer Design Framework
+
+This workflow is the **execution process**. The 8-layer framework (`design-thinking-framework.md`) is the **thinking structure**.
+
+**Mapping:**
+
+| Workflow Step | 8-Layer Framework | Purpose |
+|---------------|-------------------|---------|
+| **Step 1: Understand** (Structured confirmation) | Layer 1 (Goal) + Layer 2 (Information) | Clarify objectives, audience, scope, information priorities |
+| **Step 2: Route** (Load references) | Layer 2-7 (task-dependent) | Load theory and patterns for relevant layers |
+| **Step 3: Acquire Context** (Design system/brand) | Layer 6 (Brand) + Layer 7 (System) | Understand existing constraints and brand personality |
+| **Step 4: Design** (Build artifacts) | Layer 3 (Structure) + Layer 4 (Interaction) + Layer 5 (Visual) | Execute structure, interaction, and visual design |
+| **Step 5: Verify** (Check quality) | Layer 8 (Validation) | Test technical feasibility, usability, design quality |
+| **Step 6: Iterate** (Refine based on feedback) | Layer 8 → Layer 1 (feedback loop) | Use validation results to refine goals and execution |
+
+**When to use which:**
+- **Use workflow.md** for step-by-step execution guidance
+- **Use design-thinking-framework.md** when you need to diagnose problems, resolve conflicts, or understand "why" behind decisions
+- **Use both together** for complex multi-screen flows or design system creation
+
+## Runtime Load Announcements
+
+Treat runtime loading as visible work, not invisible thought. `load-manifest.json` is the source of truth for route bundles, checkpoint bundles, and optional inspiration bundles. Bundle matching is done by an Agent subagent that reads the catalog from `scripts/generate-bundle-catalog.mjs` and semantically matches the user's prompt. `scripts/resolve-load-bundles.mjs` is kept as a keyword-based fallback.
+
+Rules:
+- announce before reading runtime references or copying templates
+- use the exact line format: `Load: because=<reason> loaded=<comma-separated paths>`
+- if the bundle is already loaded, say `Load: because=<reason> already_loaded=<comma-separated paths>`
+- use stable reasons from `load-manifest.json` such as `all-design-tasks`, `question-first-delivery`, `deep-design-review`, `react-prototype`, `before-animation`, `before-delivery`
+- do not announce ordinary codebase reads that are not part of the skill runtime bundle
+- do not silently skip bundle loads; explicit dedupe is part of the contract
 
 ## First-Turn Rule
 
 Treat this as supporting guidance, not an override:
 
-- **Ask a batch** for new tasks with missing audience, scope, output shape, hard constraints, or reference context
+- **Use structured confirmation** for new tasks with missing audience, scope, output shape, hard constraints, or reference context
 - **Skip to assumptions** only when the brief is already rich, or the user explicitly asks to move fast
 - **Act directly** for follow-up iterations and minor fixes
 
-If you are unsure which path applies, default to the question batch. Do not invent a fourth path.
+If you are unsure which path applies, default to the next blocking confirmation step. Do not invent a fourth path.
 
 ## The Art of Asking Questions
 
-Ask one batch, not a back-and-forth drip.
+Ask **in steps**, not as a long unstructured dump.
 
 Default target:
-- 7 questions
+- 3 to 4 confirmation steps
 
-Allowed range:
-- 5 questions for narrow tasks
-- 10 questions for broad multi-surface tasks
+Preferred shape:
+- 1 blocking question per step
+- 2 to 4 short options
+- optional freeform when the platform supports it
 
-After the batch:
-- ask at most one follow-up round
-- only ask follow-ups for critical blocking fields
-- if critical fields are still unknown after one follow-up round, proceed with explicit assumptions
+Fallback:
+- if the platform has no structured question UI, compress these steps into one compact batch message
+
+After the steps:
+- stop once blocking fields are resolved
+- ask at most one open follow-up round if critical details remain
+- if critical fields are still unknown after that, proceed with explicit assumptions
 
 Critical blocking fields:
 - output shape
 - audience
 - scope
 - hard constraints that would materially change the direction
+- existing contract update mode (`DESIGN.md`: append / merge / overwrite) when relevant
 
 Non-blocking fields:
 - optional refinements
@@ -48,14 +87,21 @@ Non-blocking fields:
 
 ## Required Question Checklist
 
-When you are in the question-first path, clarify these 5 categories:
+When you are in the question-first path, clarify these categories in order:
 
 ### 1. Design Context (Most Important)
 
 - Is there an existing design system, UI kit, or component library? Where?
+- Is there an existing `DESIGN.md` or equivalent contract file?
 - Is there a brand guideline, color spec, typography spec?
 - Are there screenshots of an existing product/page to reference?
 - Is there a codebase to read?
+
+**If there is already a `DESIGN.md`:**
+- Ask how to update it before touching it
+- Required mode selection: **Append / Merge / Overwrite**
+- Recommend **Merge** by default
+- Do not silently rewrite the file just because a new direction sounds better
 
 **If the user says "no"**:
 - Help them find it -- look through project directories, check for reference brands
@@ -79,9 +125,9 @@ When you are in the question-first path, clarify these 5 categories:
 - Which parameters should be adjustable in real time? (color/font size/spacing/layout/copy/feature flags)
 - Will the user want to continue tweaking after completion?
 
-### 5. Task-Specific Questions (At Least 4)
+### 5. Task-Specific Detail (Only If Still Blocking)
 
-Ask 4+ detail questions specific to the task. For example:
+Ask follow-up detail questions only if they still materially affect direction. For example:
 
 **Building a landing page**:
 - What is the target conversion action?
@@ -101,38 +147,43 @@ Ask 4+ detail questions specific to the task. For example:
 - Rhythm (fast/slow/segmented)?
 - Key frames that must appear?
 
-## Question Template Example
+## Structured Confirmation Example
 
-When encountering a new task, you can copy this structure to ask in the conversation:
+When encountering a new task, prefer this structure:
 
 ```markdown
-Before starting, I want to align on a few questions. List them all at once, you can answer in batch:
+Step 1 — Context
+Do you already have references I should match?
+- Existing design system / screenshots
+- Existing codebase only
+- No references, work from scratch
 
-**Design Context**
-1. Do you have a design system/UI kit/brand guidelines? If so, where?
-2. Are there existing products or competitor screenshots to reference?
-3. Is there a codebase in the project I can read?
+Step 2 — Existing contract
+If `DESIGN.md` already exists, how should I update it?
+- Append to it
+- Merge into it
+- Overwrite it
 
-**Variations**
-4. How many variations do you want? On which dimensions (visual/interaction/color/...)?
-5. Do you want all variations "close to the answer" or a map from conservative to wild?
+Step 3 — Exploration
+How broad should I go?
+- One direction, close to expected
+- Three directions, conservative → bold
 
-**Fidelity**
-6. Fidelity: wireframe / semi-finished / full hi-fi with real data?
-7. Scope: one screen / one entire flow / entire product?
+Step 4 — Scope
+What should I build first?
+- One screen
+- One flow
+- Wireframe pass before hi-fi
 
-**Tweaks**
-8. Which parameters should be adjustable in real time after completion?
-
-**Task-Specific**
-9. [Task-specific question 1]
-10. [Task-specific question 2]
-...
+Step 5 — Confirm
+I'll proceed with [summary]. Continue?
 ```
 
-## After the Question Batch
+If the platform lacks structured question UI, convert the same flow into one compact text block.
 
-Once the question batch is answered, or once unanswered critical fields have been converted into explicit assumptions, move into delivery.
+## After the Confirmation Steps
+
+Once the confirmation steps are answered, or once unanswered critical fields have been converted into explicit assumptions, move into delivery.
 
 ### Direction Memo (Only When Needed)
 
@@ -161,6 +212,9 @@ After the direction is clear:
 - Write React components to replace placeholders
 - Create variations (using design_canvas or Tweaks)
 - If it's slides/animation, start with starter components
+- announce any newly loaded runtime bundle before reading it, even mid-task when a checkpoint triggers
+- if you chose the question-first path, route with `new-ambiguous-task` plus `question-first-delivery`
+- if the user asked for critique/review/audit/score, route with `deep-design-review` before judging the work
 
 Show again halfway through. If the design direction is wrong, showing late means wasted work.
 
@@ -175,7 +229,11 @@ After the user is satisfied with the overall direction, polish:
 ### Verification + Delivery
 
 - Use Playwright to screenshot (see `references/verification.md`)
-- Open in browser and visually confirm
+- Open in browser and visually confirm after the **final** edit
+- Review the full page **and** every changed section; do not stop at the first viewport
+- For responsive work, check at least desktop + one narrow/mobile viewport
+- For iterative edits on an existing long page, treat touched sections as mandatory coverage targets
+- Never declare "done" from code inspection alone
 - Summarize **minimally**: only mention caveats and next steps
 
 ## The Deep Logic of Variations

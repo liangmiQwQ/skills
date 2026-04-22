@@ -68,36 +68,42 @@ Forbidden phrases (never say these about verifiable facts):
 
 If you cannot verify: say "I cannot confirm this — please check" rather than guessing. Wrong facts damage user trust and waste everyone's time.
 
-**P1: Batch Questions First.** For new design tasks, begin with one batch of clarifying questions before designing. Ask them all at once so the user can answer in one pass. Skip only for: minor fixes, follow-up iterations, explicit speed requests, or already-rich briefs.
+**P1: Structured Confirmation First.** For new design tasks, begin with structured, step-by-step confirmation before designing. Prefer one blocking question at a time using the platform's native question UI when available. Skip only for: minor fixes, follow-up iterations, explicit speed requests, or already-rich briefs.
 
-When asking, cover these 5 categories every time:
+Default order of confirmation:
 
-1. **Design Context** — existing design system / UI kit / codebase / brand guidelines / product screenshots?
-2. **Variations** — how many? which dimensions (visual / color / layout / interaction)?
-3. **Fidelity & Scope** — wireframe / hi-fi? one screen / full flow?
-4. **Tweaks** — which parameters should be adjustable after delivery?
-5. **Task-specific** — at least 4 questions specific to the task type
+1. **Design Context** — existing design system / UI kit / codebase / screenshots?
+2. **Variations** — how many directions? conservative vs wide exploration?
+3. **Fidelity & Scope** — wireframe / hi-fi? one screen / one flow / full flow?
+4. **Build Confirmation** — confirm the working direction before full build
 
-Template:
+Rules:
+- Prefer **step-by-step** confirmation over one giant questionnaire
+- Prefer **1 question per step**
+- Prefer **2-4 short options** plus freeform when the platform supports it
+- Stop asking once blocking uncertainty is resolved
+- If the platform lacks structured question UI, fall back to one compact text batch
+
+Structured confirmation example:
 ```markdown
-Before starting, a few questions — answer in one batch:
+Step 1 — context
+Do you already have a design system or screenshots I should match?
+- Yes, I have references
+- No, work from scratch
 
-**Design Context**
-1. Design system / UI kit / brand guidelines? Where?
-2. Existing product screenshots or URL I can reference?
-3. Codebase I can read?
+Step 2 — variations
+How broad should the exploration be?
+- 1 direction, close to expected
+- 3 directions, conservative → bold
 
-**Variations & Fidelity**
-4. How many variations? Which dimensions?
-5. Fidelity: wireframe / semi-finished / full hi-fi?
+Step 3 — fidelity/scope
+What should I build first?
+- One screen
+- One complete flow
+- A low-fi wireframe pass first
 
-**Tweaks**
-6. Which parameters adjustable after delivery?
-
-**Task-specific**
-7. [question]
-8. [question]
-...
+Step 4 — confirm
+I'll proceed with [summary]. Continue?
 ```
 
 **P2: Anti-AI Slop.** These are banned without exception:
@@ -113,20 +119,42 @@ Before starting, a few questions — answer in one batch:
 
 Full rules in `references/content-guidelines.md`.
 
+**P3: Loading Must Be Audible.** Never silently load runtime resources. Every time you load runtime references, templates, or supporting docs, announce it first using this exact format:
+
+```text
+Load: because=<reason> loaded=<comma-separated paths>
+```
+
+If the same bundle is already in context, do not silently skip it. Say:
+
+```text
+Load: because=<reason> already_loaded=<comma-separated paths>
+```
+
+Use short, stable reasons such as `all-design-tasks`, `react-prototype`, `question-first-delivery`, `before-animation`, `before-delivery`. `load-manifest.json` is the machine-readable source of truth for bundle contents, and `scripts/resolve-load-bundles.mjs` is the runtime consumer that resolves prompt text plus explicit checkpoints into concrete bundle loads. The routing table below is the human summary.
+
 ---
 
 ## Routing Table
 
-Classify the user's task by intent (output format, keywords), then load only the references and templates you need. For multi-type tasks, combine all matching rows. For tasks not in the table, default to loading `react-setup` plus the closest matching component reference.
+Classify the user's task by intent (output format, keywords), then resolve bundles through `scripts/resolve-load-bundles.mjs`, which reads `load-manifest.json`. For multi-type tasks, combine all matching rows. For tasks not in the table, default to `all-design-tasks` plus `new-ambiguous-task` and the closest matching component reference.
 
 | Task type | Load reference | Copy template | Verify focus |
 |-----------|---------------|---------------|-------------|
-| **ANY design task** | `references/design-excellence.md` + `references/content-guidelines.md` | — | Design quality + anti-slop |
+| **ANY design task** | `references/design-excellence.md` + `references/content-guidelines.md` + `references/typography-spacing-examples.md` + `references/design-philosophy.md` | — | Design quality + anti-slop + typography/spacing + philosophy |
+| Design philosophy / why questions | `references/design-philosophy.md` + `references/design-principles.md` | — | Worldview + decision framework |
+| Complex multi-screen flow | `references/design-thinking-framework.md` | — | 8-layer decision tree |
+| Information architecture | `references/information-design-theory.md` + `references/design-excellence.md` | — | Cognitive load + hierarchy |
+| Interaction design problems | `references/interaction-design-theory.md` + `references/interactive-prototype.md` | — | Fitts/Hick's Law + feedback |
+| Visual quality / composition | `references/visual-design-theory.md` + `references/design-excellence.md` | — | Gestalt + color psychology |
+| Brand / emotional tone | `references/brand-emotion-theory.md` + `references/design-styles.md` | — | Brand personality + trust |
+| Design system architecture | `references/system-design-theory.md` + `references/design-system-creation.md` | — | Constraints + scalability |
 | Layout problems | `references/anti-patterns/layout.md` | — | Anti-pattern check |
 | Color problems | `references/anti-patterns/color.md` | — | Anti-pattern check |
-| Typography problems | `references/anti-patterns/typography.md` | — | Anti-pattern check |
+| Typography problems | `references/anti-patterns/typography.md` + `references/typography-spacing-examples.md` | — | Anti-pattern check + spacing verification |
+| Typography system design | `references/typography-design-system.md` | — | Complete theory + modular scale + baseline grid |
 | Interaction problems | `references/anti-patterns/interaction.md` | — | Anti-pattern check |
-| High-quality output needed | `references/design-patterns.md` + `case-studies/README.md` | — | Pattern application |
+| High-quality output needed | `references/design-patterns.md` + `references/case-studies/README.md` | — | Pattern application |
 | Brand style clone | `references/getdesign-loader.md` + `references/design-context.md` | Choose template as needed | Brand aesthetic match |
 | Brand asset acquisition | `references/asset-acquisition.md` + `references/design-context.md` | — | Real assets used, no CSS silhouettes |
 | Choose design style/direction | `references/design-styles.md` | — | Philosophy alignment |
@@ -138,8 +166,8 @@ Classify the user's task by intent (output format, keywords), then load only the
 | Landing page | `references/starter-components.md` + `references/design-patterns.md` | `templates/browser_window.jsx` (optional) | Responsive layout |
 | Animation / motion | `references/animation-best-practices.md` + `references/animations.md` | `templates/animations.jsx` | Timeline playback + __ready signal |
 | Animation pitfalls | `references/animation-pitfalls.md` | — | No common failures |
-| Mobile mockup | `references/starter-components.md` + `react-setup.md` | `templates/ios_frame.jsx` or `android_frame.jsx` | Bezel rendering — **MUST use template, never handwrite Dynamic Island/status bar** |
-| Interactive prototype | `references/interactive-prototype.md` + `react-setup.md` | Choose frame template | Navigation works |
+| Mobile mockup | `references/starter-components.md` + `references/react-setup.md` | `templates/ios_frame.jsx` or `android_frame.jsx` | Bezel rendering — **MUST use template, never handwrite Dynamic Island/status bar** |
+| Interactive prototype | `references/interactive-prototype.md` + `references/react-setup.md` | Choose frame template | Navigation works |
 | Wireframe / low-fi | `references/frontend-design.md` | `templates/design_canvas.jsx` | Layout structure visible |
 | Design system creation | `references/design-system-creation.md` | — | Tokens apply + coherence |
 | No design system provided | `references/frontend-design.md` + `references/design-excellence.md` | Choose template | Aesthetic coherence |
@@ -173,9 +201,56 @@ If the direction feels wrong, now is the cheapest moment to change it.
 
 **Save → show → wait for confirmation before continuing.** Skip only for minor edits or when the user explicitly says to proceed.
 
-**1. Understand** — For new design tasks, start with one batch of clarifying questions via `AskUserQuestion`. Use the template in P1 above. Use this precedence order: localized edit → act directly; explicit speed request → skip to assumptions; rich brief (audience + output shape + constraints + references) → skip to assumptions; everything else → ask the batch. **Detect brand mentions** — scan for brand names (Stripe, Vercel, Notion, Linear, Apple, etc.). If a brand is mentioned, load `references/getdesign-loader.md`.
+**1. Understand** — For new design tasks, start with structured step-by-step confirmation via the platform's native question UI when available (`AskUserQuestion`, `request_user_input`, or equivalent). Use this precedence order: localized edit → act directly; explicit speed request → skip to assumptions; rich brief (audience + output shape + constraints + references) → skip to assumptions; everything else → ask the next blocking question. If structured UI is unavailable, send one compact text batch instead. **Detect brand mentions** — scan for brand names (Stripe, Vercel, Notion, Linear, Apple, etc.). If a brand is mentioned, load `references/getdesign-loader.md`.
 
-**2. Route** — Read the routing table below. Load the specified reference(s). Copy the specified template(s):
+**Existing design contract rule** — if the project already has `DESIGN.md` (or an equivalent explicit design system file) and the current task would change it, do not silently rewrite it. Ask the user to choose one mode before editing:
+- **Append** — add a new section or extension, keep the existing contract intact
+- **Merge** — integrate the new direction into the existing contract, preserving compatible rules and rewriting conflicts
+- **Overwrite** — replace the current contract with the new one
+
+Default recommendation: **Merge**. Use **Append** when adding a bounded subsystem or feature-specific addendum. Use **Overwrite** only when the user clearly wants to reset the design system.
+
+**2. Route** — Match the user's request against the bundle catalog using an Agent subagent for semantic understanding.
+
+Use the **Agent** tool (subagent_type `general-purpose`) with a prompt like:
+```
+Read the bundle catalog by running:
+  node <skill-dir>/scripts/generate-bundle-catalog.mjs
+Then read <skill-dir>/load-manifest.json for bundle details (references/templates/scripts).
+
+Given the user's request: "<user request>"
+
+Match the request against the catalog. Return JSON:
+{
+  "taskTypes": ["matched-name", ...],
+  "optionalInspirations": ["matched-name", ...]
+}
+
+Rules:
+- Match semantic intent, not just keywords — consider Chinese equivalents, indirect intent, and paraphrases
+- Only use bundle names that appear in the catalog output — never invent names
+- A prompt can match 0 or more bundles in each category
+- Do NOT match checkpoints — those are set by the calling skill based on workflow context
+```
+
+**Set checkpoints explicitly** based on task context (not from the subagent result):
+- On the question-first path → include `question-first-delivery`
+- User asked for critique/review/audit/score → include `deep-design-review`
+- Task involves animation/motion → include `before-animation`
+- Task involves an iOS mockup → include `before-ios-mockup`
+- Before final delivery → include `before-delivery`
+- Before any export → include `before-export`
+
+If the Agent tool is unavailable, fall back to:
+```bash
+node <skill-dir>/scripts/resolve-load-bundles.mjs --prompt "<user request>"
+```
+
+Load `defaults.all-design-tasks`, then every matched task type, then any relevant checkpoint/supporting bundle. Before reading or copying any runtime bundle, announce it using:
+```text
+Load: because=<reason> loaded=<comma-separated paths>
+```
+Do not silently load or silently dedupe. If a bundle is already loaded, say `already_loaded=...` instead. After the announcement, read the specified reference(s). Copy the specified template(s):
 ```bash
 cp <skill-dir>/templates/<component>.<ext> ./<component>.<ext>
 ```
@@ -203,16 +278,34 @@ If no context exists: say so clearly — "I'll work from general intuition, whic
 
 **5. Build** — Write the HTML file. Show at halfway — don't wait until done. Use tweaks for variants rather than separate files.
 
-**Checkpoint: Before animation** — Load `references/animation-best-practices.md` AND `references/animation-pitfalls.md`. Verify the 16 hard rules before writing any motion code.
+**Checkpoint: Before saying "done"** — after your final edit, render the artifact yourself. Do not stop at code inspection. For multi-section pages, inspect every section you touched — not just the first screen or hero. For responsive work, inspect at least one desktop viewport and one narrow/mobile viewport. Use full-page screenshots plus targeted section screenshots when needed.
 
-**Checkpoint: Before export** — Load the relevant export reference. For editable PPTX, verify the 4 hard constraints in `references/editable-pptx.md` BEFORE starting HTML.
+**Checkpoint: Deep critique / audit** — If the user asked for a critique, review, audit, or score, announce `because=deep-design-review`, then load `references/design-checklist.md`, `references/principle-review.md`, `references/verification.md`, and `references/typography-spacing-quick-ref.md` before judging the work.
 
-**Checkpoint: Before iOS mockup** — **MUST use `templates/ios_frame.jsx`**. Never handwrite Dynamic Island (124×36px, top:12), status bar, or home indicator. 99% of handwritten attempts have positioning bugs. Read the template, copy the entire `iosFrameStyles` + `IosFrame` component into your HTML, wrap your screen content in `<IosFrame>`. Do not write `.dynamic-island`, `.status-bar`, or `.home-indicator` classes yourself.
+**Checkpoint: Before animation** — Announce `because=before-animation`, then load `references/animation-best-practices.md` AND `references/animation-pitfalls.md`. Verify the 16 hard rules before writing any motion code.
 
-**6. Verify** — Load `references/verification-protocol.md`. Run three-phase verification:
+**Checkpoint: Before export** — Announce `because=before-export`, then load the relevant export reference. For editable PPTX, verify the 4 hard constraints in `references/editable-pptx.md` BEFORE starting HTML.
+
+**Checkpoint: Before iOS mockup** — Announce `because=before-ios-mockup`, then **MUST use `templates/ios_frame.jsx`**. Never handwrite Dynamic Island (124×36px, top:12), status bar, or home indicator. 99% of handwritten attempts have positioning bugs. Read the template, copy the entire `iosFrameStyles` + `IosFrame` component into your HTML, wrap your screen content in `<IosFrame>`. Do not write `.dynamic-island`, `.status-bar`, or `.home-indicator` classes yourself.
+
+**Checkpoint: Typography & Spacing** — Before taking screenshot, verify:
+- [ ] Body text: 16-18px (web) or 24-32px (slides) — never smaller
+- [ ] Line height: 1.5+ for body text, 1.2-1.3 for headings
+- [ ] Heading → body gap: 12-16px
+- [ ] Paragraph → paragraph: 16-24px
+- [ ] Image top margin: 24-32px (after text)
+- [ ] Image bottom margin: 12-16px (before caption)
+- [ ] Section breaks: 48-64px minimum
+- [ ] All spacing from scale: 4/8/12/16/24/32/48/64/96/128
+- [ ] All vertical spacing is multiple of 8px
+- [ ] Using only 2-3 font weights (400/600/700)
+
+**6. Verify (Mandatory self-check)** — Announce `because=before-delivery`, then load `references/verification-protocol.md`. Run three-phase verification yourself after the final edit:
 - **Structural:** console errors, layout, responsiveness
 - **Visual:** screenshot review, design quality
 - **Design excellence:** hierarchy, spacing, color harmony, emotional fit
+
+Never deliver based on "it should be fine" reasoning. Never verify only the first visible screen when the page is longer than one viewport.
 
 **7. Deliver** — Minimal summary only:
 ```markdown
@@ -226,7 +319,10 @@ Don't list every page. Don't explain the tech stack. Don't self-praise.
 
 Every delivered artifact must satisfy:
 - **No console errors** — check before delivery
-- **Screenshot verified** — you have seen it rendered correctly
+- **Screenshot verified** — you have seen it rendered correctly after the final edit
+- **Maker self-check completed** — you personally opened/rendered the artifact; code review alone is insufficient
+- **Touched areas covered** — every changed section/state reviewed; not just the hero or first viewport
+- **Viewport coverage** — responsive pages checked on desktop + narrow/mobile; decks checked slide-by-slide
 - **Descriptive filename** — e.g., `Landing Page.html`, not `untitled.html`
 - **Fixed-size content scales** — slide decks use the deck_stage template for proper letterboxing
 - **Tweaks panel present** — if multiple variants exist, exposed as tweaks
@@ -243,6 +339,97 @@ Every delivered artifact must satisfy:
 - **Placeholder > bad asset.** A clean placeholder beats a bad attempt.
 - **Use colors from the design system.** If too restrictive, use oklch.
 - **Only use emoji if the design system uses them.**
+
+## Typography & Spacing System
+
+**Critical:** These rules prevent the most common visual quality issues. Apply them to every design.
+
+**Theory foundation:** Based on modular scale (1.25 ratio), 8px baseline grid, and optimal line length (45-75 characters). See `references/typography-design-system.md` for complete theory and mathematical foundation.
+
+### Typography Guardrails
+
+Treat typography as a system, not decoration. The primary language of the page determines the typography system.
+
+- **Primary script wins.** If the page is mostly Chinese, build the typography system around Chinese first. If mostly Latin, build around Latin first.
+- **Role-based fonts only.** Assign fonts by role: body/UI, CJK headings, Latin display, mono. Do not swap fonts section by section for novelty.
+- **Maximum font families:** 2 core families + 1 mono. Example: one sans for body/UI, one serif/display family for headings or brand, one mono for code.
+- **Decorative Latin display is limited.** Use Latin display faces for logos, short English brand words, or isolated labels — not for mixed CJK body copy.
+- **No mixed-script headline trap.** If a heading is primarily Chinese, set the entire heading with the CJK headline font. Do not let a Latin display face control the same line and force Chinese fallback.
+- **No fake weights.** Only use weights that are actually loaded. Do not rely on browser-synthesized bold/italic for headline typography.
+- **CJK tracking defaults to neutral.** Do not apply negative letter-spacing to Chinese headings by default. Keep tracking at `0` unless screenshot review proves a tighter value works.
+- **Metadata is still readable text.** For CJK-heavy docs/products, avoid a sea of 12-13px labels. Most metadata/UI copy should remain 14-16px.
+- **Display fonts are accent, not structure.** Decorative type should cover a small minority of total text area. If removing the display face breaks the page, the system is over-dependent on it.
+- **Verify mixed-script headlines visually.** Any heading that mixes Chinese + English must be screenshot-checked for line breaks, weight mismatch, and rhythm before delivery.
+
+### Font Size Scale
+
+**Web/Mobile:**
+- Display (Hero): 48-72px — landing hero, major titles
+- H1: 36-48px — page titles
+- H2: 28-36px — section headings
+- H3: 20-24px — subsection headings
+- Body Large: 18-20px — intro text, emphasis
+- Body: 16-18px — default body text (never smaller than 16px)
+- Small: 14-16px — captions, metadata
+- UI: 14-16px — buttons, labels
+
+**Slides/Presentations:**
+- Title: 80-120px — title slide
+- Section: 56-72px — section dividers
+- Heading: 36-48px — slide headings
+- Body: 24-32px — main content (never smaller than 24px)
+- Caption: 18-20px — footnotes
+
+### Line Height Rules
+
+Match line-height to font size:
+- **48px+**: 1.1-1.2 (tight for impact)
+- **24-48px**: 1.2-1.3 (headings)
+- **16-20px**: 1.5-1.6 (body text — never less than 1.5)
+- **14px**: 1.6-1.7 (small text needs more space)
+- **CJK text**: Add +0.1 to all values
+
+### Font Weight Hierarchy
+
+Use only 2-3 weights:
+- **400 (Regular)**: Body text, paragraphs
+- **500 (Medium)**: UI elements (optional)
+- **600 (Semibold)**: Subheadings, buttons
+- **700 (Bold)**: Main headings
+
+Never use 100/300/900 unless brand-specific.
+
+### Spacing Scale & Application
+
+**Base scale:** 4, 8, 12, 16, 24, 32, 48, 64, 96, 128
+
+**Text block spacing:**
+- Heading → Body: 12-16px
+- Paragraph → Paragraph: 16-24px
+- Section → Section: 48-64px
+
+**Image spacing (critical for vertical rhythm):**
+- Text → Image (top margin): 24-32px
+- Image → Caption (bottom margin): 12-16px
+- Caption → Next element: 32-48px
+- Image in hero: 48-64px margins
+
+**Container padding:**
+- Cards: 24-32px
+- Sections: 48-64px (vertical), 24-48px (horizontal)
+- Slides: 64-96px (all sides)
+- Buttons: 12px (vertical) × 24px (horizontal)
+
+**Component gaps:**
+- Form fields: 16-24px
+- List items: 12-16px
+- Grid items: 24-32px
+
+### Vertical Rhythm Rule
+
+All vertical spacing must be multiples of 8px. This creates visual consistency.
+
+**Quick check:** Measure any two elements — the gap should be 8, 16, 24, 32, 48, 64, 96, or 128px. Never 20px, 36px, or random values.
 
 ## Slide and Screen Labels
 

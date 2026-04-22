@@ -26,16 +26,19 @@ A Claude Code skill for high-fidelity HTML design and prototype creation — sli
 cc-design embeds a structured design workflow into Claude Code, enabling it to operate as an expert product designer. Three core principles guide every task:
 
 - **Fact verification (P0)** — Never guess. Verify claims about design trends, brand aesthetics, or technology. Wrong facts are worse than no facts.
-- **Batch questions first (P1)** — For new ambiguous design tasks, start with one batch of clarifying questions. Skip that only for minor fixes, follow-up iterations, explicit speed requests, or already-rich briefs.
+- **Structured confirmation first (P1)** — For new ambiguous design tasks, start with step-by-step structured confirmation. Use the platform's native question UI when available; fall back to one compact batch only when structured prompts are unavailable.
 - **Anti-AI slop (P2)** — Aggressive gradients, emoji (unless brand), generic SaaS hero sections, and overused fonts are banned. Full rules in `references/content-guidelines.md`.
+- **Audible loading (P3)** — Runtime bundles are never loaded silently. cc-design announces every reference/template bundle with `Load: because=... loaded=...` before using it.
 
 Progressive disclosure keeps the main skill definition concise while 27+ technical references load on demand.
+`load-manifest.json` is the machine-readable source of truth for bundle contents, `scripts/generate-bundle-catalog.mjs` generates the bundle catalog for AI matching, and `scripts/lint-load-manifest.mjs` checks that every reference/template is accounted for.
 
 The core product promise is behavioral, not just feature breadth:
-- new ambiguous tasks start with one batch of clarifying questions
+- new ambiguous tasks start with structured step-by-step confirmation
 - richly specified briefs can skip straight to a first pass with explicit assumptions
 - explicit speed requests can skip straight to a first pass with explicit assumptions
 - small edits and follow-up iterations do not reopen the full discovery flow
+- existing `DESIGN.md` files are never silently rewritten; the user confirms append / merge / overwrite first
 
 ## Features
 
@@ -43,6 +46,7 @@ The core product promise is behavioral, not just feature breadth:
 |---|---|
 | **Output formats** | Interactive prototypes, slide decks, landing pages, UI mockups, animated motion studies, wireframes, design systems |
 | **Design philosophies** | 20 design philosophy schools organized in 5 schools: Information Architects, Motion Poets, Minimalists, Experimental Vanguard, Eastern Philosophy. See `references/design-styles.md` |
+| **Design thinking** | 8-layer design framework (Goal→Information→Structure→Interaction→Visual→Brand→System→Validation), 10 core design principles, theory foundations for each layer |
 | **Brand style cloning** | Progressive loading of 68+ brand design systems from [getdesign.md](https://getdesign.md) |
 | **Design patterns** | Curated catalog of proven layout patterns with case studies |
 | **Design review** | 5-dimension scoring framework (Philosophy Alignment, Visual Hierarchy, Craft Quality, Functionality, Originality). See `references/critique-guide.md` |
@@ -129,6 +133,7 @@ Audio assets (BGM and SFX) are not included in the repository to keep it lightwe
 
 ```
 cc-design/
+├── load-manifest.json                    # Runtime bundle map for refs/templates/checkpoints
 ├── SKILL.md                              # Skill definition (YAML + routing table + workflow)
 ├── EXAMPLES.md                           # Usage examples and advanced workflows
 ├── test-prompts.json                     # 6 test prompts for skill validation
@@ -179,6 +184,8 @@ cc-design/
 │   ├── browser_window.jsx                # Browser window chrome
 │   └── animations.jsx                    # Timeline animation engine (signals)
 └── scripts/                              # Export utility scripts
+    ├── lint-load-manifest.mjs           # Checks refs/templates are all routed or tagged
+    ├── resolve-load-bundles.mjs         # Runtime resolver for manifest-backed bundle selection
     ├── package.json                      # Dependencies and npm scripts
     ├── export_deck_pdf.mjs              # Multi-file deck → PDF
     ├── export_deck_stage_pdf.mjs        # Single-file deck → PDF
@@ -196,25 +203,31 @@ cc-design/
 
 ```
 ┌─────────────────────────────────────┐
-│           SKILL.md                  │  ← Always loaded (131 lines)
-│  Core principles, routing table,   │
-│  workflow, rules, contracts         │
+│           SKILL.md                  │
+│  Triggering, workflow, contracts    │
 └──────────────┬──────────────────────┘
-               │  Loaded on demand per routing table
+               │  Reads machine-readable routing rules
+               ▼
+┌─────────────────────────────────────┐
+│       load-manifest.json            │
+│  task bundles + checkpoints +       │
+│  optional inspirations              │
+└──────────────┬──────────────────────┘
+               │  Announces each bundle before loading
        ┌───────┴────────┐
        ▼                ▼
 ┌──────────────┐  ┌──────────────┐
 │ references/  │  │ templates/   │
-│ 27 docs +    │  │ (copied to   │
-│ case-studies │  │  project)    │
+│ loaded on    │  │ copied into  │
+│ demand       │  │ the project  │
 └──────────────┘  └──────────────┘
                         │
                 ┌───────┴────────┐
                 ▼                ▼
          ┌──────────────┐  ┌──────────────┐
          │  scripts/    │  │  agents/     │
-         │  (export     │  │  (platform   │
-         │   tools)     │  │   config)    │
+         │  lint +      │  │  platform    │
+         │  export      │  │  metadata    │
          └──────────────┘  └──────────────┘
 ```
 
@@ -261,32 +274,38 @@ Mention a brand name to load its design system from [getdesign.md](https://getde
 Understand → Route → Acquire Context → Design Intent → Build → Verify → Deliver
     │          │           │                │             │        │         │
     ▼          ▼           ▼                ▼             ▼        ▼         ▼
- Batch      Load        Read            6-question    HTML +   3-phase    File
- questions  refs +      design          checklist     React    verify:    delivered
-            templates   system          (focal,      comps    structural,
+ Stepwise   Announce +  Read            intent +      HTML +   3-phase    File
+ confirm    refs +      design          scope         React    verify:    delivered
+            templates   system          checkpoints   comps    structural,
                                      tone, flow,             visual,
                                      spacing,               excellence
                                      color, type)
 ```
 
 First-turn behavior follows one default path:
-- **New ambiguous task** — ask one batched set of clarifying questions
+- **New ambiguous task** — ask structured confirmation questions step by step
 - **New rich brief** — begin with explicit assumptions, then build
 - **Explicit speed request** — begin with explicit assumptions, then build
 - **Follow-up iteration or minor fix** — act directly unless audience, scope, or output type changes
 
 `SKILL.md` is the runtime behavior contract. `references/workflow.md` supports execution and must not override it.
+`load-manifest.json` is the runtime routing manifest, and `scripts/generate-bundle-catalog.mjs` generates the compact catalog consumed by the AI matcher. Every runtime bundle load should be announced before it is read or copied.
 
 Two mandatory checkpoints in the Build phase:
 - **Before animation** — load animation-best-practices + animation-pitfalls, verify 16 hard rules
 - **Before export** — load the relevant export reference, check tool availability and constraints
 
+Verification is a required maker self-check:
+- after the final edit, open/render the artifact yourself
+- inspect full page plus every changed section, not just the first screen
+- for responsive work, inspect at least desktop + one narrow/mobile viewport
+
 ## Compatibility
 
 | Platform | Status | Notes |
 |---|---|---|
-| Claude Code (CLI) | **Primary target** | Playwright MCP + local scripts |
-| Codex / OpenAI-compatible | Supported | Prompt metadata in `agents/openai.yaml` |
+| Claude Code (CLI) | **Primary target** | Playwright MCP + local scripts + structured stepwise confirmation |
+| Codex / OpenAI-compatible | Supported | Prompt metadata in `agents/openai.yaml`, optimized for structured stepwise confirmation |
 
 ## Contributing
 
@@ -298,6 +317,7 @@ Two mandatory checkpoints in the Build phase:
 6. Open a pull request
 
 When adding new reference documents, add a row to the routing table in SKILL.md so the model knows when to load it.
+Also update `load-manifest.json`, keep `scripts/resolve-load-bundles.mjs` behavior aligned, and run `node scripts/lint-load-manifest.mjs`.
 
 If a pull request changes first-turn behavior, it must also update:
 - `SKILL.md`

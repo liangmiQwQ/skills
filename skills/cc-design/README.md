@@ -1,10 +1,8 @@
-# CC Design
+# cc-design
 
 **[Demo](https://cc-design-demo.vercel.app)**
 
 A Claude Code skill for high-fidelity HTML design and prototype creation — slide decks, interactive prototypes, landing pages, UI mockups, animations, and visual design explorations.
-
-Adapted from the Claude Artifacts design environment to work natively in Claude Code, using Playwright MCP for verification and local scripts for export.
 
 ## Screenshots
 
@@ -22,53 +20,76 @@ Adapted from the Claude Artifacts design environment to work natively in Claude 
   <a href="./screenshots/previews/cc-design-glass-preview.png"><img src="./screenshots/previews/cc-design-glass-preview.png" alt="Glass Dashboard" width="32%"></a>
   <a href="./screenshots/previews/cc-design-banking-preview.png"><img src="./screenshots/previews/cc-design-banking-preview.png" alt="Banking App" width="32%"></a>
 </p>
-<p align="center">
-  <a href="./screenshots/previews/cc-design-spacex-preview.png"><img src="./screenshots/previews/cc-design-spacex-preview.png" alt="SpaceX" width="32%"></a>
-  <a href="./screenshots/previews/cc-design-mars-preview.png"><img src="./screenshots/previews/cc-design-mars-preview.png" alt="Mars Landing" width="32%"></a>
-  <a href="./screenshots/previews/cc-design-mechops-preview.png"><img src="./screenshots/previews/cc-design-mechops-preview.png" alt="Mech-Ops" width="32%"></a>
-</p>
-<p align="center">
-  <a href="./screenshots/previews/cc-design-llm-sketch-preview.png"><img src="./screenshots/previews/cc-design-llm-sketch-preview.png" alt="LLM Sketch" width="32%"></a>
-  <a href="./screenshots/previews/cc-design-retro-preview.png"><img src="./screenshots/previews/cc-design-retro-preview.png" alt="Retro Pixel" width="32%"></a>
-  <a href="./screenshots/previews/cc-design-thermo-preview.png"><img src="./screenshots/previews/cc-design-thermo-preview.png" alt="Thermodynamics" width="32%"></a>
-</p>
 
 ## Overview
 
-CC Design embeds a structured design workflow into Claude Code, enabling it to operate as an expert product designer across the full lifecycle: from clarifying requirements and acquiring design context, through building with real UI kits and design systems, to delivering polished HTML artifacts with screenshot-based verification.
+cc-design embeds a structured design workflow into Claude Code, enabling it to operate as an expert product designer. Three core principles guide every task:
 
-Two core principles:
+- **Fact verification (P0)** — Never guess. Verify claims about design trends, brand aesthetics, or technology. Wrong facts are worse than no facts.
+- **Batch questions first (P1)** — For new ambiguous design tasks, start with one batch of clarifying questions. Skip that only for minor fixes, follow-up iterations, explicit speed requests, or already-rich briefs.
+- **Anti-AI slop (P2)** — Aggressive gradients, emoji (unless brand), generic SaaS hero sections, and overused fonts are banned. Full rules in `references/content-guidelines.md`.
 
-- **Context-first design** — Never design from scratch when existing brand systems, component libraries, or product code is available. Actively acquire and reuse design vocabulary before creating new visual directions.
-- **Progressive disclosure** — The main skill definition stays concise while 12+ technical references are loaded on demand, keeping context window usage minimal.
+Progressive disclosure keeps the main skill definition concise while 27+ technical references load on demand.
+
+The core product promise is behavioral, not just feature breadth:
+- new ambiguous tasks start with one batch of clarifying questions
+- richly specified briefs can skip straight to a first pass with explicit assumptions
+- explicit speed requests can skip straight to a first pass with explicit assumptions
+- small edits and follow-up iterations do not reopen the full discovery flow
 
 ## Features
 
 | Category | Capabilities |
 |---|---|
 | **Output formats** | Interactive prototypes, slide decks, landing pages, UI mockups, animated motion studies, wireframes, design systems |
-| **Brand style cloning** | Progressive loading of 68+ brand design systems from [getdesign.md](https://getdesign.md) (Stripe, Vercel, Notion, Linear, Apple, etc.) |
-| **Design patterns** | Curated catalog of proven layout patterns with case studies from Stripe, Linear, Notion, and more |
-| **Design excellence** | Built-in quality framework with emotional tone targeting, hierarchy checks, and anti-slop rules |
+| **Design philosophies** | 20 design philosophy schools organized in 5 schools: Information Architects, Motion Poets, Minimalists, Experimental Vanguard, Eastern Philosophy. See `references/design-styles.md` |
+| **Brand style cloning** | Progressive loading of 68+ brand design systems from [getdesign.md](https://getdesign.md) |
+| **Design patterns** | Curated catalog of proven layout patterns with case studies |
+| **Design review** | 5-dimension scoring framework (Philosophy Alignment, Visual Hierarchy, Craft Quality, Functionality, Originality). See `references/critique-guide.md` |
+| **Anti-AI slop** | Comprehensive anti-slop rules: banned visual patterns, font blacklist, color strategy, layout rules. See `references/content-guidelines.md` |
+| **Animation** | Stage+Sprite timeline engine with easing library, `__ready`/`__recording` signal protocol, 16 hard pitfall rules, best practices guide |
 | **Variations** | Generates 3+ design directions across layout, interaction, visual intensity, and motion axes |
-| **Prototyping** | React + Babel inline JSX with pinned versions, component scope management, starter scaffolds |
-| **Tweaks system** | Self-contained in-page design controls with real-time preview and localStorage persistence |
+| **Prototyping** | React + Babel inline JSX with pinned versions, scope management, starter scaffolds |
+| **Tweaks system** | In-page design controls with localStorage persistence and EDITMODE forward-compatibility |
 | **Verification** | Three-phase verification (structural, visual, design excellence) via Playwright MCP |
-| **Export** | PPTX, PDF, and self-contained inline HTML via local Node.js scripts |
+| **Export** | PDF (multi-file + single-file), PPTX (image mode + editable mode under constraints), video (HTML to MP4 via Playwright + ffmpeg), inline HTML |
+| **Audio design** | Dual-track audio system (SFX beat layer + BGM atmosphere layer), 37 SFX catalog, ffmpeg mixing templates |
 
 ## Installation
 
 Clone into your Claude Code skills directory:
 
 ```bash
-git clone https://github.com/ZeroZ-lab/cc-design.git ~/.claude/skills/cc-design
+git clone https://github.com/ZeroZ-lab/claritas-design.git ~/.claude/skills/cc-design
 ```
 
-Or add as a submodule:
+For Codex-style global installs, use:
 
 ```bash
-git submodule add https://github.com/ZeroZ-lab/cc-design.git skills/cc-design
+git clone https://github.com/ZeroZ-lab/claritas-design.git ~/.codex/skills/cc-design
 ```
+
+## Version Awareness
+
+`cc-design` now ships with a root `VERSION` file and a lightweight update checker:
+
+```bash
+~/.codex/skills/cc-design/bin/ccdesign-update-check
+```
+
+When the skill detects that your local version is stale, it will surface:
+
+```text
+UPGRADE_AVAILABLE <local> <remote>
+```
+
+The user-facing upgrade path stays unified:
+
+```bash
+npx skills update cc-design
+```
+
+`cc-design` only detects and prompts. It does not own the upgrade executor.
 
 ### Export scripts
 
@@ -76,71 +97,115 @@ git submodule add https://github.com/ZeroZ-lab/cc-design.git skills/cc-design
 cd ~/.claude/skills/cc-design/scripts && npm install && cd -
 ```
 
-This installs `pptxgenjs` and `playwright`. For Playwright-backed export:
+This installs `playwright`, `pptxgenjs`, `pdf-lib`. For Playwright-backed export:
 
 ```bash
 npx playwright install chromium
 ```
 
+For video and audio export, install ffmpeg (optional dependency):
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt install ffmpeg
+
+# Windows (via Chocolatey)
+choco install ffmpeg
+```
+
+For editable PPTX mode (optional):
+
+```bash
+# sharp is an optionalDependency — npm install will attempt it
+# If it fails on your platform, editable PPTX falls back to image mode
+```
+
+Audio assets (BGM and SFX) are not included in the repository to keep it lightweight. See `references/sfx-library.md` and `references/audio-design-rules.md` for the catalog and download instructions.
+
 ## Project Structure
 
 ```
 cc-design/
-├── SKILL.md                              # Skill definition (YAML frontmatter + workflow)
+├── SKILL.md                              # Skill definition (YAML + routing table + workflow)
 ├── EXAMPLES.md                           # Usage examples and advanced workflows
+├── test-prompts.json                     # 6 test prompts for skill validation
 ├── screenshots/                          # Demo screenshots for README
 ├── agents/
 │   └── openai.yaml                       # Codex-compatible platform interface config
 ├── references/
-│   ├── design-excellence.md              # Quality framework, emotional tones, anti-slop rules
-│   ├── design-patterns.md                # Proven layout patterns and component patterns
+│   ├── design-excellence.md              # Quality framework, emotional tones
+│   ├── design-patterns.md                # Proven layout patterns
+│   ├── design-styles.md                  # 20 design philosophy schools
+│   ├── content-guidelines.md             # Anti-AI slop rules, font/color/layout bans
+│   ├── design-context.md                 # Context gathering workflow
+│   ├── workflow.md                        # Full design workflow (Junior Designer mode)
+│   ├── critique-guide.md                 # 5-dimension design review scoring
+│   ├── animation-best-practices.md       # Animation design principles and recipes
+│   ├── animation-pitfalls.md             # 16 hard rules from real failure cases
+│   ├── animations.md                     # Stage+Sprite API reference
+│   ├── slide-decks.md                    # Comprehensive slide deck guide
+│   ├── editable-pptx.md                  # PPTX export constraints (4 hard rules)
+│   ├── video-export.md                   # Video export pipeline docs
+│   ├── audio-design-rules.md             # Dual-track audio system specs
+│   ├── sfx-library.md                    # 37 SFX catalog and selection guide
+│   ├── scene-templates.md                # 8 output-type scene specs
 │   ├── frontend-design.md                # General frontend design fundamentals
 │   ├── design-system-creation.md         # Creating design systems from scratch
 │   ├── getdesign-loader.md               # Brand style loading from getdesign.md
-│   ├── react-babel-setup.md              # React/Babel pinned versions and scope rules
-│   ├── starter-components.md             # Starter component catalog and usage
+│   ├── react-setup.md                    # React/Babel pinned versions and scope rules
+│   ├── starter-components.md             # Starter component catalog
 │   ├── interactive-prototype.md          # Interactive prototype patterns
-│   ├── tweaks-system.md                  # In-page tweak controls
+│   ├── tweaks-system.md                  # In-page tweak controls (useTweaks hook)
 │   ├── platform-tools.md                 # Playwright tool reference
+│   ├── verification.md                   # HTML output verification guide
 │   ├── verification-protocol.md          # Three-phase verification protocol
-│   ├── question-protocol.md              # Structured clarifying question templates
 │   └── case-studies/                     # Real-world design references
 │       ├── README.md                     # Case study index
-│       ├── product-pages/                # Stripe, Linear, Notion landing pages
-│       ├── presentations/                # Pitch deck, keynote-style layouts
-│       ├── mobile-apps/                  # iOS onboarding patterns
-│       └── creative-works/               # Creative design references
+│       ├── product-pages/
+│       ├── presentations/
+│       ├── mobile-apps/
+│       └── creative-works/
+├── assets/
+│   └── personal-asset-index.example.json # Personal asset index template
 ├── templates/                            # Starter component files
-│   ├── deck_stage.js                     # Slide presentation stage
-│   ├── design_canvas.jsx                 # Side-by-side option grid
-│   ├── ios_frame.jsx                     # iPhone device frame
-│   ├── android_frame.jsx                 # Android device frame
-│   ├── macos_window.jsx                  # macOS window chrome
+│   ├── deck_stage.js                     # Slide presentation stage (Shadow DOM)
+│   ├── design_canvas.jsx                 # Side-by-side option grid with lightbox
+│   ├── ios_frame.jsx                     # iPhone device frame (Dynamic Island)
+│   ├── android_frame.jsx                 # Android device frame (punch-hole)
+│   ├── macos_window.jsx                  # macOS window chrome (darkMode)
 │   ├── browser_window.jsx                # Browser window chrome
-│   └── animations.jsx                    # Timeline animation engine
+│   └── animations.jsx                    # Timeline animation engine (signals)
 └── scripts/                              # Export utility scripts
-    ├── package.json
-    ├── gen_pptx.js                       # HTML → PPTX export
-    ├── super_inline_html.js              # HTML + assets → single file
-    ├── open_for_print.js                 # HTML → PDF via Playwright
+    ├── package.json                      # Dependencies and npm scripts
+    ├── export_deck_pdf.mjs              # Multi-file deck → PDF
+    ├── export_deck_stage_pdf.mjs        # Single-file deck → PDF
+    ├── export_deck_pptx.mjs             # Dual-mode PPTX export
+    ├── html2pptx.js                     # HTML to PPTX conversion engine
+    ├── render-video.js                  # HTML → MP4 (Playwright + ffmpeg)
+    ├── add-music.sh                     # BGM mixing (ffmpeg)
+    ├── convert-formats.sh               # MP4 → 60fps + GIF conversion
+    ├── super_inline_html.js             # HTML + assets → single file
     └── lib/
-        └── parse_args.js                 # Shared CLI argument parser
+        └── parse_args.js                # Shared CLI argument parser
 ```
 
 ### Architecture
 
 ```
 ┌─────────────────────────────────────┐
-│           SKILL.md                  │  ← Always loaded into context
-│  Routing table, workflow, rules,    │
-│  content guidelines, contracts      │
+│           SKILL.md                  │  ← Always loaded (131 lines)
+│  Core principles, routing table,   │
+│  workflow, rules, contracts         │
 └──────────────┬──────────────────────┘
                │  Loaded on demand per routing table
        ┌───────┴────────┐
        ▼                ▼
 ┌──────────────┐  ┌──────────────┐
 │ references/  │  │ templates/   │
-│ 12 docs +    │  │ (copied to   │
+│ 27 docs +    │  │ (copied to   │
 │ case-studies │  │  project)    │
 └──────────────┘  └──────────────┘
                         │
@@ -162,10 +227,23 @@ The skill activates automatically for design-related requests. Example prompts:
 "Create a 10-slide pitch deck for the Q3 board meeting"
 "Build an interactive prototype of the checkout flow"
 "Explore 3 visual directions for the new dashboard"
-"Make the onboarding screens look good on mobile"
-"Create a design system for our product"
-"Low-fidelity wireframe for an e-commerce checkout"
+"Animate this logo reveal with the Takram style"
+"Export the deck as editable PPTX"
+"Record the animation as a 25fps MP4 video"
+"Review this design and score it on 5 dimensions"
 ```
+
+### Design Style Selection
+
+Mention a style philosophy to set the design direction:
+
+```
+"Use the Pentagram style for this infographic"
+"Apply Experimental Jetset minimalism to this poster"
+"Mix Takram restraint with Locomotive motion for the hero"
+```
+
+See `references/design-styles.md` for all 20 philosophy schools.
 
 ### Brand Style Cloning
 
@@ -175,10 +253,7 @@ Mention a brand name to load its design system from [getdesign.md](https://getde
 "Create a pricing page with Stripe's aesthetic"
 "Notion-style kanban board"
 "Mix Vercel's minimalism with Linear's purple accents"
-"Show me this dashboard in Apple style vs Tesla style"
 ```
-
-Supports 68+ brands. See [EXAMPLES.md](./EXAMPLES.md) for detailed patterns.
 
 ## Design Workflow
 
@@ -186,7 +261,7 @@ Supports 68+ brands. See [EXAMPLES.md](./EXAMPLES.md) for detailed patterns.
 Understand → Route → Acquire Context → Design Intent → Build → Verify → Deliver
     │          │           │                │             │        │         │
     ▼          ▼           ▼                ▼             ▼        ▼         ▼
- Clarify    Load        Read            6-question    HTML +   3-phase    File
+ Batch      Load        Read            6-question    HTML +   3-phase    File
  questions  refs +      design          checklist     React    verify:    delivered
             templates   system          (focal,      comps    structural,
                                      tone, flow,             visual,
@@ -194,7 +269,17 @@ Understand → Route → Acquire Context → Design Intent → Build → Verify 
                                      color, type)
 ```
 
-The routing table in SKILL.md maps task types to the specific references and templates needed, loading only what's required for each design task.
+First-turn behavior follows one default path:
+- **New ambiguous task** — ask one batched set of clarifying questions
+- **New rich brief** — begin with explicit assumptions, then build
+- **Explicit speed request** — begin with explicit assumptions, then build
+- **Follow-up iteration or minor fix** — act directly unless audience, scope, or output type changes
+
+`SKILL.md` is the runtime behavior contract. `references/workflow.md` supports execution and must not override it.
+
+Two mandatory checkpoints in the Build phase:
+- **Before animation** — load animation-best-practices + animation-pitfalls, verify 16 hard rules
+- **Before export** — load the relevant export reference, check tool availability and constraints
 
 ## Compatibility
 
@@ -213,6 +298,13 @@ The routing table in SKILL.md maps task types to the specific references and tem
 6. Open a pull request
 
 When adding new reference documents, add a row to the routing table in SKILL.md so the model knows when to load it.
+
+If a pull request changes first-turn behavior, it must also update:
+- `SKILL.md`
+- `README.md`
+- `references/workflow.md`
+- `CLAUDE.md` if the release checklist changes
+- `VERSION`
 
 ## License
 

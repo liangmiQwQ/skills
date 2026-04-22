@@ -9,7 +9,7 @@
     "cc-design": {
       "source": "ZeroZ-lab/cc-design",
       "sourceType": "github",
-      "computedHash": "4d6ed1738953f78a77716aa42f0fe3fccc26df1418e3b6642eb4bfeba2178f20"
+      "computedHash": "535765f905526eb020a2d0749ecd8e4611f5c4468d43dfda39ab8d2d31975b67"
     },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
@@ -114,7 +114,7 @@
     "vite-plus": {
       "source": "vite-plus",
       "sourceType": "node_modules",
-      "computedHash": "796663dcf6fa4605df3285aae862aa6fc5869cbfc80f319ce20ffa4e8f4a19e8"
+      "computedHash": "9170dcbd33ba1377079b55d0d2cd23cc6ef600697d6d0c0f031847ac7f5ef2f4"
     },
     "vitepress": {
       "source": "antfu/skills",

@@ -12,7 +12,13 @@
         "references/layout-systems.md",
         "references/responsive-design.md",
         "references/design-patterns.md",
-        "references/visual-design-theory.md"
+        "references/visual-design-theory.md",
+        "references/design-iron-law.md",
+        "references/design-common-sayings.md",
+        "references/design-red-flags.md",
+        "references/failure-mode-handling.md",
+        "references/design-adr.md",
+        "references/exit-conditions.md"
       ]
     }
   },
@@ -402,7 +408,8 @@
       "detect": {
         "anyKeywords": ["audio design", "sfx", "sound design", "bgm", "music"]
       },
-      "references": ["references/audio-design-rules.md", "references/sfx-library.md"]
+      "references": ["references/audio-design-rules.md", "references/sfx-library.md"],
+      "templates": ["templates/audio-engine.jsx", "templates/audio-controls.jsx"]
     },
     "data-visualization": {
       "description": "Data visualization, charts, graphs, dashboards, analytics, metrics, statistics display, 数据可视化, 图表, 仪表板, 数据展示",

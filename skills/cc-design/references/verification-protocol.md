@@ -69,8 +69,24 @@ This is a **maker self-check**. The person who made the change must inspect the 
 3. For responsive work, capture at least one narrow/mobile viewport
 4. Review all screenshots against criteria above
 5. If any criterion fails → fix in Build step, re-verify from Phase 1
-6. If all pass → proceed to Deliver step
+6. If all pass → proceed to Phase 4 (User Review)
 ```
+
+## Task-Type-Specific Verification
+
+In addition to the three-phase protocol, verify task-type-specific items:
+
+| Task Type | Additional Verification |
+|---|---|
+| Landing Page | Responsive at desktop + mobile. CTA prominence checked. Body font >= 16px. |
+| Slide Deck | Every slide has `[data-screen-label]`. Body font >= 24px. `deck_stage` used. |
+| Animation | `__ready` signal present. Phase dwell times >= 3s. Easing correct (out/in). |
+| Interactive Prototype | All paths tested. No dead ends. State transitions smooth. |
+| Brand Clone | Colours from real assets. Fonts exact. Tone matches brand personality. |
+| Design Critique | Each dimension scored. Severity labels on all findings. |
+| Export | File opens correctly. Tool dependencies confirmed. |
+
+Full details in `references/exit-conditions.md`.
 
 ## Fix Loop
 
@@ -82,3 +98,17 @@ Phase 2 fail → fix → re-navigate → Phase 1 + Phase 2 again
 ```
 
 Never skip Phase 1 to "just check visuals." Structural errors cause visual defects that are symptoms, not root causes.
+
+If the fix loop repeats 3+ times on the same issue, or if fixing one thing breaks another, enter the structured recovery protocol: see `references/failure-mode-handling.md`.
+
+## Phase 4: User Review (new)
+
+**Purpose**: Get human approval before delivery. After all three phases pass, present results to the user.
+
+Steps:
+1. Present exit conditions checklist results (checked / failed items) from `references/exit-conditions.md`
+2. Present Phase 2 screenshot(s)
+3. Wait for user decision:
+   - **Approve** → proceed to Deliver step
+   - **Request changes** → re-enter fix loop (back to Phase 1), fix the specific item, re-run all phases
+   - **Rethink direction** → trigger Iteration Gate in `references/workflow.md` (back to Step 1 — Understand)

@@ -42,3 +42,12 @@ for _ in 0..3 {
 ```
 
 Never write `/// Returns the foo` on a function named `get_foo` — it adds nothing and will drift out of sync.
+
+## Avoid chained calls
+
+Prefer `match`, `if ... else ...`, `if let`, `let ... else ...` over chained `and_then`, `map`, `map_or_else`, `filter`, etc. because the former is more readable and maintainable.
+
+Especially for long chains, it's hard to read and debug.
+
+It doesn't means you can never use functional style. It means we should use them sparingly.
+Remember, Everything is done for the sake of code readability.

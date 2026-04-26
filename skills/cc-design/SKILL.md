@@ -50,6 +50,22 @@ HTML is your tool, but your medium varies — you must embody an expert in that 
 
 ---
 
+## Entry / Exit
+
+- **Entry**: User asks to design, prototype, mock up, build, or render HTML visual artifacts — including slide decks, interactive prototypes, landing pages, UI mockups, animations, brand style clones, design systems, visual critiques, or export renders. Also triggered when the user says "make it look good" or "design a screen for X."
+- **Exit**: A deliverable matching the task type, with console errors cleared, screenshot verified after final edit, and every touched section inspected individually. See `references/exit-conditions.md` for per-task-type exit criteria.
+- **Do Not Use**: Pure backend work with no user-visible surface, data analysis without visualization, text-only documents with no layout requirements, or pure software development with no visual component.
+
+## Iron Law
+
+See `references/design-iron-law.md` for the full Iron Law definition. In short:
+
+- **No unchecked fact = no design decision** (P0)
+- **No AI slop patterns. Ever.** (P2)
+- **No screenshot after final edit = no delivery** (Verify Don't Assume)
+
+---
+
 ## Core Principles
 
 **P0: Fact Verification — Do This First, Every Time.**
@@ -67,6 +83,8 @@ Forbidden phrases (never say these about verifiable facts):
 - ❌ "I believe the latest version is X"
 
 If you cannot verify: say "I cannot confirm this — please check" rather than guessing. Wrong facts damage user trust and waste everyone's time.
+
+See also: `references/design-common-sayings.md` for preemptive rationalization defence, and `references/design-red-flags.md` for behavioural stop signals.
 
 **P1: Gather Enough Context First.** For new design tasks, do not start building when you only have partial context. Resolve or explicitly assume the blocking fields before any full build:
 
@@ -94,38 +112,59 @@ End with:
 Default order of confirmation:
 
 1. **Design Context** — existing design system / UI kit / codebase / screenshots?
-2. **Variations** — how many directions? conservative vs wide exploration?
-3. **Fidelity & Scope** — wireframe / hi-fi? one screen / one flow / full flow?
-4. **Plan Approval** — approve the execution plan before full build
+2. **Direction (new)** — confirm own understanding before planning
+3. **Variations** — how many directions? conservative vs wide exploration?
+4. **Fidelity & Scope** — wireframe / hi-fi? one screen / one flow / full flow?
+5. **Plan Approval** — approve the execution plan before full build
+
+All questions must follow a **standard option format** that works on both Claude Code and Codex:
+
+```
+<question>
+<number>) <option>
+<number>) <option>
+```
+
+When the platform supports structured question UI (e.g., Claude Code's `AskUserQuestion`), use it to present the same options as selectable buttons. When it doesn't (e.g., Codex), output the exact same numbered format as text — the user picks by typing the number.
 
 Rules:
-- Prefer **step-by-step** confirmation over one giant questionnaire
-- Prefer **1 question per step**
-- Prefer **2-4 short options** plus freeform when the platform supports it
+- **Step-by-step** — 1 question per step, not one giant questionnaire
+- **2-4 short options** per question — never more
 - Stop asking once blocking uncertainty is resolved
-- If the platform lacks structured question UI, fall back to one compact text batch
-- Rich briefs may skip most questions, but they still require a visible plan before build
-- Explicit speed requests may compress the process into a mini-plan, but they do not skip planning unless the user explicitly says to
+- Rich briefs skip most questions, but still require a visible plan before build
+- Explicit speed requests compress to a mini-plan, but still plan unless the user explicitly says to skip
 
-Structured confirmation example:
+Canonical example (works on all platforms):
 ```markdown
 Step 1 — context
 Do you already have a design system or screenshots I should match?
-- Yes, I have references
-- No, work from scratch
+1) Yes, I have references
+2) No, work from scratch
 
-Step 2 — variations
+Step 2 — direction confirmation
+Based on our answers so far, I understand we're building:
+- Type: landing page
+- Context: brand reference (Stripe)
+- Audience: SaaS buyers, technical
+- Core action: sign up for free trial
+
+Is this direction correct?
+1) Yes, proceed
+2) No, adjust the type
+3) No, adjust the audience
+
+Step 3 — variations
 How broad should the exploration be?
-- 1 direction, close to expected
-- 3 directions, conservative → bold
+1) 1 direction, close to expected
+2) 3 directions, conservative → bold
 
-Step 3 — fidelity/scope
+Step 4 — fidelity/scope
 What should I build first?
-- One screen
-- One complete flow
-- A low-fi wireframe pass first
+1) One screen
+2) One complete flow
+3) A low-fi wireframe pass first
 
-Step 4 — plan
+Step 5 — plan
 Plan
 - Goal: ...
 - Confirmed facts: ...
@@ -246,7 +285,7 @@ Approve this plan before I continue into the full build.
 
 **Save → show → wait for approval before continuing.** Skip only for minor edits, approved follow-up iterations, or when the user explicitly says to skip planning.
 
-**1. Understand** — For every design task, start by loading `all-design-tasks`. For new or underspecified work, also load `question-first-delivery` and use the platform's native question UI when available (`AskUserQuestion`, `request_user_input`, or equivalent). Ask the fixed route-shaping questions in this order until routing is locked: output type, task state, available context, interaction/device/export constraints, primary design risk. After routing is locked, ask only the remaining blocking product questions. Use this precedence order: localized edit → act directly; approved follow-up iteration → act directly; explicit speed request → ask only the missing blocking route/product questions, then produce a mini-plan; rich brief (audience + output shape + constraints + references) → skip most questioning, but still confirm any unresolved route-shaping facts before planning; everything else → ask the next blocking route-shaping question. If structured UI is unavailable, send one compact text batch instead. **Detect brand mentions** — scan for brand names (Stripe, Vercel, Notion, Linear, Apple, etc.) and route to `brand-style-clone` when the user wants that aesthetic.
+**1. Understand** — For every design task, start by loading `all-design-tasks`. For new or underspecified work, also load `question-first-delivery` and ask the route-shaping questions using the standard option format (see P1.5). Ask one question per step, 2-4 options each, until routing is locked: output type, task state, available context, interaction/device/export constraints, primary design risk. After routing is locked, ask only the remaining blocking product questions. Use this precedence order: localized edit → act directly; approved follow-up iteration → act directly; explicit speed request → ask only the missing blocking route/product questions, then produce a mini-plan; rich brief (audience + output shape + constraints + references) → skip most questioning, but still confirm any unresolved route-shaping facts before planning; everything else → ask the next blocking route-shaping question. **Detect brand mentions** — scan for brand names (Stripe, Vercel, Notion, Linear, Apple, etc.) and route to `brand-style-clone` when the user wants that aesthetic.
 
 **Existing design contract rule** — if the project already has `DESIGN.md` (or an equivalent explicit design system file) and the current task would change it, do not silently rewrite it. Ask the user to choose one mode before editing:
 - **Append** — add a new section or extension, keep the existing contract intact
@@ -340,7 +379,17 @@ Use the plan to answer: focal point, emotional tone, visual flow, spacing strate
 
 **5. Approval** — Stop after the plan and wait for user approval on first-pass work. Do not treat silence as approval on new tasks. Continue immediately only for minor edits, approved follow-up iterations, or explicit instructions to skip planning.
 
-**6. Build** — Write the HTML file after the plan is approved. Show at halfway — don't wait until done. Use tweaks for variants rather than separate files.
+**6. Build** — Write the HTML file after the plan is approved. Use a **per-section preview pattern** instead of a single halfway checkpoint:
+
+- **Multi-section pages**: finish one section → render → screenshot → show user → approve → next section
+- **Slide decks**: finish title + one content slide → show → approve → build remaining slides
+- **Animations**: finish storyboard → show → approve → build animation frames
+- **Prototypes**: finish one screen → show → approve → next screen
+
+The first section is the minimum viable preview. If the user rejects direction here, zero code is wasted.
+Use tweaks for variants rather than separate files.
+
+If the user rejects this direction (especially 3+ times or feedback keeps changing), STOP building more variations. Enter the Iteration Gate protocol instead — see `references/workflow.md`.
 
 **Checkpoint: Before saying "done"** — after your final edit, render the artifact yourself. Do not stop at code inspection. For multi-section pages, inspect every section you touched — not just the first screen or hero. For responsive work, inspect at least one desktop viewport and one narrow/mobile viewport. Use full-page screenshots plus targeted section screenshots when needed.
 
@@ -364,12 +413,39 @@ Use the plan to answer: focal point, emotional tone, visual flow, spacing strate
 - [ ] All vertical spacing is multiple of 8px
 - [ ] Using only 2-3 font weights (400/600/700)
 
-**7. Verify (Mandatory self-check)** — Announce `because=before-delivery`, then load `references/verification-protocol.md`. Run three-phase verification yourself after the final edit:
+**7. Verify (Mandatory self-check)** — Announce `because=before-delivery`, then load `references/verification-protocol.md` and `references/exit-conditions.md`. Run three-phase verification yourself after the final edit:
 - **Structural:** console errors, layout, responsiveness
 - **Visual:** screenshot review, design quality
 - **Design excellence:** hierarchy, spacing, color harmony, emotional fit
 
 Never deliver based on "it should be fine" reasoning. Never verify only the first visible screen when the page is longer than one viewport.
+
+If the fix loop repeats 3+ times on the same issue, or fixing one thing breaks another, enter the structured recovery protocol — see `references/failure-mode-handling.md`.
+
+**7a. User Review (new)** — After agent self-verify, present results to user for approval before delivery:
+
+1. **Show Phase 2 screenshot(s)** — the rendered artifact after final edit
+2. **Present exit conditions results** — checked items vs failed items from `references/exit-conditions.md`
+3. **Wait for user decision**
+
+Format:
+```markdown
+Design Review
+Exit conditions:
+- [x] No console errors
+- [x] Responsive at desktop + mobile
+- [ ] Body font >= 16px — currently 14px, needs bump
+- [x] Visual hierarchy clear
+- [screenshot: <path>]
+
+Approve for delivery?
+1) Approve, deliver it
+2) Adjust [specific item] — re-enters fix loop
+3) Rethink direction — back to Step 1 (Understand)
+```
+
+On "Adjust" → re-enter Verify (Step 7), fix the failed item, re-run all phases.
+On "Rethink" → enter Iteration Gate in `references/workflow.md`.
 
 **8. Deliver** — Minimal summary only:
 ```markdown

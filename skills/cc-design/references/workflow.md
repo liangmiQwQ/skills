@@ -243,7 +243,27 @@ If the platform lacks structured question UI, convert the same flow into one com
 
 ## After the Confirmation Steps
 
-Once the confirmation steps are answered, or once unanswered critical fields have been converted into explicit assumptions, do not move straight into delivery. Produce a visible plan, wait for approval, then build.
+Once the confirmation steps are answered, or once unanswered critical fields have been converted into explicit assumptions, do not move straight into delivery. First confirm direction understanding, then produce a visible plan, wait for approval, then build.
+
+### Direction Confirmation (new)
+
+Before writing the plan, summarize what you understand and ask the user to confirm:
+
+```markdown
+Based on our answers, I understand we're building:
+- Type: [landing page / deck / prototype / animation / ...]
+- Context: [brand reference / design system / codebase / scratch]
+- Audience: [target user]
+- Core action / purpose: [what the user should do]
+
+Is this direction correct?
+1) Yes, proceed to Plan
+2) No, adjust the type
+3) No, adjust the audience / purpose
+```
+
+Don't build yet if the user adjusts — re-confirm the adjusted fields, then proceed to plan.
+This step is skip-able for simple edits but **required for new tasks**.
 
 ### Planning Gate
 
@@ -292,7 +312,12 @@ After the plan is approved:
 - if you chose the question-first path, route with `question-first-delivery` plus the bundles locked by the route-shaping answers
 - if the user asked for critique/review/audit/score, route with `deep-design-review` before judging the work
 
-Show again halfway through. If the design direction is wrong, showing late means wasted work.
+Use a **per-section preview pattern** instead of a single halfway checkpoint:
+- For multi-section pages: finish one section → render → show user → approve → next section
+- For slide decks: finish title + one content slide → show → approve → build remaining slides
+- For animations: finish storyboard → show → approve → build animation frames
+- For prototypes: finish one screen → show → approve → next screen
+The first section is the minimum viable preview. If the user rejects direction here, zero code is wasted.
 
 ### Detail Polish
 
@@ -353,6 +378,31 @@ For every design, mentally go through these dimensions and pick 2-3 to give vari
 - **User's description is contradictory**: Point out the contradiction, let the user choose one direction.
 - **Task is too large to handle at once**: Break into steps, do the first step for the user to review, then proceed.
 - **Effect the user wants is technically difficult**: Explain the technical boundary clearly, provide alternatives.
+
+## Iteration Gate
+
+If the design direction is rejected 3+ times, or if feedback keeps changing direction each round:
+
+**STOP producing more variations. Do not produce a 4th direction.**
+
+### Assessment checklist
+
+1. Is the brief complete? Are audience, scope, output shape, and constraints all clear?
+2. Are we working from the right reference context (brand assets, design system, competitor references)?
+3. Has the user provided explicit, specific feedback on what is wrong?
+4. Is there a fundamental mismatch between what was requested and what was built?
+
+### Protocol
+
+1. Present the impasse to the user: "We have explored 3 directions and none matched. Let me make sure I understand the core requirement."
+2. Re-confirm the 6 blocking fields from workflow Step 1 (Understand): audience, output shape, scope, hard constraints, reference source, success criteria.
+3. If the brief has changed since the original spec, update it explicitly on the conversation. Do not build on the old brief.
+4. Propose **ONE** new direction with explicit reasoning about why it differs from the rejected three.
+5. If the user still cannot articulate what they want, provide 2-3 concrete visual references for them to react to — "pick the closest" is easier than "describe the ideal".
+
+**Never cycle through a 4th, 5th, or 6th variation without going back to the foundation.** Each additional wasted iteration erodes trust and consumes budget.
+
+See also: `references/design-red-flags.md` for human partner signals that indicate an imminent iteration gate.
 
 ## Summary Rules
 

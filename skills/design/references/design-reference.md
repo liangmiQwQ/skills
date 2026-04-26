@@ -240,7 +240,7 @@ For a multi-page or production UI, emit a short `DESIGN.md`-style summary before
 6. **Depth and Elevation** - shadow system or background-color-step system; describe each level
 7. **Do's and Don'ts** - 5 to 10 guardrails specific to this project, not generic rules
 8. **Responsive Behavior** - breakpoints, how navigation collapses, touch target minimums
-9. **Agent Prompt Guide** - a quick color reference (name: value pairs) + 3 to 5 example component prompts ready to paste into a follow-up request. Prompts must be specific enough to execute without further lookup: every value, every radius, every letter-spacing, every weight inlined. Example standard (values are illustrative, use the project's own tokens): "Create a hero on `{bg-canvas}`, headline at 48px weight 600, line-height 1.00, letter-spacing -0.022em, color `{text-primary}`, CTA at `{accent}` with `{btn-radius}` radius" — that level of specificity, not "hero with primary color and CTA button"
+9. **Agent Prompt Guide** - a quick color reference (name: value pairs) + 3 to 5 example component prompts ready to paste into a follow-up request. Prompts must be specific enough to execute without further lookup: every value, every radius, every letter-spacing, every weight inlined. Example standard (values are illustrative, use the project's own tokens): "Create a hero on `{bg-canvas}`, headline at 48px weight 600, line-height 1.00, letter-spacing -0.022em, color `{text-primary}`, CTA at `{accent}` with `{btn-radius}` radius"; that level of specificity, not "hero with primary color and CTA button"
 
 For a single component or quick prototype, skip this. The three-line thesis in SKILL.md is sufficient.
 

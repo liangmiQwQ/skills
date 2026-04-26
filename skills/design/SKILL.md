@@ -3,7 +3,7 @@ name: design
 description: "Produces distinctive, production-grade UI for any component, page, or visual interface. Handles screenshot-driven iteration when the user sends an image with a visual complaint. Not for backend logic or data pipelines."
 when_to_use: "设计, 做页面, 做组件, 不好看, 不和谐, 样式, 前端, UI, build page, create component, make it look good, style, design, screenshot with visual complaint"
 metadata:
-  version: "3.14.0"
+  version: "3.15.0"
 ---
 
 # Design: Build It With a Point of View
@@ -21,9 +21,10 @@ Activate when the user sends a screenshot or image alongside a complaint ("这�
 
 1. Read the screenshot. State the problem in one sentence: what specifically looks wrong (spacing, contrast, alignment, typeface, color).
 2. Wait for the user to confirm the diagnosis before touching code.
-3. Find the responsible code: grep for the component name or class, read the actual file. Do not rely on memory or assumptions about file location.
-4. Apply the minimal fix. One component, one issue.
-5. Ask the user to verify in the browser. Do not hand off without this step.
+3. If the diagnosis is a known UX problem (split-view sync, infinite scroll, virtualised list, sticky header), spend one round surveying how 2-3 mature products in the same category solve it before writing code. Cite what each does. Skip only if the fix is purely cosmetic (color, spacing, copy).
+4. Find the responsible code: grep for the component name or class, read the actual file. Do not rely on memory or assumptions about file location.
+5. Apply the minimal fix. One component, one issue.
+6. Ask the user to verify in the browser. Do not hand off without this step.
 
 **Boundary**: if the fix requires changing 3 or more components, or if it reveals a direction problem rather than a specific bug, pause and run the full direction lock before continuing.
 
@@ -111,6 +112,7 @@ Give at least 3 variations, spread across genuinely different dimensions:
 | Light-mode app: white panel on white background, visually indistinguishable | Adjacent nested surfaces must differ visually. Either background step (sidebar vs main ≥4% lightness difference) or shadow minimum `0 1px 3px rgba(0,0,0,0.10)`. |
 | Added an extra section because it "felt incomplete" | Ask first. The user knows their audience; you do not. If you think more content would help, surface the suggestion as a question, do not ship it unilaterally. |
 | Tried to generate a logo, app icon, or brand illustration | Icons, naming, and brand identity require human taste and judgment. Use a labeled placeholder and ask the user to supply the real asset. |
+| Moved tab bar / sidebar to a new edge, neighbours overlapped or resized awkwardly | Repositioning a chrome element changes the bounding box of every neighbour. After the move, re-measure the safe area against window controls (traffic lights on macOS), title, and any floating overlays. Verify at narrowest supported width. |
 
 ## Handoff
 

@@ -3,7 +3,7 @@ name: hunt
 description: "Finds root cause of errors, crashes, unexpected behavior, and failing tests before applying any fix. Not for code review or new features."
 when_to_use: "排查, 查查, 报错, 崩溃, 不工作, 不对, 跑不通, debug, why broken, not working, what's wrong, fix error, stack trace"
 metadata:
-  version: "3.14.0"
+  version: "3.15.0"
 ---
 
 # Hunt: Diagnose Before You Fix
@@ -79,6 +79,7 @@ Add one targeted instrument: a log line, a failing assertion, or the smallest te
 | Race condition diagnosed as a stale-state bug | For timing-sensitive issues, inspect event timestamps and ordering before state |
 | Reproduced locally but failed in CI | Align the environment first (runtime version, env vars, timezone), then chase the code |
 | Stack trace points deep into a library | Walk back 3 frames into your own code; the bug is almost always there, not in the dependency |
+| Worked when launched from app, broke when opened via file association / drag-drop / deep link / external proxy | Reproduce using the exact entry point the user described. App-internal init differs from cold-launch-with-file init; state may not be ready when the document arrives. |
 
 ## Outcome
 

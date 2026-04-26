@@ -3,7 +3,7 @@ name: think
 description: "Turns rough ideas into approved plans with validated structure before writing code. Covers new features, architecture decisions, and value judgments about whether to build, keep, or remove something. Not for bug fixes or small edits."
 when_to_use: "出方案, 给方案, 深入分析, 怎么设计, 用什么方案, 判断一下, 有没有必要, 值不值得, what's the best approach, plan this, how should I, should we keep this"
 metadata:
-  version: "3.14.0"
+  version: "3.15.0"
 ---
 
 # Think: Design and Validate Before You Build
@@ -22,9 +22,10 @@ Activate when: the user wants to fix something rather than build something, the 
 **Flow:**
 
 1. One recommended fix: 2-3 sentences. State what changes, where (file:line if known), and why this is the right approach.
-2. Which files are involved. If more than 5 files, note this explicitly.
-3. One risk: what could go wrong with this fix and how to verify it didn't.
-4. Wait for one round of approval. Then stop; implementation starts when the user requests it.
+2. Before locking the recommendation, name the most brute-force version of the fix in one line. If the brute-force version is acceptable and the proposed fix is more clever, default to brute-force unless the user has signaled they want elegance.
+3. Which files are involved. If more than 5 files, note this explicitly.
+4. One risk: what could go wrong with this fix and how to verify it didn't.
+5. Wait for one round of approval. Then stop; implementation starts when the user requests it.
 
 **Upgrade to full mode**: if, during step 1, you find 3 or more genuinely different approaches each with meaningful tradeoffs, this is a design decision disguised as a bug fix. Tell the user and switch to the full flow.
 
@@ -46,6 +47,7 @@ Activate when: the user wants to judge whether something should exist, be kept, 
 
 - Confirm the working path: `pwd` or `git rev-parse --show-toplevel`. Never assume `~/project` and `~/www/project` are the same.
 - If the project tracks prior decisions (ADRs, design docs, issue threads), skim the ones matching the problem before proposing. Skip if none exist.
+- If the plan involves a default value, env var, or config field, open the project's actual config file (e.g. `pake.json`, `tauri.conf.json`, `package.json`, `.env`) and lift the live value. Never quote a default from memory or docs.
 
 ## Check for Official Solutions First
 
@@ -124,5 +126,6 @@ Pressure-test:
 - **Page budget**: Given target page count, does each section get appropriate space?
 - **Hierarchy clarity**: Can a reader skim headings and understand the argument?
 - **Content-to-chrome ratio**: Is too much space spent on decoration vs substance?
+- **Voice consistency**: name the single metaphor (expert, peer, junior, tool) and trace it through every section header. Mid-doc metaphor switches read as authorial drift; fix at outline time, not after writing.
 
 Output: Approved section structure with page allocation, before any writing begins.

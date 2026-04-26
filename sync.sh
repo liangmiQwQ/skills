@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 ska() {
-  skills add "$@" -y -a claude-code
+  npx skills add "$@" -y -a claude-code
 }
 
 # ====== SKILLS ADDING AREA BEGIN =======

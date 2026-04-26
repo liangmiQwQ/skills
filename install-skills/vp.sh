@@ -11,7 +11,7 @@ cp "$PKG" "$BACKUP"
 pnpm install -D vite-plus
 
 # Run experimental sync
-skills experimental_sync -y --agent claude-code
+cp -r node_modules/vite-plus/skills/* .claude/skills/
 
 # Revert package.json and reinstall
 cp "$BACKUP" "$PKG"

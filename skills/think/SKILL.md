@@ -3,13 +3,12 @@ name: think
 description: "Turns rough ideas into approved plans with validated structure before writing code. Covers new features, architecture decisions, and value judgments about whether to build, keep, or remove something. Not for bug fixes or small edits."
 when_to_use: "出方案, 给方案, 深入分析, 怎么设计, 用什么方案, 判断一下, 有没有必要, 值不值得, what's the best approach, plan this, how should I, should we keep this"
 metadata:
-  version: "3.15.0"
+  version: "3.16.0"
 ---
 
 # Think: Design and Validate Before You Build
 
 Prefix your first line with 🥷 inline, not as its own paragraph.
-
 
 Turn a rough idea into an approved plan. No code, no scaffolding, no pseudo-code until the user approves.
 
@@ -17,31 +16,19 @@ Give opinions directly. Take a position and state what evidence would change it.
 
 ## Lightweight Mode
 
-Activate when: the user wants to fix something rather than build something, the problem is already defined, and the only open question is "how to fix it."
+Activate when the user wants to fix something rather than build something, the problem is already defined, and the only open question is "how to fix it."
 
-**Flow:**
+Give one recommended fix in 2-3 sentences: what changes, where (file:line if known), and why. Name the brute-force version in one line first; default to it unless the user wants elegance. List involved files, flag explicitly if more than 5. State one risk. Wait for approval before implementing.
 
-1. One recommended fix: 2-3 sentences. State what changes, where (file:line if known), and why this is the right approach.
-2. Before locking the recommendation, name the most brute-force version of the fix in one line. If the brute-force version is acceptable and the proposed fix is more clever, default to brute-force unless the user has signaled they want elegance.
-3. Which files are involved. If more than 5 files, note this explicitly.
-4. One risk: what could go wrong with this fix and how to verify it didn't.
-5. Wait for one round of approval. Then stop; implementation starts when the user requests it.
-
-**Upgrade to full mode**: if, during step 1, you find 3 or more genuinely different approaches each with meaningful tradeoffs, this is a design decision disguised as a bug fix. Tell the user and switch to the full flow.
+Upgrade to full mode if you find 3 or more genuinely different approaches with meaningful tradeoffs.
 
 ## Evaluation Mode
 
-Activate when: the user wants to judge whether something should exist, be kept, exposed, or removed. Typical triggers: "判断一下", "有没有必要", "值不值得", "该不该保留", "should we keep this", "is this worth it".
+Activate when the user wants to judge whether something should exist, be kept, exposed, or removed. Typical triggers: "判断一下", "有没有必要", "值不值得", "should we keep this", "is this worth it".
 
-**Flow:**
+State the evaluation target and what kind of judgment is needed (value, risk, or tradeoff). Take a current-state snapshot: what it does, who uses it, what depends on it; grep and read before opining. Give one recommended conclusion with rationale; no options list. If the conclusion is "remove" or "major rework", list impact scope: files, dependents, migration cost. Wait for confirmation before acting.
 
-1. State the evaluation target and what kind of judgment the user is asking for (value, risk, or tradeoff).
-2. Current-state snapshot: what this thing does today, who uses it, what depends on it. Grep and read before opining.
-3. One recommended conclusion with rationale. No options list. Take a position.
-4. If the conclusion is "remove" or "major rework", list the impact scope: files, dependents, migration cost.
-5. Wait for confirmation before acting.
-
-**Distinction from Lightweight Mode**: Lightweight answers "how to fix it" (method choice). Evaluation answers "should it exist" (value judgment). If the user says "fix this, then judge whether we need it", run Lightweight first, Evaluation second.
+Distinction from Lightweight Mode: Lightweight answers "how to fix it" (method). Evaluation answers "should it exist" (value judgment).
 
 ## Before Reading Any Code
 
@@ -58,6 +45,8 @@ Before proposing custom implementations, search for framework built-ins, officia
 Give one recommended approach with rationale. Include effort, risk, and what existing code it builds on. Mention one alternative only if the tradeoff is genuinely close (>40% chance the user would prefer it). Always include one minimal option.
 
 For the recommendation, identify the most fragile assumption (premise collapse) and state it explicitly: "This plan assumes X. If X does not hold, Y happens." If the assumption is load-bearing and fragile, deform the design to survive its failure.
+
+**Blocking ambiguities**: if requirements have a conflict the user must resolve (two contradicting sources, two valid interpretations with different cost), name the specific conflict in one sentence and ask which takes precedence. Do not silently pick.
 
 **Additional attack angles** (run only when the plan involves external dependencies, high concurrency, or data migration):
 
@@ -116,16 +105,3 @@ Plan approved. To implement: describe what you want built, or say "implement thi
 ```
 
 Keep it concise (2-3 sentences max). The user decides when to start implementation.
-
-## Document Architecture Mode
-
-Activate when: "plan a white paper", "structure a portfolio", "document outline", or pre-writing planning
-
-Pressure-test:
-- **Narrative arc**: Does the section order build momentum or scatter attention?
-- **Page budget**: Given target page count, does each section get appropriate space?
-- **Hierarchy clarity**: Can a reader skim headings and understand the argument?
-- **Content-to-chrome ratio**: Is too much space spent on decoration vs substance?
-- **Voice consistency**: name the single metaphor (expert, peer, junior, tool) and trace it through every section header. Mid-doc metaphor switches read as authorial drift; fix at outline time, not after writing.
-
-Output: Approved section structure with page allocation, before any writing begins.

@@ -6,6 +6,7 @@ The runtime contract lives in `SKILL.md`:
 - new ambiguous tasks start with structured step-by-step confirmation
 - richly specified briefs can skip most clarification, but still require a visible plan
 - follow-up iterations and minor fixes act directly unless scope changes
+- update checks and design context management are handled by plugin hooks (`hooks/session-start.sh`, `hooks/pre-compact-preserve.sh`, `hooks/stop-cleanup.sh`) rather than inline SKILL.md instructions
 
 Use this file to structure the step-by-step confirmation flow and the follow-through after that decision has already been made.
 
@@ -77,18 +78,21 @@ If you are unsure which path applies, default to the next blocking confirmation 
 
 ## The Art of Asking Questions
 
-Ask **in steps**, not as a long unstructured dump.
+On Claude Code, **MUST** use `AskUserQuestion` for every confirmation step. This is mandatory — never output plain text questions when structured UI is available.
 
 Default target:
 - 3 to 4 confirmation steps
 
-Preferred shape:
-- 1 blocking question per step
-- 2 to 4 short options
-- optional freeform when the platform supports it
+`AskUserQuestion` shape (Claude Code — required):
+- 1 blocking question per step (`question` field)
+- short header, max 12 chars (`header` field)
+- 2 to 4 options, each with `label` (1-5 words) and `description` (1 sentence) (`options` field)
+- `multiSelect: true` only when multiple answers apply
 
-Fallback:
-- if the platform has no structured question UI, compress these steps into one compact batch message
+Text fallback (Codex only — do NOT use on Claude Code):
+- 1 blocking question per step
+- 2 to 4 short numbered options
+- compress into one compact batch message when platform lacks structured UI
 
 After the steps:
 - stop once blocking fields are resolved
@@ -239,7 +243,7 @@ Plan
 Approve this plan, or tell me what to change before I build.
 ```
 
-If the platform lacks structured question UI, convert the same flow into one compact text block.
+On Claude Code, present the plan approval as an `AskUserQuestion` call (see SKILL.md). On Codex, output the plan as a numbered text block.
 
 ## After the Confirmation Steps
 

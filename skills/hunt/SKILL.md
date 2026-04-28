@@ -3,13 +3,12 @@ name: hunt
 description: "Finds root cause of errors, crashes, unexpected behavior, and failing tests before applying any fix. Not for code review or new features."
 when_to_use: "排查, 查查, 报错, 崩溃, 不工作, 不对, 跑不通, debug, why broken, not working, what's wrong, fix error, stack trace"
 metadata:
-  version: "3.15.0"
+  version: "3.17.0"
 ---
 
 # Hunt: Diagnose Before You Fix
 
 Prefix your first line with 🥷 inline, not as its own paragraph.
-
 
 A patch applied to a symptom creates a new bug somewhere else.
 
@@ -18,30 +17,11 @@ A patch applied to a symptom creates a new bug somewhere else.
 
 Name a specific file, function, line, or condition. "A state management issue" is not testable. "Stale cache in `useUser` at `src/hooks/user.ts:42` because the dependency array is missing `userId`" is testable. If you cannot be that specific, you do not have a hypothesis yet.
 
-## Rationalization Watch
+## Diagnosis Signals
 
-When these surface, stop and re-examine:
+Good progress: a log line matches the hypothesis, you can predict the next error before running it, you understand the propagation path from root cause to symptom, you can write a test that fails on the old code. At each of these signals, find one more independent piece of evidence before committing.
 
-| What you're thinking | What it actually means | Rule |
-|---|---|---|
-| "I'll just try this one thing" | No hypothesis, random-walking | Stop. Write the hypothesis first. |
-| "I'm confident it's X" | Confidence is not evidence | Run an instrument that proves it. |
-| "Probably the same issue as before" | Treating a new symptom as a known pattern | Re-read the execution path from scratch. |
-| "It works on my machine" | Environment difference IS the bug | Enumerate every env difference before dismissing. |
-| "One more restart should fix it" | Avoiding the error message | Read the last error verbatim. Never restart more than twice without new evidence. |
-
-## Progress Signals
-
-When these appear, the diagnosis is moving in the right direction:
-
-| What you're thinking | What it means | Next step |
-|---|---|---|
-| "This log line matches the hypothesis" | Positive evidence found | Find one more independent piece of evidence to cross-validate |
-| "I can predict what the next error will be" | Mental model is forming | Run the prediction; if it matches, the model is correct |
-| "Root cause is in A but symptoms appear in B" | Propagation path understood | Trace the call chain from A to B and confirm each link |
-| "I can write a test that would fail on the old code" | Hypothesis is specific and testable | Write the test before applying the fix |
-
-Do not claim progress without observable evidence matching at least one of these signals.
+Rationalization warning: "I'll just try this" means no hypothesis, write it first. "I'm confident" means run an instrument that proves it. "Probably the same issue" means re-read the execution path from scratch. "It works on my machine" means enumerate every env difference before dismissing. "One more restart" means read the last error verbatim; never restart more than twice without new evidence.
 
 ## Hard Rules
 
@@ -55,15 +35,9 @@ Do not claim progress without observable evidence matching at least one of these
 
 ## Bisect Mode
 
-Activate when the symptom is "used to work, now broken" or "broke after an update". Random-walking forward from the current state wastes context and produces random fixes.
+Activate when the symptom is "used to work, now broken" or "broke after an update".
 
-**Flow:**
-
-1. Find `last-known-good`: use the most recent tag where the behavior was correct (`git tag --sort=-version:refname | head -5`). Do not use a date or a raw SHA as the anchor.
-2. Define a pass/fail test command before starting. The command must be runnable non-interactively and produce an unambiguous exit code. Write it down once; reuse it at every step.
-3. Run `git bisect start`, `git bisect bad` (current), `git bisect good <tag>`. Let bisect drive; do not jump ahead.
-4. Context conservation: do not re-read large files at each step. Read once, note the key function or line, reference from notes. Bisect output is the state; keep it in the terminal, not in context.
-5. When bisect names the culprit commit: read only that commit's diff, not surrounding history. Identify the specific line that introduced the regression.
+Find the last-known-good tag (`git tag --sort=-version:refname | head -5`), define a non-interactive pass/fail test command, run `git bisect start / bad / good <tag>`, let bisect drive without jumping ahead, read large files once and reference from notes rather than re-reading at each step, and when bisect names the culprit commit read only that diff to identify the specific line that introduced the regression.
 
 ## Confirm or Discard
 
@@ -142,3 +116,7 @@ Diagnosis checklist:
 - **Browser print CSS**: Confirm `@media print` rules, `@page` margins, orphan/widow control
 
 Static analysis first (CSS review), then reproduce if needed.
+
+## IME / Unicode Issues
+
+For input method, character rendering, or text encoding bugs (IME state, cursor drift, emoji splitting, composition events), check `references/ime-unicode.md` first before forming a hypothesis.

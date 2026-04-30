@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "oxfmt": "latest",
-    "skills": "latest",
-    "vite-plus": "^0.1.20"
+    "skills": "latest"
   }
 }

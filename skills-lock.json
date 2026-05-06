@@ -28,7 +28,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/design/SKILL.md",
-      "computedHash": "042a8a2629710c66ce2945deb1aa570c0211b92955f7929d9d18ca1a16812ae1"
+      "computedHash": "b73e52ab9123bfe98998686c8ad4f117cb3282390fe93dddb5dae9158cad6b64"
     },
     "find-skills": {
       "source": "vercel-labs/skills",

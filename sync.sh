@@ -15,8 +15,6 @@ ska slidevjs/slidev
 ska antfu/skills
 ska ZeroZ-lab/cc-design
 
-sh install-skills/vp.sh # For vp skills
-
 # ====== SKILLS ADDING AREA ENDED =======
 
 rm -rf skills/*

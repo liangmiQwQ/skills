@@ -70,7 +70,7 @@ See `references/design-iron-law.md` for the full Iron Law definition. In short:
 
 Before stating anything as fact about a brand, product, price, release status, or spec — search first. This is non-negotiable.
 
-Hard flow: `WebSearch → product-facts.md (if exists) → proceed`
+Hard flow: `WebSearch → proceed`
 
 Cost comparison: 10 seconds of search << 2 hours of rework after delivering wrong information.
 
@@ -235,13 +235,15 @@ If the same bundle is already in context, do not silently skip it. Say:
 Load: because=<reason> already_loaded=<comma-separated paths>
 ```
 
+**P4: Aggressive Interaction for Knowledge Content.** When output is knowledge-focused (explanations, architectures, comparisons, tutorials, analysis), default to assuming interaction and animation are needed. Scan content for 10 dynamic cognitive structures: process, change, causation, hierarchy, variables, paths, feedback, evolution, state transitions, decision trade-offs (see `knowledge-artifact-spec.md` Section 3). If any is present, generate at least one **primary** animation/interaction module that carries the core explanation task. The Static-only Ban applies to 10 content categories (see `knowledge-artifact-spec.md` Section 4). Do NOT apply P4 to brand/marketing output (landing pages, product pages, pitch decks) — those follow normal design principles.
+
 Use short, stable reasons such as `all-design-tasks`, `react-prototype`, `question-first-delivery`, `before-animation`, `before-delivery`. `load-manifest.json` is the machine-readable source of truth for bundle contents, `scripts/generate-bundle-catalog.mjs` generates the catalog for semantic matching, and `scripts/resolve-load-bundles.mjs` remains the keyword-based fallback. Organize runtime bundles into three groups: base-required bundles (`基础必载`) for every design task, conditionally required bundles (`条件命中后必载`) for matched `taskTypes` and `checkpoints`, and truly optional inspirations (`真正可选`) for case-study-only reference. The routing table below is the human summary.
 
 ---
 
 ## Routing Table
 
-Use a two-stage route. Stage 1: always load `all-design-tasks` (`基础必载`) for every design task. If the task is new or underspecified, also load `question-first-delivery` and ask the route-shaping questions below before selecting more bundles. Stage 2: map those answers to conditionally required bundles (`条件命中后必载`), then use semantic matching only to supplement any remaining unlocked `taskTypes` or `optionalInspirations`. For tasks not in the table, default to `all-design-tasks`, ask the route-shaping questions, and set the `question-first-delivery` checkpoint when the task is still ambiguous.
+Use a two-stage route. Stage 1: always load `all-design-tasks` (`基础必载`) for every design task. If the task is new or underspecified, also load `question-first-delivery` and ask the route-shaping questions below before selecting more bundles. **Skip `question-first-delivery` when the brief already contains enough information to route** (audience + output shape + reference/constraint are all stated or clearly implied). Stage 2: map those answers to conditionally required bundles (`条件命中后必载`), then use semantic matching only to supplement any remaining unlocked `taskTypes` or `optionalInspirations`. For tasks not in the table, default to `all-design-tasks`, ask the route-shaping questions, and set the `question-first-delivery` checkpoint when the task is still ambiguous.
 
 | Task type | Load reference | Copy template | Verify focus |
 |-----------|---------------|---------------|-------------|
@@ -268,15 +270,20 @@ Use a two-stage route. Stage 1: always load `all-design-tasks` (`基础必载`) 
 | Variant exploration | `references/tweaks-system.md` | `templates/design_canvas.jsx` | Tweaks panel visible |
 | Landing page | `references/starter-components.md` + `references/design-patterns.md` | `templates/browser_window.jsx` (optional) | Responsive layout |
 | Animation / motion | `references/animation-best-practices.md` + `references/animations.md` | `templates/animations.jsx` | Timeline playback + __ready signal |
-| Animation pitfalls | `references/animation-pitfalls.md` | — | No common failures |
 | Mobile mockup | `references/starter-components.md` + `references/react-setup.md` | `templates/ios_frame.jsx` or `android_frame.jsx` | Bezel rendering — **MUST use template, never handwrite Dynamic Island/status bar** |
+| Desktop mockup | `references/starter-components.md` + `references/react-setup.md` + `references/responsive-design.md` | `templates/macos_window.jsx` | Desktop window rendering |
+| Form design | `references/form-design.md` + `references/interaction-design-theory.md` | — | Form UX + interaction patterns |
 | Interactive prototype | `references/interactive-prototype.md` + `references/react-setup.md` | Choose frame template | Navigation works |
-| **Interactive explainer** | `references/explainer-interaction-patterns.md` + `references/explainer-node-graph-visuals.md` + `references/react-setup.md` | `templates/flow_explainer.jsx` | Step-by-step playback + hover/tap interaction + responsive |
+| **Interactive explainer -- Flow** | `references/explainer-interaction-patterns.md` + `references/explainer-node-graph-visuals.md` + `references/react-setup.md` | `templates/flow_explainer.jsx` | Step-by-step playback + hover/tap interaction + responsive |
+| **Interactive explainer -- Compare** | `references/explainer-interaction-patterns.md` + `references/explainer-node-graph-visuals.md` + `references/react-setup.md` | `templates/compare_explainer.jsx` | Overview + dimension switching + hover/tap detail + dual encoding + responsive |
+| **Interactive explainer -- Decision Tree** | `references/explainer-interaction-patterns.md` + `references/explainer-node-graph-visuals.md` + `references/react-setup.md` | `templates/decision_tree.jsx` | Full-tree + hover path highlighting + conclusion emphasis + responsive |
+| **Knowledge artifact** | `references/knowledge-artifact-spec.md` + `references/information-design-theory.md` + `references/interaction-design-theory.md` | `flow_explainer.jsx` or `animations.jsx` (by animation intensity) | Interaction density (Level 0-3) + animation intensity (A0-A4) + Static-only Ban + cognitive loop |
 | Wireframe / low-fi | `references/frontend-design.md` | `templates/design_canvas.jsx` | Layout structure visible |
 | Design system creation | `references/design-system-creation.md` | — | Tokens apply + coherence |
 | No design system provided | `references/frontend-design.md` | Choose template | Aesthetic coherence |
 | Video export | `references/video-export.md` | — | ffmpeg available + correct specs |
 | Audio design | `references/audio-design-rules.md` + `references/sfx-library.md` | — | Dual-track + loudness ratio |
+| Data visualization | `references/data-visualization.md` + `references/color-theory.md` | — | Chart/graph design |
 | PDF export | `references/platform-tools.md` | — | File generated |
 | Scene output specs | `references/scene-templates.md` | — | Dimensions + format match |
 
@@ -284,18 +291,20 @@ Use a two-stage route. Stage 1: always load `all-design-tasks` (`基础必载`) 
 
 Ask only until routing is locked. These questions change bundle selection:
 
-1. **Output type** — page / deck / clickable prototype / animation / design system / critique / export target
+1. **Output type** — page / deck / clickable prototype / animation / design system / critique / export target / knowledge artifact
 2. **Task state** — new task / localized edit / approved follow-up
 3. **Available context** — design system / codebase / screenshots / brand reference / no reference
 4. **Interaction or delivery constraints** — interactive / iOS / Android / PDF / PPTX / video / none
 5. **Primary design risk** — layout / typography / color / information hierarchy / interaction / brand tone
+6. **Content type** (only for knowledge artifact / interactive explainer) — concept explanation / technical architecture / comparison or decision / teaching or analysis
 
 Map answers explicitly before semantic matching:
 
-- **Output type** → `landing-page`, `slide-deck`, `interactive-prototype`, `interactive-explainer`, `animation-motion`, `design-system-creation`, `deep-design-review`, `editable-pptx-export`, `pdf-export`, `video-export`
+- **Output type** → `landing-page`, `slide-deck`, `interactive-prototype`, `interactive-explainer`, `knowledge-artifact`, `animation-motion`, `design-system-creation`, `deep-design-review`, `editable-pptx-export`, `pdf-export`, `video-export`
 - **Task state** → new or underspecified work includes `question-first-delivery`; localized edits and approved follow-ups skip it unless scope changes
 - **Available context** → brand reference/clone adds `brand-style-clone`; asset sourcing adds `brand-asset-acquisition`; no references adds `no-design-system`
-- **Interaction/device/export constraints** → "explain process/flow" + "interactive" → `interactive-explainer`; "clickable prototype" + "product demo" → `interactive-prototype`; iOS adds `mobile-mockup` + `before-ios-mockup`; PDF/PPTX/video adds the matching export task type + `before-export`
+- **Interaction/device/export constraints** → "explain process/flow" + "interactive" → `interactive-explainer` (flow); "对比/比较/versus 两个方案" + "交互" → `interactive-explainer` (compare); "决策树/选型/技术选型" + "交互" → `interactive-explainer` (decision_tree); "分层架构/层次" + "交互" → `interactive-explainer` (currently flow, v0.3 will add layer); "HTML 结构化回复 / 视觉化解释 / 交互式说明 / 知识产物 / explorable explanation" → `knowledge-artifact`; "可点击原型" + "产品演示" → `interactive-prototype` (not explainer); "图表/数据展示" → `data-visualization` (not explainer); iOS adds `mobile-mockup` + `before-ios-mockup`; PDF/PPTX/video adds the matching export task type + `before-export`
+- **Content type** → concept explanation → `knowledge-artifact` (A1-A2, Level 2, Tabs+Accordion); technical architecture → `knowledge-artifact` (A2-A3, Level 2, layer switching+module click); comparison/decision → `knowledge-artifact` (A2, Level 2, dimension switching+scorecard) or `interactive-explainer` (compare); teaching/analysis → `knowledge-artifact` (A2-A3, Level 2-3, Stepper+self-test+simulation)
 - **Primary design risk** → layout adds `layout-problems`; typography adds `typography-problems`; color adds `color-problems`; information hierarchy adds `information-architecture`; interaction adds `interaction-problems`; brand tone adds `brand-tone`
 
 ## Workflow

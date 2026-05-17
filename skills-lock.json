@@ -34,7 +34,7 @@
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "skillPath": "skills/find-skills/SKILL.md",
-      "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
+      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
     },
     "frontend-design": {
       "source": "anthropics/skills",
@@ -46,7 +46,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "921b9c168e29cf412f0325ced684d65deaf16d5c8c89c85002fea22f2ff3f435"
+      "computedHash": "3dcebc641b962f9e3ef83ead200919bf9f9f04459a4ac4d73f2de0f83182d38d"
     },
     "nuxt": {
       "source": "antfu/skills",

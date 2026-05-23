@@ -30,7 +30,7 @@ function createUserService(db: DB) {
 }
 ```
 
-Good — just a function when there's no shared state:
+Best — just a function when there's no shared state:
 
 ```ts
 async function getUser(db: DB, id: string) {
@@ -72,15 +72,13 @@ Avoid barrel `index.ts` re-exports unless the package has a genuine public API b
 ## Comment examples
 
 ```ts
-// Not using Promise.all — the second request depends on a side
-// effect from the first, not just its return value.
+// Not using Promise.all — the second request depends on a side effect from the first, not just its return value.
 await stepOne();
 await stepTwo();
 ```
 
 ```ts
-// Delay is intentional: the upstream service rejects requests
-// that arrive within 100ms of each other.
+// Delay is intentional: the upstream service rejects requests that arrive within 100ms of each other.
 await sleep(150);
 ```
 

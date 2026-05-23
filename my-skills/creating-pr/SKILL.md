@@ -41,7 +41,7 @@ For projects with `.github/workflows`, we do not need to describe `Validation` p
 
 Add a line `🤖 Generated with [The Agent Tool's Name]` in the bottom of the description.
 
-A good PR description should like this, comments should be removed in practice. Paragraphs inside `CORE DESCRIPTION` part can be repeated as needed.
+A good PR description should like this, comments should be removed in practice. Paragraphs inside `CORE DESCRIPTION` part can be repeated or skipped as needed.
 
 ```markdown
 Close #1 <!-- If there is a linked issue -->

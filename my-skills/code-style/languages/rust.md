@@ -43,11 +43,14 @@ for _ in 0..3 {
 
 Never write `/// Returns the foo` on a function named `get_foo` — it adds nothing and will drift out of sync.
 
-## Avoid chained calls
+## Panic functions and unsafe
 
-Prefer `match`, `if ... else ...`, `if let`, `let ... else ...` over chained `and_then`, `map`, `map_or_else`, `filter`, etc. because the former is more readable and maintainable.
+You are encouraged to use `unsafe rust` and panic functions as using `unsafe`can optimize performance, and using a panic function like `unwrap`, `unreachable!()` can simplify the code.
 
-Especially for long chains, it's hard to read and debug.
+However, you must add `// SAFETY` comments for unsafe rust, even for panic function calls.
 
-It doesn't means you can never use functional style. It means we should use them sparingly.
-Remember, Everything is done for the sake of code readability.
+```rust
+let some = Some(1);
+// SAFETY: `some` must be `Some(usize)`.
+println("{}", some.unwrap())
+```

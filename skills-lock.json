@@ -42,6 +42,12 @@
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
     },
+    "global-projects": {
+      "source": "liangmiQwQ/mo",
+      "sourceType": "github",
+      "skillPath": "skills/global-projects/SKILL.md",
+      "computedHash": "e6b9fde95e524c7b0d11d8496861c6503a568b648715e43ba641087fa6b69964"
+    },
     "hunt": {
       "source": "tw93/Waza",
       "sourceType": "github",

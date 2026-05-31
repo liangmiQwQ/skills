@@ -3,7 +3,7 @@ name: finding-on-github
 description:
   If you are now working with with a opensource project while I'm not a maintainer or author (can easily know it by resolving the path)
 
-  Load this skill when I ask things like `is there a bug?` and when you sense I am willing to make / fix it. Load this skill when you are modifying an existing feature without a certain reason
+  Load this skill when I ask things like `is there a bug?` and when you sense I am willing to contribute to it, or when I am confirming whether there is a problem. Load this skill when you are modifying an existing feature without a certain reason
 ---
 
 # Finding on GitHub

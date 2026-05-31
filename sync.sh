@@ -14,6 +14,7 @@ ska vuejs-ai/skills
 ska slidevjs/slidev
 ska antfu/skills
 ska ZeroZ-lab/cc-design
+ska liangmiQwQ/mo
 
 # ====== SKILLS ADDING AREA ENDED =======
 

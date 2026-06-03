@@ -11,7 +11,7 @@
       "source": "ZeroZ-lab/cc-design",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "8aea007deaab8fca54c21619385464c56a57814528e36122bd17634875082add"
+      "computedHash": "2677de0ef5139ffd3a4ecf9523975a85b3833af5662699171b10e06eb0ddda1a"
     },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
@@ -28,7 +28,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/design/SKILL.md",
-      "computedHash": "965020cf9526d3e8e6ea5f48f7f82f446cdddc3d4861f5c0ea024eea801ad070"
+      "computedHash": "a8a1d189fa2be70f662edc22971214d5c4268270cbc9210735990dcd3e9c77b4"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -52,7 +52,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "823df330d6c1bdfb8b3c6ab9458441cd10d1684ded9f1d80a13a444df8f4bbbd"
+      "computedHash": "a168eac7e409ccda4eb09707b1cd2e5bdf075e8e4ef8c646b5743aac3629776d"
     },
     "nuxt": {
       "source": "antfu/skills",

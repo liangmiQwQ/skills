@@ -18,7 +18,8 @@
         "references/design-red-flags.md",
         "references/failure-mode-handling.md",
         "references/design-adr.md",
-        "references/exit-conditions.md"
+        "references/exit-conditions.md",
+        "references/typography-spacing-quick-ref.md"
       ]
     }
   },
@@ -587,7 +588,8 @@
       "references": [
         "references/workflow.md",
         "references/design-context.md",
-        "references/junior-designer-mode.md"
+        "references/junior-designer-mode.md",
+        "references/question-first-delivery-examples.md"
       ]
     },
     "before-animation": {
@@ -643,7 +645,8 @@
       "description": "Presentation and pitch deck case studies for inspiration, 演示文稿案例参考",
       "references": [
         "references/case-studies/presentations/keynote-style.md",
-        "references/case-studies/presentations/pitch-deck-example.md"
+        "references/case-studies/presentations/pitch-deck-example.md",
+        "references/case-studies/presentations/data-story.md"
       ]
     },
     "product-page-case-studies": {
@@ -656,7 +659,14 @@
     },
     "mobile-case-studies": {
       "description": "Mobile app case studies for inspiration, 移动端应用案例参考",
-      "references": ["references/case-studies/mobile-apps/ios-onboarding.md"]
+      "references": [
+        "references/case-studies/mobile-apps/ios-onboarding.md",
+        "references/case-studies/mobile-apps/android-dashboard.md"
+      ]
+    },
+    "creative-works-case-studies": {
+      "description": "Award-winning creative works for inspiration, 创意作品案例参考",
+      "references": ["references/case-studies/creative-works/portfolio-site.md"]
     }
   },
   "maintainerOnly": {

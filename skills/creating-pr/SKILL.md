@@ -62,3 +62,7 @@ No behavior changes. <!-- If this is a chore/refactor PR -->
 
 🤖 Generated with [Agent Name] <!-- Replace [Agent Name] with the tool you're using, e.g. Codex / Claude Code. -->
 ```
+
+## Follow-up processing
+
+After you set up your PR, you may be required to change some details, you can create new commits or just leave the changes unstaged, but do not modify the existing commits.

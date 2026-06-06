@@ -127,6 +127,8 @@ async fn [feature]_should_[expected_behavior]_when_[condition]() {
 - Uses real dependencies when feasible (temp dirs, test guards)
 - Tests the actual public API of your module
 
+One thing worth metionning, if the project provide a high-level integration test system, (it mostly looks like a directory which includes multiple foldors, each foldor inside is a test case, including step, snap or other things), you should prefer use this test system instead of hand-writing another one.
+
 ### Unit Test (Use sparingly)
 
 **Use only when**: Testing pure algorithms (version parsing, path normalization).

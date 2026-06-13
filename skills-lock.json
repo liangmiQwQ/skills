@@ -52,7 +52,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "20939be12bd3e1bfb48c780f901282f0396d54ba80316f72449dfb72824d17f1"
+      "computedHash": "1c99b210aff073114464d3f1a39e7a20a76f289ecb8e4fba1dc8cf225ed9f65c"
     },
     "nuxt": {
       "source": "antfu/skills",

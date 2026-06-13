@@ -40,8 +40,6 @@ If a piece of logic can be clearly divided into multiple stages and exceeds 50 l
 
 Every export or public item is a contract: a name that must stay stable, a surface that must stay compatible. Keep that surface as small as possible.
 
-Reserve the broadest visibility (`export`, `pub`) for the true public API. Use narrower forms (`pub(crate)`, unexported) for everything else. See the language file for specifics.
-
 ## Advanced guidance
 
 ### 1. Think Before Coding

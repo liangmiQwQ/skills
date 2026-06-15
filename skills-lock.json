@@ -28,7 +28,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/design/SKILL.md",
-      "computedHash": "4758a59ae4fed336703086aba0895de83b245c1a057ededb50c46189d1b1ec42"
+      "computedHash": "8f8fd250854bcf7cb5aa1052c0e128ca227b3b984a69038013e2bfe8bf7edd24"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -46,13 +46,13 @@
       "source": "liangmiQwQ/mo",
       "sourceType": "github",
       "skillPath": "skills/global-projects/SKILL.md",
-      "computedHash": "e6b9fde95e524c7b0d11d8496861c6503a568b648715e43ba641087fa6b69964"
+      "computedHash": "8cb0c04e44624b0b4364a0abd38ba9b3edc6036362e2fb09c2d07c6666c52000"
     },
     "hunt": {
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "1c99b210aff073114464d3f1a39e7a20a76f289ecb8e4fba1dc8cf225ed9f65c"
+      "computedHash": "460e553bccfd19499dcbb51c5b6bb5b5a7f4c1dc3e78f5cc065db0064234953e"
     },
     "nuxt": {
       "source": "antfu/skills",
@@ -82,7 +82,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/think/SKILL.md",
-      "computedHash": "736499a0ac8f63a143543d8f8b3826490c77b60761a2004d62bd10d69587b979"
+      "computedHash": "703bb85d64220145eba88d5af07daac675956d73808075306159791335273358"
     },
     "tsdown": {
       "source": "antfu/skills",

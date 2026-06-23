@@ -15,6 +15,7 @@ ska slidevjs/slidev
 ska antfu/skills
 ska ZeroZ-lab/cc-design
 ska liangmiQwQ/mo
+ska liangmiQwQ/vp-config
 
 # ====== SKILLS ADDING AREA ENDED =======
 

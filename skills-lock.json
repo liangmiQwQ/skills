@@ -114,6 +114,12 @@
       "skillPath": "skills/unocss/SKILL.md",
       "computedHash": "4b7a9f7b89994d5aef70b9d55cb7f65d6e80cea437d5786cd33bb5cf7231c7c4"
     },
+    "use-vp-config": {
+      "source": "liangmiQwQ/vp-config",
+      "sourceType": "github",
+      "skillPath": "skills/use-vp-config/SKILL.md",
+      "computedHash": "be2f122447760b0d05267cab7ee1acad3c100a6a3f5f41d22d60b372eccf236f"
+    },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",

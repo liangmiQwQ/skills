@@ -6,11 +6,11 @@ description: Tool choices for JS/TS library projects (npm packages, shared utili
 
 ## Build & Bundling
 
-- **vite-plus** with fixed extensions + dts for type declarations
+- **vite-plus** + **@liangmi/vp-config**
 
 ## Scripts & Tooling
 
-- **tsx** — run TypeScript files directly
+- **Node.js** — run TypeScript files directly for scripts and development
 - **tinyexec** — subprocess execution when needed
 
 ## Release

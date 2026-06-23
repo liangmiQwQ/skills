@@ -31,7 +31,7 @@ Always check `Allow edits by maintainers`.
 
 PR description should always follow simple and human-readable principles.
 
-Avoid excessive headings and checklists when simple paragraphs are enough. Try to use short paragraphs to express your idea and implementation details. Try using sentences like `This PR adds ...`, `The current behavior ...`, `Follows ...'s behavior`, `It means that`, `It doesn't mean that`
+Avoid excessive headings and checklists when simple paragraphs are enough. Try to use short paragraphs to express your idea and implementation details. Try using sentences like `This PR adds ...`, `The current behavior ...`, `Follows ...'s behavior`, `It means that`, `It doesn't mean that`. Avoid too long paragraphs as well.
 
 If this PR is linked to an issue, put a `Close #xyz` on the top of the description.
 
@@ -39,7 +39,7 @@ For bug fixes without an issue, you should describe the bug first. And then desc
 
 For projects with `.github/workflows`, we do not need to describe `Validation` part because CI will help verify your implementation.
 
-In order to make the pr description simple and easy to read, we should use simple words and simple sentences. Some well-known project specifications and everyday-chores may also be omitted. (For example, a snap test added in a fix pr, we do not need to mention this addition).
+In order to make the pr description simple and easy to read, we should use words and sentences as simple as possible. Some well-known project specifications and everyday-chores may also be omitted. (For example, a snap test added in a fix pr, we do not need to mention this addition).
 
 Add a line `🤖 Generated with [The Agent Tool's Name]` in the bottom of the description.
 

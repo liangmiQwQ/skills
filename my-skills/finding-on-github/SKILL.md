@@ -58,16 +58,3 @@ gh pr list --repo <owner>/<repo> --search "<keyword>" --state all
 ```
 
 If an open PR addresses the same problem — **stop me and link it**. There is no point duplicating effort.
-
----
-
-## Reporting Back
-
-Always report findings before proceeding. Structure your report as:
-
-**Intentional?** — What `git blame` + commit history says  
-**Related Issues** — Links and status of any matching issues  
-**Related PRs** — Links and status of any matching PRs  
-**Recommendation** — Should I proceed, contribute to an existing thread, or stop entirely?
-
-If the answer is "this is already handled" or "someone is on it" — say so clearly and stop.

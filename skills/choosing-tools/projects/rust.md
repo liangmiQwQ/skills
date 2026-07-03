@@ -36,3 +36,5 @@ Use these when building JavaScript-related tooling in Rust:
 
 - **oxc** — JS AST / parser / transformer / linter
 - **napi-rs** — expose Rust to Node.js
+
+Most cases, I prefer directly use https://github.com/liangmiQwQ/rs-starter.git (except napi-rs project). Please checkout my personal rs-starter template repository to learn more.

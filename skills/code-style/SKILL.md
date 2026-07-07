@@ -3,6 +3,8 @@ name: code-style
 description: You are required to load this before writing or reviewing code. Load this skill for any code-related task
 ---
 
+Load $precise-minior-adjustment skill as needed, it is used to tell agents how to make code simple and consistent with other parts in codebase.
+
 # Code Style
 
 Read the corresponding file below as needed:

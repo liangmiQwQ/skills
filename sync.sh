@@ -16,6 +16,7 @@ ska antfu/skills
 ska ZeroZ-lab/cc-design
 ska liangmiQwQ/mo
 ska liangmiQwQ/vp-config
+sh void.sh
 
 # ====== SKILLS ADDING AREA ENDED =======
 

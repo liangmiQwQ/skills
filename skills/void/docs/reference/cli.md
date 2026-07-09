@@ -579,7 +579,11 @@ void github link
 
 Link your current Void account to a GitHub identity. Opens your browser to authorize Void on GitHub (a localhost + PKCE handshake, the same mechanics as `void auth login`), then binds that GitHub identity to the logged-in account. Requires an authenticated CLI (`void auth login` first).
 
-You normally don't need to run this directly — `void github install` runs the link automatically when your account has no GitHub identity yet. Run it on its own to link ahead of time, or to link a GitHub identity without installing the App. If that GitHub account is already linked to a different Void account, the command fails and asks you to use a different GitHub account.
+You normally don't need to run this directly — `void github install` runs the link automatically when your account has no GitHub identity yet. Run it on its own to link ahead of time, or to link a GitHub identity without installing the App.
+
+::: warning Existing GitHub sign-in
+Void accounts cannot be merged. If the GitHub account you authorize is already linked to a different Void account, including one created through GitHub sign-in, `void github link` is refused with `This GitHub account is already linked to another Void account.` Run `void auth logout` and sign in to that existing account, or authorize a different GitHub account. The command is also refused if your current Void account is already linked to a different GitHub identity. Re-authorizing the GitHub account attached to your current Void account is allowed and reports `GitHub account already linked.`
+:::
 
 ### `void github install`
 
@@ -605,6 +609,8 @@ void github join
 
 Join the GitHub App installations your organization already has. If a teammate installed the Void GitHub App on a shared GitHub organization, run `void github join` to gain access to those installations without re-installing. Void opens your browser to authorize (a localhost + PKCE handshake, the same mechanics as `void github link`), confirms with GitHub which installations you can manage, and records your membership. Afterwards `void github installations` lists them and `void github connect` can connect your own projects to their repositories.
 
+In an interactive terminal you rarely need to run this yourself — `void github connect` runs the same join automatically when no active installations are linked to your account. Running `void github join` yourself matters mainly for non-interactive use (without a TTY, `void github connect` never opens a browser), or to link installations ahead of time.
+
 Requires an authenticated CLI (`void auth login` first) and organization-installation sharing enabled on your Void instance; when it is not enabled the command fails closed with a clear message. You can only join installations your GitHub authorization actually returns — you cannot name or join one you cannot access on GitHub.
 
 ### `void github connect`
@@ -614,6 +620,8 @@ void github connect [project] [options]
 ```
 
 Connect a GitHub repository to a Void project for automatic deploys. On every push to the configured branch, Void builds and deploys your project automatically.
+
+Interactively (TTY), if your account has no active installations linked, `void github connect` first runs the same browser authorize as `void github join` automatically — if a teammate already installed the Void GitHub App on your organization, you join it on the spot and the connect continues. Only when no shared installation is found does it ask you to run `void github install`. The same recovery runs when `--installation <id>` names an installation your account is not linked to yet. Without a TTY, connect never opens a browser: it fails closed and tells you to run `void github install`, or `void github join` if your organization already installed the App.
 
 **Options**
 
@@ -632,7 +640,7 @@ Interactively (TTY), after resolving the repository and branch, `void github con
 
 **Non-interactive use (CI)**
 
-When stdin is not a TTY, `void github connect` never prompts — it fails closed and names any flag it needs. `--branch` is always required. `--project` must be resolvable (positional / `--project` / `VOID_PROJECT` / linked `.void/project.json`). `--installation` is required only when your account has more than one installation; otherwise the sole installation is used. `--repo` is required when the installation grants access to all repos or to more than one selected repo; when it grants exactly one repo that repo is used automatically. Use `void github installations` to discover the `installation_id`.
+When stdin is not a TTY, `void github connect` never prompts — it fails closed and names any flag it needs. `--branch` is always required. `--project` must be resolvable (positional / `--project` / `VOID_PROJECT` / linked `.void/project.json`). `--installation` is required only when your account has more than one installation; otherwise the sole installation is used. `--repo` is required when the installation grants access to all repos or to more than one selected repo; when it grants exactly one repo that repo is used automatically. `--repo` is also required when the installation does not expose a repository list to your account (shared org installations hide it). Use `void github installations` to discover the `installation_id`.
 
 ```
 void github connect my-app \
@@ -645,7 +653,7 @@ void github connect my-app \
 
 **Connecting as an organization member**
 
-If you are a member of a GitHub organization but not the person who installed the App, `void github connect` first confirms that you personally have access to the specific repository. When it detects this, it opens your browser once to authorize access to that repo on GitHub (a localhost + PKCE handshake), then completes the connection automatically — no extra flags. Run `void github join` first so the installation appears in `void github installations`. You can only connect repositories you can access on GitHub; one you cannot see is refused with a clear message.
+If you are a member of a GitHub organization but not the person who installed the App, `void github connect` first confirms that you personally have access to the specific repository. Interactively (TTY), when it detects this it opens your browser once to authorize access to that repo on GitHub (a localhost + PKCE handshake), then completes the connection automatically — no extra flags. Without a TTY, this per-repo authorization never opens a browser: connect fails closed with an error explaining that the installation requires per-repo authorization, which needs an interactive browser sign-in, and telling you to run `void github connect` locally to authorize, then retry. Interactively, connect joins the shared installation automatically when your account has no active installations linked, so running `void github join` first is optional — useful mainly to see the installation in `void github installations` beforehand. You can only connect repositories you can access on GitHub; one you cannot see is refused with a clear message.
 
 ### `void github update`
 

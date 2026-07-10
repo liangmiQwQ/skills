@@ -700,6 +700,29 @@ void github status my-app
 
 **Project resolution** follows the same order as deploy: positional / `--project`, `VOID_PROJECT`, linked project (`.void/project.json`).
 
+### `void github disconnect`
+
+```
+void github disconnect [project]
+```
+
+Disconnect a project from its GitHub repository, stopping automatic deploys. Any in-flight builds for the project are cancelled (their deploy tokens are revoked) before the connection is removed. If the project has no connection, it reports that and exits successfully. To point a project at a different repository, disconnect first, then run `void github connect`.
+
+You are asked to confirm before anything is removed. Pass `--yes` to skip the prompt; `--yes` is **required** in a non-interactive shell (CI), where there is no prompt to answer.
+
+**Options**
+
+| Flag               | Description                                                       |
+| ------------------ | ----------------------------------------------------------------- |
+| `--project <name>` | Project name (alias for the positional argument)                  |
+| `--yes`            | Skip the confirmation prompt (required in non-interactive shells) |
+
+```
+void github disconnect my-app --yes
+```
+
+**Project resolution** follows the same order as deploy: positional / `--project`, `VOID_PROJECT`, linked project (`.void/project.json`).
+
 ## Build
 
 Inspect Deploy-on-GitHub builds.

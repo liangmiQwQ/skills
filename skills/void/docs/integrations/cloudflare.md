@@ -285,3 +285,110 @@ That's it. The Cloudflare Vite plugin produces a complete build output with a me
 ### Local development
 
 `pnpm dev` continues to work as before -- Miniflare creates local instances of all bindings regardless of the IDs in your `wrangler.jsonc`. Your real resource IDs are only used when you run `wrangler deploy`.
+
+### AI (self-host)
+
+`void/ai` works on your own Cloudflare account, along two paths:
+
+- **Workers AI** (`ai.run`, `ai.stream`, `ai.image`) works out of the box. When your app imports `void/ai`, `vite build` infers that you need AI and adds a Workers AI binding (`env.AI`) to the generated `wrangler.json` automatically -- you do **not** add it to `wrangler.jsonc`.
+- **Provider models** (`ai.provider("openai").fetch(...)`) route through _your own_ Cloudflare AI Gateway. Set its id in `void.json` and add the provider's API key as a Worker secret.
+
+```jsonc
+// void.json
+{
+  "ai": {
+    "gateway": "my-gateway", // an AI Gateway in YOUR Cloudflare account
+  },
+}
+```
+
+```bash
+# provider API key, stored as a Worker secret (never committed)
+wrangler secret put OPENAI_API_KEY
+```
+
+```ts
+// routes/chat.ts
+import { defineHandler } from 'void';
+import { ai } from 'void/ai';
+
+export const POST = defineHandler(async (c) => {
+  // Workers AI -- uses env.AI directly
+  const summary = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+    prompt: 'Summarize the changelog.',
+  });
+
+  // Provider model -- routes through your "my-gateway" AI Gateway,
+  // authed with the OPENAI_API_KEY secret above
+  const res = await ai.provider('openai').fetch('chat/completions', {
+    method: 'POST',
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages: [] }),
+  });
+
+  return c.json({ summary, provider: await res.json() });
+});
+```
+
+`ai.gateway` is required for `ai.provider().fetch()` -- without it, that call returns a `501`. No AI traffic or provider secret passes through Void's shared proxy: requests go directly to _your own_ Cloudflare AI Gateway, authenticated with provider secrets from _your_ Worker's environment. (The request and that secret are of course still sent onward to the AI Gateway and the upstream provider you call.)
+
+Notes:
+
+- **No cross-tenant usage metering.** On the Void platform, AI calls are metered and billed through a shared proxy. Self-hosted, there is no metering -- you get your own [Cloudflare AI Gateway analytics](https://developers.cloudflare.com/ai-gateway/) instead.
+- **The runtime reads the `env.AI` binding by name** -- a custom-named root AI binding is not supported.
+- **`void dev` has no local Workers AI emulation.** In development, AI still routes through Void, so `void dev` AI requires `void auth login` even when you deploy self-hosted.
+
+### ISR (self-host)
+
+[Revalidation (ISR)](../guide/edge/revalidation.md) works self-hosted, but the cache KV is **not** auto-injected (a KV binding needs a real namespace id). Create a namespace and bind it as `ISR_CACHE`:
+
+```bash
+wrangler kv namespace create ISR_CACHE
+```
+
+```jsonc
+// wrangler.jsonc
+{
+  "kv_namespaces": [
+    {
+      "binding": "ISR_CACHE",
+      "id": "<your-namespace-id>",
+    },
+  ],
+}
+```
+
+Configure revalidation exactly as on the platform -- globally or per-path in `void.json`:
+
+```jsonc
+// void.json
+{
+  "routing": {
+    "revalidate": { "/blog/*": 3600, "*": 60 },
+  },
+}
+```
+
+...or per page with an exported `revalidate` literal in a `.server.ts` companion (Pages mode):
+
+```ts
+// pages/blog/[slug].server.ts
+export const revalidate = 3600; // seconds
+```
+
+On-demand purges work through `revalidate()`:
+
+```ts
+import { revalidate } from 'void/isr';
+
+await revalidate({ paths: ['/blog/hello'] });
+// or purge every ISR page:
+await revalidate({ all: true });
+```
+
+Self-hosted, `revalidate()` purges this worker's own KV entries (global, authoritative) plus the current colo's edge cache.
+
+Limits (the single-worker cache ladder can't do everything the platform's dispatch layer does):
+
+- **No fleet-wide / cross-colo edge purge.** `revalidate()` clears KV globally and the _local_ colo's edge cache; other colos keep serving their edge copy until it expires (bounded by the response's `s-maxage`), then re-render on the next edge miss.
+- **The pages-protocol JSON variant is not served from a cold colo's KV.** A colo that hasn't rendered the HTML yet re-renders the JSON live; the JSON edge cache is warmed only as a side effect of the HTML render path.
+- **The warm cache is dropped on every redeploy.** Each `vite build` bakes a fresh deployment id into the cache keys, so cached HTML never outlives the hashed assets it references -- the first request after a deploy is a cold render.

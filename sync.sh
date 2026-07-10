@@ -16,6 +16,7 @@ ska antfu/skills
 ska ZeroZ-lab/cc-design
 ska liangmiQwQ/mo
 ska liangmiQwQ/vp-config
+ska yetone/kill-ai-slop
 sh void.sh
 
 # ====== SKILLS ADDING AREA ENDED =======

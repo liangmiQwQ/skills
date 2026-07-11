@@ -36,6 +36,20 @@ Another acceptable form of annotation is a flow comment for complex functions. F
 
 If a piece of logic can be clearly divided into multiple stages and exceeds 50 lines, then it needs flow comments.
 
+---
+
+After your finishing your whole implementation, check the code diff, if the diff is more than 50 lines while there are no comments added, there are problems.
+
+## Diagnostics Handling
+
+In my project, I have a set of strict linting rules. It's normal to meet the diagnostics.
+
+When meeting diagnostics, the first thing you do is to think, not to change the code. You should check whether the diagnostic's purpose fit the current code's purpose and behavior target. You should check whether following diagnostic will make the code more complex, more confusing or more simple.
+
+You should reject some unreasonable diagnostics, and keep the reasonable ones. Follow the code style.
+
+When you are rejecting an unreasonable diagnostics, prefer use comment (`// oxlint-disable-...`, `#[allow(...)]`) to disable it, instead of disabling it globally and modifying config files. You can also check the codebase to know whether there is other cases disable the same rules, if a rule is disabled too many time, you can suggest me to adjust config file in the response. But do not modify them urself unless I required.
+
 ## Visibility
 
 **Start with nothing visible. Add visibility only when another module needs it.**

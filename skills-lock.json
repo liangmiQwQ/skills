@@ -64,7 +64,7 @@
       "source": "yetone/kill-ai-slop",
       "sourceType": "github",
       "skillPath": "skill/SKILL.md",
-      "computedHash": "fe4b82b57754077a6fbce711c842b8ba798be3189458e8a5aebf215ce65ab3af"
+      "computedHash": "c5a6ed03f8334dc372705a3fcf904d132e9a208dec1143d4dc00d595314dddf4"
     },
     "nitro": {
       "source": "antfu/skills",

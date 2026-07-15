@@ -5,6 +5,8 @@ description: You are required to load this before writing or reviewing code. Loa
 
 Load $precise-minior-adjustment skill as needed, it is used to tell agents how to make code simple and consistent with other parts in codebase.
 
+After your finish your task, also run a round of simplify according to $precise-minior-adjustmen before commit or summarizing.
+
 # Code Style
 
 Read the corresponding file below as needed:

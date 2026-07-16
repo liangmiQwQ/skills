@@ -14,7 +14,7 @@ ska vuejs-ai/skills
 ska slidevjs/slidev
 ska antfu/skills
 ska ZeroZ-lab/cc-design
-ska liangmiQwQ/mo
+ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/vp-config
 ska yetone/kill-ai-slop
 sh void.sh

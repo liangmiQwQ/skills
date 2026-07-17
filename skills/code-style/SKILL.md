@@ -1,6 +1,6 @@
 ---
 name: code-style
-description: You are required to load this before writing or reviewing code. Load this skill for any code-related task
+description: You are required to load this before writing code. Load this skill for code-related task. Do not use this skill for simple reading code or analyze tasks unless it's related to personal codestyle.
 ---
 
 Load $precise-minior-adjustment skill as needed, it is used to tell agents how to make code simple and consistent with other parts in codebase.
@@ -57,6 +57,14 @@ When you are rejecting an unreasonable diagnostics, prefer use comment (`// oxli
 **Start with nothing visible. Add visibility only when another module needs it.**
 
 Every export or public item is a contract: a name that must stay stable, a surface that must stay compatible. Keep that surface as small as possible.
+
+## Organize
+
+One goal to achieve when coding is to make the code more structured and predictable. That will make humans easy to control and review your code.
+
+For example, you can use a big `match`(Rust), and handle different branches for different cases with simple lines.
+
+A thousand lines of structured, predictable, regular code is better than five hundred lines of messy code.
 
 ## Advanced guidance
 

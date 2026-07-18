@@ -96,6 +96,12 @@
       "skillPath": "skills/slidev/SKILL.md",
       "computedHash": "c1e4be1019bf486f99eb534ba3d5e3c402ed3020960b51faf607692480607fb6"
     },
+    "test-doctor": {
+      "source": "zerob13/skills",
+      "sourceType": "github",
+      "skillPath": "skills/test-doctor/SKILL.md",
+      "computedHash": "b0206973c6b0b5335431f750cd89fd62f7b542e4ccf65bc511ed34707e7299dc"
+    },
     "think": {
       "source": "tw93/Waza",
       "sourceType": "github",

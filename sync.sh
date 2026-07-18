@@ -17,6 +17,7 @@ ska ZeroZ-lab/cc-design
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/vp-config
 ska yetone/kill-ai-slop
+ska zerob13/skills --skill test-doctor
 sh void.sh
 
 # ====== SKILLS ADDING AREA ENDED =======

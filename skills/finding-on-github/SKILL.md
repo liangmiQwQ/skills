@@ -1,7 +1,7 @@
 ---
 name: finding-on-github
 description:
-  If you are now working with with a opensource project while I'm not a maintainer or author (can easily know it by resolving the path)
+  If you are now working with with a opensource project while I'm not a maintainer or author
 
   Load this skill when I ask things like `is there a bug?` and when you sense I am willing to contribute to it, or when I am confirming whether there is a problem. Load this skill when you are modifying an existing feature without a certain reason
 ---
@@ -58,3 +58,5 @@ gh pr list --repo <owner>/<repo> --search "<keyword>" --state all
 ```
 
 If an open PR addresses the same problem — **stop me and link it**. There is no point duplicating effort.
+
+If you loaded this skill and did this inspect, leave a simple line in your response to make sure I can work on it.

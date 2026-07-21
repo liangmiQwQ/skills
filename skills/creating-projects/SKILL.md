@@ -28,5 +28,7 @@ When you are initializing a project, you should care about these aspect:
 7. Scripts (For manually validation, and installing the developing products onto the using computer)
 8. Deploy (Websites)
 9. Tools version (Node version, Rust version)
+10. GitHub repo description, PR merge setting
+11. AGENTS.md document
 
 You should prepare them in detail but should not make them too complex, for example, linting CI shouldn't be run on all macOS, Linux and Windows, a small library also doesn't need a VitePress website for docs.

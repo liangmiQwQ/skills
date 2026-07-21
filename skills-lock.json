@@ -40,7 +40,7 @@
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "skillPath": "skills/find-skills/SKILL.md",
-      "computedHash": "781bd6d3f9b19f8c9af6b53d8d0e4876d0183841b565db34ca7092ffa412d111"
+      "computedHash": "b146008599c31057cef1c145774cea5d5afb30e8f43fa802e47a4b461419aaaf"
     },
     "frontend-design": {
       "source": "anthropics/skills",
@@ -64,7 +64,7 @@
       "source": "yetone/kill-ai-slop",
       "sourceType": "github",
       "skillPath": "skill/SKILL.md",
-      "computedHash": "8acf6a178e98c3a8c9e49921a777702648c43fab0232a908e6493d2a2c05dadf"
+      "computedHash": "bece0e23b22176d36a1d07c9c01b448b8458affd5c17328fb780b88b08018939"
     },
     "nitro": {
       "source": "antfu/skills",

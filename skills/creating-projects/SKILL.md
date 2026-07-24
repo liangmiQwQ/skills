@@ -1,6 +1,6 @@
 ---
 name: creating-projects
-description: Load this skill when you are required to create projects
+description: Load this skill when you are required to create projects. Do not load this skill when you are creating reproduction/poc repo.
 ---
 
 When you are creating a project, you should make it usable and maintainable, you need to make infrastructure tools, release and validation system work perfectly.

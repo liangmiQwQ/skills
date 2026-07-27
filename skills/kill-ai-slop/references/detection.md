@@ -309,7 +309,23 @@ in is motion doing a job; a card that jumps when the cursor grazes it is not.
 Also flag animating layout properties (width/height/margin/padding) — jank on
 top of the decoration.
 
-### 27 The all-caps card grid
+### 27 The wobbling spinner
+```
+rg -n 'translate\(-50%, ?-50%\)' -g '*.{css,tsx,jsx,vue,svelte,astro,html}'
+rg -n '@keyframes +[a-zA-Z-]*(spin|rotate|load)'
+rg -n -i 'animate-spin'
+rg -n 'transform-origin: *[0-9]'
+```
+*Confirm:* run the page and watch one full revolution — the arc's centre must
+not trace a circle. Code tells: a spin keyframe that sets `transform:
+rotate(…)` on an element centered with `transform: translate(-50%, -50%)` (the
+keyframe replaces the whole property, so the element snaps off-centre and
+orbits); a `transform-origin` that isn't the element's centre; `animate-spin`
+on an emoji or on an SVG whose artwork isn't centred in its viewBox. A
+centered element whose keyframe re-states the translate (`translate(-50%,
+-50%) rotate(360deg)`) is fine.
+
+### 28 The all-caps card grid
 ```
 rg -n -i 'grid-cols-3'
 rg -n -i 'uppercase[\s\S]{0,30}(text-xs|tracking-wide|tracking-wider)|text-transform:\s*uppercase'
@@ -318,7 +334,7 @@ rg -n -i 'everything you need|why (you.?ll love|choose|teams)'
 *Confirm:* an ALL-CAPS micro-label + number/icon repeated across interchangeable
 cards — a feature grid or a stat-card grid — points unrelated.
 
-### 28 The invented stat row
+### 29 The invented stat row
 ```
 rg -n -i '\b[0-9]+[km]\+'
 rg -n '99\.9%|24/7'
@@ -328,7 +344,7 @@ rg -n -i '(10k|50k|99\.9|24/7)[\s\S]{0,60}(developers|users|teams|uptime|support
 with tiny uppercase labels, in the hero or above the fold. A real, odd,
 sourced figure ("1,847 CI runs yesterday") is the fix, not a hit.
 
-### 29 The 01 / 02 / 03 section markers
+### 30 The 01 / 02 / 03 section markers
 ```
 rg -n '["'\''>`]0[1-9]["'\''<`]' -g '*.{tsx,jsx,vue,svelte,astro,html}'
 rg -n -i 'text-(7|8|9)xl[\s\S]{0,50}(text-(gray|slate|zinc|neutral)-(100|200)|opacity-(5|10|20))'
@@ -338,7 +354,7 @@ rg -n -i 'step[- ](one|two|three)'
 genuinely ordered sequence — install steps, a changelog, an indexed catalogue —
 has earned its numbers.
 
-### 30 Cards inside cards
+### 31 Cards inside cards
 Grep gives leads; the judgment is in the rendered DOM.
 ```
 rg -n '<(Card|Panel|Box)[^>]*>\s*<\1' -g '*.{tsx,jsx,vue,svelte}'
@@ -348,7 +364,7 @@ rg -n -i 'rounded[^"]*border[^"]*"[\s\S]{0,120}rounded[^"]*border' -g '*.{tsx,js
 and shrinking padding. A child that is genuinely a separate object (a preview,
 an embed) may keep its own surface.
 
-### 31 One gap everywhere
+### 32 One gap everywhere
 ```
 rg -n '(space-y-4|gap-4)[^"'\''`]{0,80}(space-y-4|gap-4)'   # the token twice on one line
 rg -n -c 'space-y-4|gap-4'                                  # per-file counts; high = lead
@@ -359,7 +375,7 @@ one value for both within-group and between-group distances is the tell.
 *Confirm:* a heading equidistant from its own body and from the previous
 section. A deliberate uniform grid (a photo wall, a calendar) is a choice.
 
-### 32 Inter everywhere (evolved)
+### 33 Inter everywhere (evolved)
 ```
 rg -n -i 'fonts\.googleapis\.com/css2\?family=(Inter|Space\+Grotesk|Manrope|Plus\+Jakarta)'
 rg -n -i 'font-family:\s*[^;]*("?Inter"?|"?Space Grotesk"?|"?Manrope"?|"?Plus Jakarta Sans"?|"?Geist"?)'
@@ -371,7 +387,7 @@ anyone compared alternatives. A team that tried others and landed on Inter made
 a choice; check for any evidence of one (a comment, a brand doc, a deliberate
 fallback stack).
 
-### 33 The tasteful terminal (evolved)
+### 34 The tasteful terminal (evolved)
 ```
 rg -n -i 'font-mono' -g '*.{tsx,jsx,vue,svelte,astro,html}'
 rg -n -i 'font-family:\s*[^;]*(mono|jetbrains|fira code|ibm plex mono|geist mono)'
@@ -382,7 +398,7 @@ near-black with a single warm accent. This one needs judgment most — it's a
 current default, so weigh whether the terminal metaphor actually serves the
 product.
 
-### 34 The editorial dashboard (evolved)
+### 35 The editorial dashboard (evolved)
 ```
 rg -n -i '>\s*Good (morning|afternoon|evening),' -g '*.{tsx,jsx,vue,svelte,astro,html}'
 rg -n -i 'font-serif' -g '*.{tsx,jsx,vue,svelte,astro,html}'

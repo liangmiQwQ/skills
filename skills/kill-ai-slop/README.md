@@ -2,7 +2,7 @@
 
 Scan a web project for **AI slop**, the generic machine-default visual and copy
 tics of vibe-coded products, and strip it out. This skill turns the catalogue at
-**[killaislop.com](https://killaislop.com)** into action: it detects 34 tells
+**[killaislop.com](https://killaislop.com)** into action: it detects 35 tells
 from their code-level signals, explains why each reads as machine-made, and
 proposes or applies the clean fix.
 
@@ -14,7 +14,8 @@ icon tiles, glassmorphism and over-rounding, oversized drop shadows, corners
 that don't nest, borders that die at rounded corners, badge & pill spam,
 AI-drawn SVG icons, icon-in-a-tint-of-itself
 tiles, kickers over every heading, full-sentence display headlines, flat type
-hierarchies, springy hover effects, all-caps stat-card grids, invented stat
+hierarchies, springy hover effects, wobbling off-centre spinners, all-caps
+stat-card grids, invented stat
 rows, 01/02/03 section markers, cards nested in cards, monotone one-gap
 spacing, the default Inter/Space Grotesk look, the "tasteful terminal"
 default, and the editorial-serif dashboard costume. It works across
@@ -105,7 +106,7 @@ language- or stack-specific rules.
 | File | |
 |---|---|
 | `SKILL.md` | The skill definition, workflow, and guardrails. |
-| `references/taxonomy.md` | The 34 tells: what each is, why it's slop, the fix. |
+| `references/taxonomy.md` | The 35 tells: what each is, why it's slop, the fix. |
 | `references/detection.md` | The code patterns per tell, and their false positives. |
 | `references/fixes.md` | Before→after remediation patterns. |
 | `scripts/scan.mjs` | The dependency-free scanner. |

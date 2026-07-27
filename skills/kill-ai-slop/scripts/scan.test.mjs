@@ -65,12 +65,14 @@ test("finds multiline patterns and documented runtime signals", () => {
         `.kicker { text-transform: uppercase; letter-spacing: 0.1em; }\n` +
         `.panel { transition: width 200ms ease; }\n` +
         `.steps::before { content: "step one"; }\n` +
-        `.body { font-family: Geist, sans-serif; }\n`,
+        `.body { font-family: Geist, sans-serif; }\n` +
+        `.load { top: 50%; left: 50%; transform: translate(-50%, -50%); animation: spin 1s linear infinite; }\n` +
+        `@keyframes spin { to { transform: rotate(360deg); } }\n`,
     );
 
     const report = reportFor(project);
     assert.equal(finding(report, "01")?.hits[0].line, 1);
-    for (const id of ["02", "06", "10", "14", "26", "29", "32"]) {
+    for (const id of ["02", "06", "10", "14", "26", "27", "30", "33"]) {
       assert.ok(finding(report, id), `expected tell ${id} to be detected`);
     }
   });

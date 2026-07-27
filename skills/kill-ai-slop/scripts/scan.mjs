@@ -365,8 +365,23 @@ const TELLS = [
       /transition:[^;{}]*\b(?:width|height|margin|padding)\b/i,
     ],
   },
+  // Leads only — the wobble itself is visual. A centering translate near a spin
+  // keyframe is the classic clobber; an off-centre transform-origin near a spin
+  // animation is the other spelling of the same bug.
   {
     id: "27",
+    group: "motion",
+    name: "wobbly spinner",
+    fix: "fixed rotation centre; keep centering out of the animated transform",
+    patterns: [
+      /translate\(-50%,\s*-50%\)[\s\S]{0,600}?@keyframes\s+[\w-]*(?:spin|rotate|load)/i,
+      /@keyframes\s+[\w-]*(?:spin|rotate|load)[\w-]*\s*\{[\s\S]{0,160}?transform:\s*rotate\([^)]*\)\s*;?\s*\}[\s\S]{0,600}?translate\(-50%,\s*-50%\)/i,
+      /(?:\banimate-spin\b|animation:[^;{}]*\b[\w-]*spin)[\s\S]{0,200}?transform-origin:\s*(?!center\b|50%\s*50%)[\w.% -]/i,
+      /transform-origin:\s*(?!center\b|50%\s*50%)[\w.% -]+;[\s\S]{0,200}?(?:\banimate-spin\b|animation:[^;{}]*\b[\w-]*spin)/i,
+    ],
+  },
+  {
+    id: "28",
     group: "layout",
     name: "all-caps card grid",
     fix: "show the one key thing fully",
@@ -377,7 +392,7 @@ const TELLS = [
     ],
   },
   {
-    id: "28",
+    id: "29",
     group: "layout",
     name: "invented stat row",
     fix: "only measured, sourced numbers",
@@ -389,7 +404,7 @@ const TELLS = [
     ],
   },
   {
-    id: "29",
+    id: "30",
     group: "layout",
     name: "01/02/03 section markers",
     fix: "number only real sequences",
@@ -400,21 +415,21 @@ const TELLS = [
     ],
   },
   {
-    id: "30",
+    id: "31",
     group: "layout",
     name: "cards inside cards",
     fix: "one surface per region; hairlines inside",
     patterns: [/<(Card|Panel|Box)[^>]*>\s*<\1\b/],
   },
   {
-    id: "31",
+    id: "32",
     group: "layout",
     name: "one gap everywhere",
     fix: "space by relationship, not by token",
     patterns: [/(space-y-4|gap-4)\b[\s\S]{0,120}?\b(space-y-4|gap-4)\b/],
   },
   {
-    id: "32",
+    id: "33",
     group: "evolved",
     name: "Inter everywhere",
     fix: "compare faces; be able to say why this one",
@@ -425,7 +440,7 @@ const TELLS = [
     ],
   },
   {
-    id: "33",
+    id: "34",
     group: "evolved",
     name: "tasteful-terminal",
     fix: "mono for code only",
@@ -439,7 +454,7 @@ const TELLS = [
   // opt-in oldstyle figures — the "magazine dashboard" kit. Serif on genuinely
   // editorial surfaces (docs, essays) is not this tell; confirm before fixing.
   {
-    id: "34",
+    id: "35",
     group: "evolved",
     name: "editorial-dashboard",
     fix: "sans + tabular numerals for scanned UI",

@@ -249,6 +249,14 @@ Void manages Better Auth migrations as part of the normal Void migration flow:
 - deploy runs auth migrations together with app migrations
 - users do not run a separate Better Auth CLI path
 
+This applies to `void deploy` (the managed platform), which creates the Better Auth
+tables at runtime after dispatch. Deploying to your own Cloudflare account with
+[`--backend cloudflare`](/integrations/cloudflare) does **not** run that step: there,
+your checked-in `db/migrations/*.sql` must already produce the Better Auth schema, and
+deploy fails closed if they do not. Define the tables in `db/schema.ts` and run
+`void db generate` — Drizzle's `.unique()` and `.references()` are opt-in, and the
+constraints are verified too. See [#274](https://github.com/voidzero-dev/void/issues/274).
+
 ## Unsupported Modes
 
 Void-managed Better Auth is supported only for Cloudflare Void apps in v1.

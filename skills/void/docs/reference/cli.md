@@ -32,6 +32,7 @@ Use this page as a command reference. If you are setting up a project for the fi
 | `void auth login`                 | Authenticate with Void                                              |
 | `void project link`               | Link directory to a project                                         |
 | `void project logs`               | Show runtime logs from deployed project                             |
+| `void project requests`           | Show request-level traffic (status, method, timing)                 |
 | `void project rollback`           | Roll back to a previous deployment                                  |
 | `void project cancel`             | Cancel an active deployment                                         |
 | `void project purge-cache`        | Purge all cached pages                                              |
@@ -162,12 +163,12 @@ void project logs [--level <level>] [--filter <text>] [--range <duration>] [--de
 
 Show runtime logs from the deployed project. Uses the linked project from `.void/project.json`.
 
-| Flag                 | Purpose                                                                                                                                                 | Default |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `--range <duration>` | How far back to look. Format: `<number><unit>` (m/h/d). Max 7d.                                                                                         | `1h`    |
-| `--level <level>`    | Filter by log level. One of `error`, `warn`, `info`, `log`, `debug`, `all`. `error` also includes uncaught exceptions and non-`ok` requests.            | `all`   |
-| `--filter <text>`    | Case-insensitive **substring** match against log message text and exception name/message — not a level filter. Shows the full request entry on any hit. | none    |
-| `--deployment <id>`  | Filter logs to a specific deployment ID.                                                                                                                | none    |
+| Flag                 | Purpose                                                                                                                                                                                                         | Default |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `--range <duration>` | How far back to look. Format: `<number><unit>` (m/h/d). Max 7d.                                                                                                                                                 | `1h`    |
+| `--level <level>`    | Filter by log level. One of `error`, `warn`, `info`, `log`, `debug`, `all`. `error` also includes uncaught exceptions, non-`ok` outcomes, and any 5xx response — even when the worker neither threw nor logged. | `all`   |
+| `--filter <text>`    | Case-insensitive **substring** match against log message text and exception name/message — not a level filter. Shows the full request entry on any hit.                                                         | none    |
+| `--deployment <id>`  | Filter logs to a specific deployment ID.                                                                                                                                                                        | none    |
 
 Output shows one line per request (`HH:MM:SS METHOD URL STATUS`) with indented console log and exception lines beneath. Errors and exceptions are colored red, warnings yellow.
 
@@ -178,7 +179,32 @@ void project logs --level error --range 12h
 void project logs --level error --filter websocket
 ```
 
-Tip: `void project logs` only sees what Cloudflare Tail captures — top-level `console.*` calls and uncaught throws. Application errors caught and persisted to your own DB are invisible to tail. Surface them via `console.error(...)` or `void/log`'s `logger.error(...)` so they show up under `--level error`.
+Tip: `void project logs` only sees what Cloudflare Tail captures — top-level `console.*` calls and uncaught throws. Application errors caught and persisted to your own DB are invisible to tail. Surface them via `console.error(...)` or `void/log`'s `logger.error(...)` so they show up under `--level error`. For 5xx that never reach your worker at all (edge-router errors, static/SPA projects), use `void project requests --status 5xx`.
+
+### `void project requests`
+
+```
+void project requests [--status <filter>] [--range <duration>]
+```
+
+Show request-level traffic recorded at the edge for the linked project: one line per request with time, method, HTTP status, request type, and server timing. Unlike `void project logs` (which only has rows for invoked user workers), this reads the edge request-metering data, so it also surfaces:
+
+- **5xx the edge router generated itself** — missing deployment manifest, static-asset read timeouts, SSR dispatch timeouts — which never invoke your worker and so never appear in logs.
+- **Requests to static/SPA projects**, which are served directly from storage and never run a worker.
+
+| Flag                 | Purpose                                                                                       | Default |
+| -------------------- | --------------------------------------------------------------------------------------------- | ------- |
+| `--status <filter>`  | Filter by status: a class (`2xx`, `3xx`, `4xx`, `5xx`) or an exact 3-digit code (e.g. `500`). | none    |
+| `--range <duration>` | How far back to look. Format: `<number><unit>` (m/h/d). Max 7d.                               | `1h`    |
+
+Output shows one line per request (`HH:MM:SS METHOD STATUS TYPE DURATION`). 5xx are colored red, 4xx yellow. Note: request paths are not recorded, so this view shows status and type rather than URLs — use `void project logs` for per-URL, per-log detail on requests that do reach your worker.
+
+Examples:
+
+```
+void project requests --status 5xx
+void project requests --range 24h
+```
 
 ### `void project rollback [deployId]`
 
@@ -226,19 +252,22 @@ If `--project` is provided, purges that project's cache instead of the linked pr
 
 ```
 void deploy [--project <name>] [--dir <path>] [--spa] [--skip-build] [--debug]
+void deploy --backend cloudflare [--provision]
 ```
 
 Auto-detects your project type and chooses the right pipeline. See [Supported App Types](../guide/app-types.md) and [Deployment](../guide/deployment.md) for details.
 
 For Drizzle projects, deploy performs a read-only schema drift check. If a new migration would be generated, deploy stops and tells you to run `void db generate`, review the migration, commit it yourself, and rerun `void deploy`.
 
-| Flag               | Purpose                                                                      |
-| ------------------ | ---------------------------------------------------------------------------- |
-| `--project <name>` | Target a specific project by slug                                            |
-| `--dir <path>`     | Deploy a pre-built static directory (skips build)                            |
-| `--spa`            | Use SPA mode instead of SSG for static deploys                               |
-| `--skip-build`     | Skip the build step (use existing build output)                              |
-| `--debug`          | Mirror the structured deploy log to stderr (also written to `~/.void/logs/`) |
+| Flag                   | Purpose                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `--project <name>`     | Target a specific project by slug; not supported with `--backend cloudflare`                 |
+| `--dir <path>`         | Deploy a pre-built static directory (skips build); not supported with `--backend cloudflare` |
+| `--spa`                | Use SPA mode instead of SSG for static deploys; not supported with `--backend cloudflare`    |
+| `--skip-build`         | Skip the build step (use existing build output); not supported with `--backend cloudflare`   |
+| `--backend cloudflare` | Deploy to your own Cloudflare account instead of the Void platform                           |
+| `--provision`          | Create missing bindings (D1/KV/R2/Queues/Hyperdrive); requires `--backend cloudflare`        |
+| `--debug`              | Mirror the structured deploy log to stderr (also written to `~/.void/logs/`)                 |
 
 Every deploy writes a structured JSONL trace to `~/.void/logs/deploy-<timestamp>.jsonl` regardless of `--debug`. On failure the path is printed at the end of the error message so you can attach it when reporting platform issues. `VOID_DEPLOY_DEBUG=1` is accepted as an alternate trigger for stderr mirroring.
 
@@ -251,6 +280,37 @@ Project resolution precedence:
 If no project is linked and no override is provided, CLI prompts to link or create one. In CI (non-TTY), `void deploy` errors out instead — set `VOID_PROJECT` or pass `--project <slug>`.
 
 That fallback is mainly for projects that skipped Void project setup during `void init`.
+
+### `void deploy --backend cloudflare`
+
+Deploy the built worker straight to **your own** Cloudflare account instead of the Void platform. This path uses your local `wrangler` auth and your root `wrangler.jsonc` — no Void login or linked project is involved.
+
+```
+void deploy --backend cloudflare              # deploy using resources already in wrangler.jsonc
+void deploy --backend cloudflare --provision  # create any missing resources first, then deploy
+```
+
+Prerequisites:
+
+- A Cloudflare account must be **pinned**: set `account_id` in your root `wrangler.jsonc`, or export `CLOUDFLARE_ACCOUNT_ID`. A multi-account token otherwise makes wrangler prompt (or error in CI), which Void cannot intercept.
+- Authenticate wrangler (`wrangler login`, or set `CLOUDFLARE_API_TOKEN`). Deploy needs a token with `Workers Scripts:Edit` plus read on the resources you bind; `--provision` additionally needs per-product `*:Edit` (D1, KV, R2, Queues, Hyperdrive).
+- `CLOUDFLARE_API_TOKEN` is **required** to provision a Hyperdrive config for the first time — `wrangler login` covers every other resource, but wrangler exposes no machine-readable Hyperdrive list, so Void checks for an existing config over the Cloudflare REST API, which OAuth cannot authenticate. Without a token, `--provision` stops before touching your account. Alternatively create the Hyperdrive config yourself and put its id in `wrangler.jsonc` — deploying an already-provisioned Hyperdrive app needs no token.
+- `--skip-build` is **not supported** with `--backend cloudflare`: this backend validates the artifact the build emits (worker `vars` in `dist/ssr/wrangler.json`, the generated auth schema), so there is nothing to check without a fresh build.
+- `--project`, `--dir` and `--spa` are **not supported** with `--backend cloudflare` either, and are rejected rather than ignored: no Void project is resolved on this path, and it uploads the worker your build emits rather than a static directory.
+- Local Docker is required to build apps that use the sandbox.
+
+What it does, in order: settles the app class before any account op (v1 supports **full Void apps on the Cloudflare Workers target** -- worker-bearing apps running Void's routing, with D1/KV/R2/Queues/Hyperdrive and, on D1/SQLite, auth + ISR; framework SSR of every kind, static/SPA/SSG apps, node/bun/deno targets, and PostgreSQL apps with auth or with checked-in migrations all fail closed with guidance), pins the account and checks auth, provisions or drift-checks resources, **builds**, then gates on the artifact the build emitted — production secrets checked against the build's effective mode/envDir, the auth schema, and migration validation — then applies remote D1 migrations for SQLite apps (verifying the applied set equals the validated set and none remain pending), and finally runs `wrangler deploy` on exactly the verified artifact. Auth apps must ship checked-in migrations that produce the Better Auth schema — the managed platform's runtime auth-migration step does not run on this backend.
+
+The build deliberately comes **before** the secret, auth-schema, and migration gates, because those gates inspect the real emitted worker rather than a prediction of it. A missing secret or a bad migration surfaces after the build has run — relevant when a build is expensive or has side effects. Remote D1 migrations run only once every gate has passed, so a failed gate mutates nothing remote.
+
+`--provision` creates any D1 database, KV namespace, R2 bucket, Queues, Hyperdrive config, and the ISR cache namespace your source needs, then lets wrangler write the real ids into your root `wrangler.jsonc`. It is **idempotent** — re-running creates nothing that already exists (it reads existing ids first). Notes:
+
+- **Provision is a single-operator, dev-machine action.** The lock that guards it is per local config path only; it does not coordinate across machines. Two people provisioning the same account at once could create duplicate resources. `--provision` also **fails closed in CI / non-interactive shells** unless your committed `wrangler.jsonc` already covers every resource (a provable no-op). Provision locally, commit the updated `wrangler.jsonc`, then let CI run `void deploy --backend cloudflare`.
+- **Your `wrangler.jsonc` is rewritten.** When wrangler writes the new ids, it preserves your comments but normalizes the whole file's indentation — expect that in the diff.
+- **Your `.env*` values ship as plaintext.** All four of `.env`, `.env.local`, `.env.production` and `.env.production.local` are loaded by this backend and baked into the worker's `vars` — the `.local` files included, unlike managed `void deploy`. A value also present in the shell environment is stripped back out. Move real secrets to `wrangler secret put <NAME>` so they are not committed into `wrangler.json`. Deploy warns on likely-plaintext secrets and hard-blocks on missing required secrets.
+- **First deploy of a not-yet-deployed worker:** its remote secrets can't be listed yet, so the secret gate prints the required key names and the `wrangler secret put <NAME>` commands to bootstrap them on the draft worker before deploying (or add a value to `.env` / `.env.production` and rerun).
+
+See the [Cloudflare integration guide](../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account) for the full walk-through.
 
 ## Database
 

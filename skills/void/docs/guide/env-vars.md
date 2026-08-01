@@ -109,14 +109,22 @@ In practice `env.ts` should only import schema helpers from `void/env` and — a
 
 Void uses Vite's standard `.env` convention to populate the schema:
 
-| File                    | Loaded in dev | Shipped on deploy  |
-| ----------------------- | ------------- | ------------------ |
-| `.env`                  | yes           | yes (`plain_text`) |
-| `.env.local`            | yes           | no                 |
-| `.env.production`       | yes           | yes (`plain_text`) |
-| `.env.production.local` | yes           | no                 |
+Whether a file's values ship depends on which deploy path you use:
+
+| File                    | Loaded in dev | Shipped by `void deploy` | Shipped by `--backend cloudflare` |
+| ----------------------- | ------------- | ------------------------ | --------------------------------- |
+| `.env`                  | yes           | yes (`plain_text`)       | yes (worker `vars`)               |
+| `.env.local`            | yes           | no                       | **yes** (worker `vars`)           |
+| `.env.production`       | yes           | yes (`plain_text`)       | yes (worker `vars`)               |
+| `.env.production.local` | yes           | no                       | **yes** (worker `vars`)           |
 
 `.local` files are gitignored by convention — use them for secrets you don't want in source control.
+
+::: warning `.local` files are not deploy-excluded on `--backend cloudflare`
+Managed `void deploy` reads only `.env` and `.env.production`, so a `.local` file keeps secrets off the platform. The self-host `void deploy --backend cloudflare` path instead runs Vite's production env loading, which reads all four files and bakes them into the worker's `vars` as plaintext. A value that is also `export`ed in the shell with the same value is stripped back out, so this bites hardest in CI, where the variable usually only exists in the file.
+
+On that path, keep real secrets out of every `.env*` file and use `wrangler secret put <NAME>` instead. See [Cloudflare deploy](/integrations/cloudflare).
+:::
 
 ### Dotenv variable expansion
 

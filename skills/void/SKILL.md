@@ -32,39 +32,40 @@ Then ask what to do next.
 
 ## Task Routing
 
-| User intent                               | Docs file(s)                                                                              |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| CLI command syntax, flags, env vars       | `docs/reference/cli.md`                                                                   |
-| Initial setup, onboarding, first app      | `docs/guide/quickstart.md`, `docs/reference/cli.md`                                       |
-| App type detection and mode behavior      | `docs/guide/app-types.md`, `docs/reference/config.md`                                     |
-| Server/API routing and middleware         | `docs/guide/server-routing.md`, `docs/integrations/hono.md`                               |
-| Pages mode, loader/action, forms, layouts | `docs/guide/pages-routing/*.md`, `docs/guide/type-safety.md`                              |
-| Database and migrations                   | `docs/guide/database.md`, `docs/guide/type-safety.md`                                     |
-| Typed fetch and end-to-end typing         | `docs/guide/typed-fetch.md`, `docs/guide/type-safety.md`                                  |
-| Authentication                            | `docs/guide/auth.md`, `docs/guide/env-vars.md`                                            |
-| Cloudflare runtime bindings and config    | `docs/integrations/cloudflare.md`, `docs/reference/config.md`, `docs/guide/env-vars.md`   |
-| AI inference (Workers AI, providers)      | `docs/guide/ai.md`                                                                        |
-| KV / storage / queues / cron jobs         | `docs/guide/kv.md`, `docs/guide/storage.md`, `docs/guide/queues.md`, `docs/guide/jobs.md` |
-| SSR and caching                           | `docs/guide/ssr.md`, `docs/guide/edge/*.md`                                               |
-| Rewrites, redirects, fallbacks            | `docs/guide/edge/rewrites.md`, `docs/guide/edge/redirects.md`, `docs/reference/config.md` |
-| Static site generation                    | `docs/guide/ssg.md`                                                                       |
-| Deployment and CI                         | `docs/guide/deployment.md`, `docs/reference/cli.md`                                       |
-| Project status, deployment history        | `docs/reference/cli.md`                                                                   |
-| Cache purging                             | `docs/reference/cli.md`                                                                   |
-| Project logs, runtime errors              | `docs/reference/cli.md`                                                                   |
-| Secrets management (put/sync/delete)      | `docs/reference/cli.md`, `docs/guide/env-vars.md`                                         |
-| Typed env vars (`defineEnv`, `env.ts`)    | `docs/guide/env-vars.md`                                                                  |
-| Custom domain setup                       | `docs/reference/cli.md`                                                                   |
-| Database status, reset, seed, export      | `docs/reference/cli.md`, `docs/guide/database.md`                                         |
-| Auth login/logout/whoami                  | `docs/reference/cli.md`                                                                   |
-| Overview / introduction                   | `docs/guide/index.md`                                                                     |
-| API surface details                       | `docs/reference/api.md`                                                                   |
-| Meta framework integration                | `docs/integrations/frameworks/*.md`                                                       |
-| Coding agent setup                        | `docs/integrations/agents.md`                                                             |
-| Node.js / Bun / Deno targets              | `docs/integrations/nodejs-bun-deno.md`                                                    |
-| ORMs and external databases               | `docs/integrations/orms-and-external-dbs.md`                                              |
-| Project structure and conventions         | `docs/reference/structure.md`                                                             |
-| Resource/binding inference                | `docs/reference/resource-inference.md`                                                    |
+| User intent                                | Docs file(s)                                                                              |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| CLI command syntax, flags, env vars        | `docs/reference/cli.md`                                                                   |
+| Initial setup, onboarding, first app       | `docs/guide/quickstart.md`, `docs/reference/cli.md`                                       |
+| App type detection and mode behavior       | `docs/guide/app-types.md`, `docs/reference/config.md`                                     |
+| Server/API routing and middleware          | `docs/guide/server-routing.md`, `docs/integrations/hono.md`                               |
+| Pages mode, loader/action, forms, layouts  | `docs/guide/pages-routing/*.md`, `docs/guide/type-safety.md`                              |
+| Database and migrations                    | `docs/guide/database.md`, `docs/guide/type-safety.md`                                     |
+| Typed fetch and end-to-end typing          | `docs/guide/typed-fetch.md`, `docs/guide/type-safety.md`                                  |
+| Authentication                             | `docs/guide/auth.md`, `docs/guide/env-vars.md`                                            |
+| Cloudflare runtime bindings and config     | `docs/integrations/cloudflare.md`, `docs/reference/config.md`, `docs/guide/env-vars.md`   |
+| AI inference (Workers AI, providers)       | `docs/guide/ai.md`                                                                        |
+| KV / storage / queues / cron jobs          | `docs/guide/kv.md`, `docs/guide/storage.md`, `docs/guide/queues.md`, `docs/guide/jobs.md` |
+| SSR and caching                            | `docs/guide/ssr.md`, `docs/guide/edge/*.md`                                               |
+| Rewrites, redirects, fallbacks             | `docs/guide/edge/rewrites.md`, `docs/guide/edge/redirects.md`, `docs/reference/config.md` |
+| Static site generation                     | `docs/guide/ssg.md`                                                                       |
+| Deployment and CI                          | `docs/guide/deployment.md`, `docs/reference/cli.md`                                       |
+| Self-host deploy to own Cloudflare account | `docs/integrations/cloudflare.md`, `docs/reference/cli.md`                                |
+| Project status, deployment history         | `docs/reference/cli.md`                                                                   |
+| Cache purging                              | `docs/reference/cli.md`                                                                   |
+| Project logs, runtime errors               | `docs/reference/cli.md`                                                                   |
+| Secrets management (put/sync/delete)       | `docs/reference/cli.md`, `docs/guide/env-vars.md`                                         |
+| Typed env vars (`defineEnv`, `env.ts`)     | `docs/guide/env-vars.md`                                                                  |
+| Custom domain setup                        | `docs/reference/cli.md`                                                                   |
+| Database status, reset, seed, export       | `docs/reference/cli.md`, `docs/guide/database.md`                                         |
+| Auth login/logout/whoami                   | `docs/reference/cli.md`                                                                   |
+| Overview / introduction                    | `docs/guide/index.md`                                                                     |
+| API surface details                        | `docs/reference/api.md`                                                                   |
+| Meta framework integration                 | `docs/integrations/frameworks/*.md`                                                       |
+| Coding agent setup                         | `docs/integrations/agents.md`                                                             |
+| Node.js / Bun / Deno targets               | `docs/integrations/nodejs-bun-deno.md`                                                    |
+| ORMs and external databases                | `docs/integrations/orms-and-external-dbs.md`                                              |
+| Project structure and conventions          | `docs/reference/structure.md`                                                             |
+| Resource/binding inference                 | `docs/reference/resource-inference.md`                                                    |
 
 ## Working Rules
 

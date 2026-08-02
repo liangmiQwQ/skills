@@ -58,7 +58,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "c9ae2f498fc9ebc64687e51cfcd0f1acd1aaefeb925709401c609012c2482115"
+      "computedHash": "40a21295171f8fbc7c5b366511601081a50bd1cd9f3ef7b287396bba584ae690"
     },
     "kill-ai-slop": {
       "source": "yetone/kill-ai-slop",
@@ -106,7 +106,7 @@
       "source": "tw93/Waza",
       "sourceType": "github",
       "skillPath": "skills/think/SKILL.md",
-      "computedHash": "21f849896707959c1d4241715c8ecefdc4ee2a64601e201f5e1f0d2f8a79b665"
+      "computedHash": "8a40cb2afa968ffaf93adfeefd548f5a1784d30a7e82261396ca3ac1d6f0573d"
     },
     "tsdown": {
       "source": "antfu/skills",

@@ -33,6 +33,8 @@ PR description should always follow simple and human-readable principles.
 
 Avoid excessive headings and checklists when simple paragraphs are enough. Try to use short paragraphs to express your idea and implementation details. Try using sentences like `This PR adds ...`, `The current behavior ...`, `Follows ...'s behavior`, `It means that`, `It doesn't mean that`. Avoid too long paragraphs as well.
 
+You are encouraged to use `-`(list) or `1. 2.` in the PR description if the PR includes different behaviors for different conditions.
+
 If this PR is linked to an issue, put a `Close #xyz` on the top of the description.
 
 For bug fixes without an issue, you should describe the bug first. And then describe this PR's changes.

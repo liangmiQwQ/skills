@@ -77,6 +77,7 @@ Most configuration is inferred automatically. Use `void.json` to override defaul
 | `routing.prerender`  | Paths to prerender as static HTML at deploy time                                                                                                              |
 | `routing.revalidate` | Default revalidation TTL in seconds for cached responses                                                                                                      |
 | `inference.bindings` | Override inferred bindings. You only need this if auto-detection is not doing what you want. Accepts `true` or a custom binding name such as `"db": "MY_DB"`. |
+| `routing.notFound`   | **Ignored.** SvelteKit, Nuxt, Analog, and Astro pin `not_found_handling` to `"none"` — the framework worker owns unmatched HTML. `void deploy` warns if set.  |
 
 See [Configuration](../../reference/config.md) for the full reference.
 

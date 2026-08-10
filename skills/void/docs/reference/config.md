@@ -378,6 +378,24 @@ Paths to prerender as static HTML at deploy time. Each path must start with `/`.
 }
 ```
 
+#### `routing.notFound`
+
+Override how the asset layer answers a request that matched no asset and no worker route. One of `"single-page-application"`, `"404-page"`, or `"none"`. If omitted, Void infers it — see [Static Assets](../guide/edge/static-assets.md#unmatched-requests).
+
+```json
+{
+  "routing": {
+    "notFound": "404-page"
+  }
+}
+```
+
+Set `"404-page"` when your assets come from a static site generator (VitePress, Docusaurus, …) and you want unknown URLs to serve the generator's own `404.html` with a real HTTP 404. Without it, an app whose only backend is API routes keeps the inferred SPA fallback, so every unknown URL returns `index.html` with a `200` — correct for a single-page app, wrong for a generated site, and bad for crawlers.
+
+`run_worker_first` is untouched, so API routes, auth, and `/__void/*` still reach the worker first. When the worker owns HTML routing it also serves the resolved behavior itself, since `run_worker_first: ["/**"]` means the platform switch never runs — see [Unmatched requests](../guide/edge/static-assets.md#unmatched-requests).
+
+This does **not** apply to SvelteKit, Nuxt, Analog, or Astro deploys: those pin `not_found_handling` to `"none"` because the framework's own worker owns unmatched HTML, and `void deploy` warns if you set `routing.notFound` anyway.
+
 ### `inference`
 
 Configuration for build-time inference, including how Void detects your app type, bindings, and build process.
@@ -403,11 +421,19 @@ Custom names are used in the deploy manifest, Wrangler config generation/sync, r
 
 #### `inference.build`
 
-Override the build command. Useful for frameworks with their own CLIs (Nuxt, Astro) or static apps with custom build scripts. If omitted, the CLI uses the detected default build command for the current app type.
+Override the build command. Useful for frameworks with their own CLIs (Nuxt, Astro) or static apps with custom build scripts. If omitted, the CLI uses the detected default build command for the current app type. It applies to every app type, including `"void"` (where the default is `vite build`).
 
 ```json
 { "inference": { "build": "nuxt build --preset cloudflare-module" } }
 ```
+
+The command is run through a shell from the project root, with the project's own `node_modules/.bin` on `PATH`, so bare binaries and `&&` chains work:
+
+```json
+{ "inference": { "build": "vitepress build && vite build" } }
+```
+
+That chain is how a static site generator and a Void backend ship together — see [Adding a backend to a static site](../guide/app-types.md#adding-a-backend-to-a-static-site).
 
 #### `inference.scanDirs`
 

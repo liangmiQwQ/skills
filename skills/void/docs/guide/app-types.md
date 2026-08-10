@@ -73,6 +73,48 @@ At the edge, the resolution order is:
 
 **Deploy:** `void deploy` or `void deploy --dir <path>` uploads static files directly. Assets are served from the edge with automatic caching.
 
+## Adding a backend to a static site
+
+A static site generator plus a few API routes is a Void app, not a static site. Auto-detection sees the SSG dependency first (priority 2 below), so if you leave `inference.appType` unset, `void deploy` refuses rather than deploying the site and silently dropping `routes/`. Tell it which you meant.
+
+To deploy the site **and** the backend, run both builds from one command and let Void's build fold the generated site into its client output:
+
+```json
+// void.json
+{
+  "inference": {
+    "appType": "void",
+    "build": "vitepress build && vite build"
+  }
+}
+```
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { voidPlugin } from 'void';
+
+export default defineConfig({
+  plugins: [voidPlugin()],
+  // The SSG's output becomes the static assets of the Void build.
+  publicDir: '.vitepress/dist',
+});
+```
+
+`vitepress build` emits the site, then `vite build` copies `publicDir` into `dist/client` and emits the worker into `dist/ssr`. Keep `voidPlugin()` in the **root** `vite.config.ts` only — not in the generator's own config (e.g. `.vitepress/config.ts`).
+
+Because the worker now owns unmatched requests, add [`routing.notFound`](../reference/config.md#routing-notfound) if you want the generator's `404.html` instead of the SPA-style `index.html` fallback:
+
+```json
+{ "routing": { "notFound": "404-page" } }
+```
+
+To deploy the static output only and **not** the backend, say so explicitly:
+
+```json
+{ "inference": { "appType": "static" } }
+```
+
 ## Auto-Detection
 
 When running `void deploy` and no `inference.appType` is set in `void.json`, the detection logic runs in this order:
@@ -81,6 +123,7 @@ When running `void deploy` and no `inference.appType` is set in `void.json`, the
 | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | 1        | `--dir` flag                                                                                                    | Static (or SPA with `--spa`)                |
 | 2        | Known SSG in dependencies (`vitepress`, `@docusaurus/core`)                                                     | Static, builds with SSG CLI                 |
+| 2a       | ...and backend files also exist                                                                                 | Refused — set `inference.appType` yourself  |
 | 3        | `@tanstack/react-start`, `@react-router/dev`, `@sveltejs/kit`, `nuxt`, `@analogjs/platform`, or `astro` in deps | Framework                                   |
 | 4        | Backend files exist (`routes/`, `pages/`, `middleware/`, `crons/`, `queues/`, SSR entry)                        | Void app                                    |
 | 5        | `vite` or `vite-plus` in dependencies, no backend files                                                         | SPA, builds with `vite build` or `vp build` |

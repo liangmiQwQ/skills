@@ -5,7 +5,7 @@ description: Load this skill when you are required to handling Codex's review su
 
 ## Before the review
 
-You shouldn't fetch GitHub or start to do code change at first. The first task for you is to understand the PR's movitation and design direction.
+You shouldn't fetch GitHub review suggestions or start to do code change at first. The first task for you is to understand the PR's movitation and design direction.
 
 You can read the PR description, original commit and diff, make sure you completely understand the goal the PR makes. Breaking changes bourdary and features that are explicitly postponed.
 
@@ -23,7 +23,7 @@ When you are required to resolve Codex's review, you are basically in a loop. I'
   - Old problem: the problem that already has before this PR.
   - Defensive edge cases: boundary conditions like broken status and breaking installation
   - Design conflict: the solution to the problem conflicts with the core design direction of the PR. Like things that are explicitly postponed.
-- Make patches and commits to resolve valid ones, then mark them as resolved. Explain design conflict, old problems, etc... Mark unreasonable ones are resolved. For defensive edge cases, you should check whether it takes too much effort to make, if it does, skip and tell the reason (very edge case), if not, just make it. To avoid wasting too much effort on hypothetical damage scenarios, you can explain that such situations are practically impossible.
+- Make patches and commits to resolve valid ones, then mark them as resolved. Explain design conflict, old problems, etc... Mark unreasonable ones are resolved. For defensive edge cases, you shouldn't fix them by default. And then check whether its real trigger, only fix one that will actually happen. To avoid wasting too much effort on hypothetical damage scenarios, you can explain that such situations are practically impossible.
 - If you found all of them are completely bullshit, you can treat your work as done, and get into the next part.
 
 There are some cases where you are strictly forbidden to modify the code
@@ -34,11 +34,20 @@ There are some cases where you are strictly forbidden to modify the code
 - The behavior falls under follow-up functionality explicitly deferred in the PR description
 - If a review suggestion conflicts with a breaking change, the suggestion should be rejected with an explanation; do not restore compatibility behaviors that were intentionally removed.
 
-You should avoid too many review turns. The bigger the number of turns is, the less trustable the review suggestions are. You can maintain a score system in your own side to control this.
+You should avoid too many review turns. The bigger the number of turns is, the less trustable the review suggestions are. You can maintain a score system in your own side to control this. Every cost should be made to grow at a quadratic rate.
+
+For example
+The first turn: reasonable
+The second turn: Okay
+The third turn: I hope it is the last (This marks a threshold; beyond this stage, any suggestions should be treated with caution)
+
+You should prevent turns more than 8.
+
+If the PR is exceptionally large, the figures here may be multiplied, but this applies only to large PRs.
 
 ## Work after the loop
 
-After you think you've done the work (like got the thumb up, or find they are all invalid), do a round of simplify, refactor the logic completely and remove duplicated or bad code. And tell the user it's done.
+After you think you've done the work (like got the thumb up, or find they are all invalid), do a round of simplify. Then, review the accumulated diffs, remove unnecessary patches, and avoid introducing new behaviors.
 
 ## What you should learn before
 

@@ -17,7 +17,7 @@ When you are required to resolve Codex's review, you are basically in a loop. I'
 
 - Submit a comment under the corresponding pull request, the content of the comment is `@codex review`
 - Wait for its responding and review suggestions. It usually takes 5-15 minutes, you'd better to check it every minute. If you didn't get the response in one hour, stop and tell the user `timeout`.
-- After you get the Codex's response, there can be three different cases. If you get the message that `limitation hit`, stop and tell the user, or if you get the message `Do not find major problem`, and get a thumb up from Codex, stop and do the rest of operations below, if you get review suggestions, just switch to the next step.
+- After you get the Codex's response, there can be three different cases. If you get the message that `limitation hit`, stop and tell the user that no enough credit, or if you get the message `Didn't find any major issues.`, stop and do the rest of operations below, if you get review suggestions, just switch to the next step.
 - Do not start modify the code immediately, you need to determine whether it is a valid suggestion first. Divide them into these cases.
   - True regression: the real regression issue that the PR imports
   - Old problem: the problem that already has before this PR.

@@ -80,6 +80,7 @@ File-based HTTP API endpoints built on [Hono](https://hono.dev). Each file expor
 - **Catch-all**: `[...slug]` matches the remaining path
 - **Route groups**: `(admin)/` organizes files without affecting URL paths
 - **Files starting with `_`** are ignored
+- **Environment suffix**: `debug.dev.ts` builds in development only, `metrics.prod.ts` in production only
 
 See [Server Routing](/guide/server-routing) for the full guide.
 

@@ -271,6 +271,30 @@ For Drizzle projects, deploy performs a read-only schema drift check. If a new m
 
 Every deploy writes a structured JSONL trace to `~/.void/logs/deploy-<timestamp>.jsonl` regardless of `--debug`. On failure the path is printed at the end of the error message so you can attach it when reporting platform issues. `VOID_DEPLOY_DEBUG=1` is accepted as an alternate trigger for stderr mirroring.
 
+When a deploy fails after it starts, the CLI also prints a summary of that trace under the error, so the cause is visible where the file is not — a CI runner, for example, is discarded with the job. The summary has two blocks: every `error` record with its flattened cause chain, then the last 20 records as a timeline.
+
+Pre-flight failures print no summary. A missing project, a rejected flag combination, or an unsupported `--backend cloudflare` feature stops before any trace exists, and each of those prints its own message explaining what to change. A build failure prints no summary either — the build streams its own output straight to the terminal.
+
+Void masks the credentials it emits itself: signed query parameters, bearer tokens, and any field whose key names a credential.
+
+Masking your own values is left to your CI platform, which holds the secrets and masks them before the log is written. GitHub Actions does this for everything under `secrets.*`. Void does not guess at credential-shaped variable names, and it does not parse credentials out of values you supplied — a password inside a `DATABASE_URL` in your build command prints as written. Register such values as CI secrets, or keep them out of the build command.
+
+```
+■  deploy: Deploy failed: deploy in progress
+│  Deployment: dpl_7zgitxdrxxz9
+│  Detailed log: ~/.void/logs/deploy-2026-08-21T03-24-19-764Z.jsonl
+│
+│  Errors
+│     9.0s  deploy_server_error
+│           deploymentId=dpl_7zgitxdrxxz9
+│           message=deploy in progress
+│
+│  Last 20 of 26 entries
+│     8.4s  info   finalize_start        assets=98 workers=0
+│     8.6s  info   stream_deployment_id  deploymentId=dpl_7zgitxdrxxz9
+│     9.0s  error  deploy_server_error   message=deploy in progress
+```
+
 Project resolution precedence:
 
 1. `--project <name>`

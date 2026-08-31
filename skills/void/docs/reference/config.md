@@ -254,6 +254,7 @@ Curated Cloudflare Workers configuration. Cloudflare-targeted apps require an ex
 | `compatibility_date`  | `string`   | Cloudflare Workers compatibility date  |
 | `compatibility_flags` | `string[]` | Cloudflare Workers compatibility flags |
 | `vars`                | `object`   | Plain-text worker variables            |
+| `limits`              | `object`   | Worker resource limit overrides        |
 
 ```json
 {
@@ -268,6 +269,18 @@ Curated Cloudflare Workers configuration. Cloudflare-targeted apps require an ex
 ```
 
 `worker.vars` values must be strings. They are merged into Worker bindings before `.env` files are loaded, so project `.env` values override `worker.vars` for local dev/build. Do not put secrets here; use `env.ts` plus `void secret put` for production secrets.
+
+`worker.limits.cpu_ms` caps Workers CPU time per request, in milliseconds. It must be an integer between 1 and 300000 (Cloudflare's hard maximum, 5 minutes). A deploy that requests more than your account plan's ceiling fails with an error naming both the requested value and the plan maximum. Only a rollback clamps: rolling back to a deployment whose configured limit now exceeds your plan applies the plan ceiling instead of failing. If your plan changes so that a previously valid value now exceeds the ceiling, deploys keep failing until you lower `cpu_ms` in `void.json`. On the self-hosted path (`void deploy --backend cloudflare`, or a bare `wrangler deploy` of the build output), the value is written into the generated `dist/ssr/wrangler.json` as `limits.cpu_ms` and enforced by Cloudflare directly. The Void plan ceiling does not apply there, but your Cloudflare account's own CPU-time allowance still does: the Workers Free plan caps CPU at 10 ms per request, and the Workers Paid plan allows up to 300000 ms. A value above what your Cloudflare account permits is constrained or rejected by Cloudflare, not by Void.
+
+```json
+{
+  "worker": {
+    "limits": {
+      "cpu_ms": 30000
+    }
+  }
+}
+```
 
 ### `routing`
 
@@ -395,6 +408,8 @@ Set `"404-page"` when your assets come from a static site generator (VitePress, 
 `run_worker_first` is untouched, so API routes, auth, and `/__void/*` still reach the worker first. When the worker owns HTML routing it also serves the resolved behavior itself, since `run_worker_first: ["/**"]` means the platform switch never runs — see [Unmatched requests](../guide/edge/static-assets.md#unmatched-requests).
 
 This does **not** apply to SvelteKit, Nuxt, Analog, or Astro deploys: those pin `not_found_handling` to `"none"` because the framework's own worker owns unmatched HTML, and `void deploy` warns if you set `routing.notFound` anyway.
+
+TanStack Start, React Router, and vinext honor it on a managed `void deploy`, which resolves the asset config itself. Void writes no `assets` policy into their generated worker wrangler config (`dist/server` for TanStack Start and vinext App, `build/server` for React Router, `dist/ssr` for vinext Pages), so on a self-hosted `wrangler deploy` it applies only if that config declares a complete `assets` policy of its own — `binding`, `directory`, `not_found_handling`, and `run_worker_first`. Void leaves those fields untouched, so your own policy is honored; with none, Cloudflare's default applies. `vite build` warns when it is set. See [Static Assets](../guide/edge/static-assets.md#unmatched-requests) for the per-framework paths.
 
 ### `inference`
 

@@ -103,7 +103,7 @@ Apply these filename rules exactly when mapping old handlers to `routes/`:
 1. Extension and suffix parsing order
 
 - Strip extension (`.ts`, `.js`, `.mts`, `.mjs`).
-- Strip env suffix (`.dev`, `.prod`).
+- Strip env suffix (`.dev`, `.prod`). The suffix restricts the route to that environment, so only use it for handlers that must not ship to the other one.
 - Strip HTTP method suffix (`.get`, `.post`, `.put`, `.delete`, `.patch`).
 - Strip trailing `index` segment.
 - Remove route group segments `(group-name)` from URL path.

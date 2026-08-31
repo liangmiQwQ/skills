@@ -62,9 +62,76 @@ If your CI pipeline runs typechecking or other static analysis before deploy, ru
 | `VOID_TOKEN`   | Auth token (for CI, skips OAuth) |
 | `VOID_PROJECT` | Project slug override            |
 
-## GitHub Actions
+## GitHub
 
 You can deploy from a GitHub repo on every push to `main`. Running `void init --github` generates `.github/workflows/void-deploy.yml` in your project.
+
+### Void GitHub App (recommended)
+
+No `.github/workflows/void-deploy.yml` or repository `VOID_TOKEN` is required.
+
+1. Initialize your Void project
+
+```bash
+void init
+# Or, for existing Void project:
+void project link
+```
+
+2. Install the Void GitHub app
+
+```bash
+void github install
+```
+
+You should receive GitHub url asking you to install and authorize `Void Deploy`.
+
+In the browser, select the GitHub account/organization and grant access to the repository.
+
+:::details If someone already installed the App for your organization
+Join that installation instead:
+
+```bash
+void github join
+```
+
+:::
+
+3. Link your repository to your project
+
+```bash
+void github connect --executor container
+```
+
+4. Verify the connection
+
+```bash
+void github status
+```
+
+You should receive an output like:
+
+```bash
+Repository      <owner/repository>
+Branch          main
+Build executor  container
+Deploy workflow .github/workflows/void-deploy.yml (unused for container builds)
+
+```
+
+5. Push to the configured branch to trigger a new deploy
+
+```bash
+git push origin main
+```
+
+6. Follow the build
+
+```bash
+void build logs --follow
+```
+
+### GitHub Actions
 
 The workflow authenticates with [GitHub OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect) — there is **no long-lived `VOID_TOKEN` secret to store or rotate**. `void deploy` detects GitHub Actions and does the exchange itself: it requests a short-lived OIDC token from GitHub (audience `void`), exchanges it at `POST $VOID_API_URL/auth/github-oidc` for a short-lived project-scoped deploy token (about 15 minutes on the free tier; longer on higher plans, capped at ~60 minutes), and deploys — so the workflow is a single `void deploy` step. `permissions: id-token: write` is still required: it is what lets the job (and the CLI) mint the OIDC token.
 

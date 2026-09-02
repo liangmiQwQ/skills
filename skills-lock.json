@@ -130,7 +130,7 @@
       "source": "liangmiQwQ/vp-config",
       "sourceType": "github",
       "skillPath": "skills/use-vp-config/SKILL.md",
-      "computedHash": "f864d1c7ee28e59027fe791d11468177392d3f077ec0a0a7e83ab21ac18f5d00"
+      "computedHash": "11d8be852715764f12f0068c4b3dce95dab35e177eaba0b0429e254ef5420033"
     },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",

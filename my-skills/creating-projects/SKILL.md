@@ -9,11 +9,25 @@ When creating projects, what you should focus on is not the project code, but ev
 
 You can create a small placeholder like `todo!()` macro and `console.error()`. You can fill the code later if I required. If I don't require you implement any logic, just keep placeholders.
 
+## Required initialization gate
+
+For a completely new project, finish the managed project initialization before writing any scaffold or project files:
+
+1. Load the `$global-projects` skill and use its paired resolver to find the configured project root and project CLI.
+2. Resolve the repository owner and name. If either is missing or ambiguous, ask the user before creating the project directory.
+3. Resolve whether the repository should be public or private. If the user did not specify visibility, ask before continuing.
+4. Run the selected CLI's `init` command with the explicit visibility option from `<root>/<owner>/<repo>`.
+5. Verify the local path and `origin` remote, then create the scaffold inside that initialized repository.
+
+An explicit request to create or initialize a new project authorizes the managed initialization. Once the owner, name, and visibility are known, do not ask for a second confirmation before running `moi init --public`, `moi init --private`, or the paired `mo` command.
+
+Do not create the project in the current task directory, `work/`, `outputs/`, or another artifact directory unless the user explicitly chose that location. Generic artifact-output guidance does not override the managed project workflow.
+
+Do not use plain `git init` as a substitute for `moi init` or `mo init`. Do not silently skip managed initialization because a required choice is missing; ask the user for that choice instead.
+
 ## Related skills
 
-When you are required to create a completely new project (there is no foloder created, and there is no `.git` file), you are supposed to load `$global-project` skills, and use `moi` or `mo` and its `init` subcommand to control the remote and project.
-
-When you are initializing a project, like handling infrastructure and related data, you are supposed to load `$choosing-tools` skills. You can also use `$global-project` to find how my other projects use CI and tools
+When you are initializing a project, like handling infrastructure and related data, you are supposed to load `$choosing-tools` skills. You can also use `$global-projects` to find how my other projects use CI and tools
 
 ## Aspects of a project
 

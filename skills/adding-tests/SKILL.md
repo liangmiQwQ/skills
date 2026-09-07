@@ -1,6 +1,6 @@
 ---
 name: adding-tests
-description: Load this skill when a project includes tests, and you are finishing things like bug fix or feature addition and you plan to do tests related work.
+description: Load this skill when you add a test.
 ---
 
 # Adding Tests
@@ -36,3 +36,11 @@ These apply regardless of context:
 - **Test the public surface** — never modify production code (add params, expose internals) to make a test work
 
 Read the relevant branch file for context-specific guidance.
+
+## Transparent Response
+
+For the every test you added, you should mention and explain what is used for in the final response that displays to the users.
+
+Use `list` and `table` markdown grammar and explain the exact role clearly. Sometimes, one test function or one fixture includes more than one purpose or item, you are still required to describe them. You are allowed to use nested `list` (no more than 2 layers)
+
+That means, every test you added will be shown to the users, you should control the number of tests at a reasonable count otherwise you might annoy users.

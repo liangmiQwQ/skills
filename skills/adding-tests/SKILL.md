@@ -1,6 +1,6 @@
 ---
 name: adding-tests
-description: Load this skill when you add a test.
+description: Load this skill when you add a test, including modifying a test to fit an added function. Do not load this skill when you are deleting tests or modifying a test to fit a deleted feature.
 ---
 
 # Adding Tests

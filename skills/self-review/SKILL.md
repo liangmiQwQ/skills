@@ -11,9 +11,13 @@ You can read the PR description, original commit and diff, make sure you complet
 
 If you are in a loop, or in a `goal` mode, you should storage all these things, make sure you can still remember them during your sessions. Keep them in mind.
 
+Sometimes, users won't let you to use `@codex review` directly. Follow users' guidance such as `using subagents to review`.
+
 ## Handle the review
 
 When you are required to resolve Codex's review, you are basically in a loop. I'm not sure where is the start of the loop, maybe you will find users already called `@codex review` for you. And you should continue this loop unless users tell you only fix one turn.
+
+You are required to handle this process, and for detailed things, like analyzing the review suggestion should be done by subagents, refer to `How to handle the resaonable review suggestions` part to learn more about how to divide the jobs.
 
 - Submit a comment under the corresponding pull request, the content of the comment is `@codex review`
 - Wait for its responding and review suggestions. It usually takes 5-15 minutes, you'd better to check it every minute. If you didn't get the response in one hour, stop and tell the user `timeout`.
@@ -36,14 +40,32 @@ There are some cases where you are strictly forbidden to modify the code
 
 You should avoid too many review turns. The bigger the number of turns is, the less trustable the review suggestions are. You can maintain a score system in your own side to control this. Every cost should be made to grow at a quadratic rate.
 
-For example
-The first turn: reasonable
-The second turn: Okay
-The third turn: I hope it is the last (This marks a threshold; beyond this stage, any suggestions should be treated with caution)
+Most of the time, the third turn is wished to be the last one. (This marks a threshold; beyond this stage, any suggestions should be treated with caution)
 
 You should prevent turns more than 8.
 
 If the PR is exceptionally large, the figures here may be multiplied, but this applies only to large PRs.
+
+## How to divide the work and delegate to subagents
+
+You should handle the whole process, and delegate work to subagents for detailed tasks. If your working environment doesn't support subagents feature, ignore this paragraph.
+
+What should be done on your side:
+
+- Analyze the PR's direction, and don't forget the PR's goal
+- Analyze user's specific prompt and do the decisions
+- Handle the timer
+- Summon and manage subagents
+
+What should be done to subagents (one item means one subagent):
+
+- Triage whether this is a valid review suggestion (include leaving comments for rejected ones)
+- Fix a set of valid review suggestions (including commit, comment)
+- Finish `Work after the loop` and users' specific work unless user required not to use subagents
+
+For the `triage` and `determine` step, you should create multiple in parallel. You are not allowed to pre-triage. You should prompt subagents and let them only return `yes` or `not`, instead of returning detailed reason. Get into the next step after all subagents return.
+
+For the `fix` step, you are expected to create only one agent for one review run. You are not allowed to tell subagents the thought or other things to fix this bug, you should only tell the agents about the changes' purpose and the content or link of valid review suggestions. And let subagents explain the exact implementation detail in the GitHub comments rather than response or subagent response. You should only know if all of them got ready. In this part, subagents themselves are allowed to create nested subagents, if the works are independent and won't cause conflict.
 
 ## Work after the loop
 

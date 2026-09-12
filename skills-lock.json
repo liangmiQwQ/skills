@@ -60,6 +60,11 @@
       "skillPath": "skills/hunt/SKILL.md",
       "computedHash": "42031e6a62e06984d3c8eb2800f99f407d4b870e192296114501f8e680d08eeb"
     },
+    "japanese-learning": {
+      "source": "liangmiQwQ/language-learning",
+      "sourceType": "github",
+      "computedHash": "9c7623c7c313088bbed09277d3b0310453bf2bd9fd5ea1e8dd88ae8a789c268d"
+    },
     "kill-ai-slop": {
       "source": "yetone/kill-ai-slop",
       "sourceType": "github",

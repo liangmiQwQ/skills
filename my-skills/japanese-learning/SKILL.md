@@ -9,7 +9,7 @@ Use the learner's actual evidence to choose the next step. Connect familiar spok
 
 ## Start with the saved record
 
-Resolve the data directory using [records.md](references/records.md). Run the bundled `scripts/learning_store.py show` for the selected learner; initialize only if no record exists. Read the profile and relevant recent events before proposing new work. Paths to bundled resources are relative to this skill, not the current working directory.
+Resolve the data directory using [records.md](references/records.md). Run the bundled `scripts/learning-store.mjs show` for the selected learner; initialize only if no record exists. Read the profile and relevant recent events before proposing new work. Paths to bundled resources are relative to this skill, not the current working directory.
 
 If no learner was specified, use `default`. Keep a classmate's submitted work in a separate learner profile when identifiable; do not assign shared progress or guesses to both people. Missing data is unknown, not zero ability. Do not claim disk access succeeded unless it did.
 

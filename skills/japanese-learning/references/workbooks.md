@@ -11,7 +11,7 @@ Keep lesson content tied to natural exchanges rather than vocabulary-only pages.
 ## Authoring and print checks
 
 - Use A4 white pages with high-contrast text and light rules; avoid ink-heavy decorations. Keep readable body text and generous handwriting space.
-- Use deterministic authoring when useful, such as Python with ReportLab. Save an editable content source and the builder, rather than only a PDF. Keep source data separate from layout if that reduces future edits.
+- Prefer JavaScript authoring with available document tooling. Use another renderer when the requested format or the available tools make it necessary, and explain that choice. Save an editable content source and the builder, rather than only a PDF. Keep source data separate from layout if that reduces future edits.
 - Discover available runtimes and fonts in the current environment. Do not distribute licensed system fonts. Embed licensed-to-embed fonts covering Japanese, Chinese and Latin; verify every used glyph, including small kana, marks and punctuation.
 - Prefer fixed lesson boundaries to accidental page flow. A front cover changes duplex pairing: check actual page order before promising that each day's two pages occupy one sheet. Print instructions should match the delivered layout.
 - Check that every required exercise is taught or has sufficient lookup support. Make answer identifiers match the final exercise identifiers, including after layout edits.
@@ -29,7 +29,7 @@ Create a new private artifact directory for each edition, for example:
 <learner>/artifacts/week-02-v1/
   workbook.pdf
   content.md
-  build.py
+  build.mjs
   manifest.json
 ```
 

@@ -14,6 +14,7 @@ ska slidevjs/slidev
 ska antfu/skills
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/vp-config
+ska liangmiQwQ/language-learning --skill japanese-learning || exit 1
 ska yetone/kill-ai-slop
 ska zerob13/skills --skill test-doctor
 sh void.sh

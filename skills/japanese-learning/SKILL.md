@@ -9,7 +9,7 @@ Use the learner's actual evidence to choose the next step. Connect familiar spok
 
 ## Start with the saved record
 
-Resolve the data directory using [records.md](references/records.md). Run the bundled `scripts/learning-store.mjs show` for the selected learner; initialize only if no record exists. Read the profile and relevant recent events before proposing new work. Paths to bundled resources are relative to this skill, not the current working directory.
+Resolve the data directory using [records.md](references/records.md). Run the bundled `node scripts/learning-store.mjs context` for the selected learner; initialize only if no record exists. Read the profile and relevant recent summaries before proposing new work; fetch a full event only when its evidence matters. Follow [memory.md](references/memory.md) for selective retrieval and meaningful updates. Paths to bundled resources are relative to this skill, not the current working directory.
 
 If no learner was specified, use `default`. Keep a classmate's submitted work in a separate learner profile when identifiable; do not assign shared progress or guesses to both people. Missing data is unknown, not zero ability. Do not claim disk access succeeded unless it did.
 
@@ -23,7 +23,7 @@ The current request and saved preferences take precedence over the teaching defa
 
 ## Close the loop on disk
 
-Record new materials, self-reports, submitted attempts and feedback in the private store using the helper. Save the source and final artifact for generated materials. Save the question/exercise identifiers together with answers so future feedback remains interpretable.
+Record meaningful new materials, self-reports, submitted attempts and feedback in the private store using the helper. Repeated preferences, routine tool activity and conversation filler do not need new learning events. Respect a preference for no answer submission or accuracy-only reports; do not require either to continue. Save the source and final artifact for generated materials. Save the question/exercise identifiers together with answers so future feedback remains interpretable.
 
 A generated workbook is **assigned material**, not completed practice. A self-report is not an assessed result. Report mastery only when supported by actual work; keep recognition, handwriting, listening and sentence production distinct. Unknown completion dates and scores remain null.
 

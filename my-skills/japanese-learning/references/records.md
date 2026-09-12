@@ -8,9 +8,11 @@ Run the helper from its installed skill directory, using absolute paths if the w
 
 ```sh
 node scripts/learning-store.mjs init
-node scripts/learning-store.mjs show
+node scripts/learning-store.mjs context
+node scripts/learning-store.mjs event --id week-02-v1-created
+node scripts/learning-store.mjs show # Full history only when needed
 node scripts/learning-store.mjs record --file /absolute/path/to/event.json
-node scripts/learning-store.mjs --learner classmate-1 show
+node scripts/learning-store.mjs --learner classmate-1 context
 ```
 
 `--root /absolute/path` overrides the root for that invocation. Record a persistent custom root in the user's environment rather than depending on a particular task directory. Node.js 22+ and its built-in modules are sufficient; the helper performs no network requests.
@@ -22,7 +24,7 @@ node scripts/learning-store.mjs --learner classmate-1 show
   artifacts/<edition-id>/...
 ```
 
-`init` does not overwrite an existing profile. `show` is read-only and prints the profile plus events ordered by recording time. It reports event counts, not mastery. `record` validates the event, stamps its recording time and creates a new immutable file atomically; duplicate IDs are errors. A correction is a new event referencing the previous one. Keep private file permissions. Back up this root through the user's existing private backup system if configured; do not create or push a remote without destination-specific authorization.
+`init` does not overwrite an existing profile. `context` is the default read-only view: current profile, current material, and up to five learning-event summaries; use `--limit 0..20`. `event --id ID` reads one complete event. See [memory.md](memory.md) for what to retain and retrieve. `show` is read-only and prints the profile plus events ordered by recording time. It reports event counts, not mastery. `record` validates the event, stamps its recording time and creates a new immutable file atomically; duplicate IDs are errors. A correction is a new event referencing the previous one. Keep private file permissions. Back up this root through the user's existing private backup system if configured; do not create or push a remote without destination-specific authorization.
 
 ## Profile
 
@@ -47,7 +49,7 @@ Types:
 - `material_created`: edition ID, planned lesson IDs, topics, relative archived file paths, hashes or manifest, and workload. It does not create an attempt.
 - `exercise_attempt`: `details.material_id`, `details.answers` (nonempty list of objects with `exercise_id`, `prompt`, `answer`). Preserve the submitted content; use null for an explicitly blank answer and omit unsubmitted exercises. Attach evidence paths when available.
 - `feedback`: `details.attempt_id` referencing an existing attempt, `details.results` (nonempty list with `exercise_id`, `result`, `correction`, `reason`). Results are `correct`, `incorrect`, `partial`, `unanswered` or `not_assessed`. Optional `score` has numeric `earned` and positive `possible`; do not score work without a stated grading basis.
-- `note`: preferences, unresolved questions, plan changes, corrections or imports that are not exercise performance. Include `corrects_event_id` when applicable.
+- `note`: preferences, unresolved questions, plan changes, corrections or imports that are not exercise performance. Include `corrects_event_id` when applicable. Set `details.memory_scope: "learning"` only for notes that affect teaching; administrative notes are excluded from default context.
 
 Example of assigned material, not completed work:
 

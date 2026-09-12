@@ -143,6 +143,22 @@ function validate(event, directory) {
   }
 }
 
+function summarize(event) {
+  if (!event) return null;
+  const { id, type, occurred_on, recorded_at, summary, topics, details } = event;
+  const result = { id, type, occurred_on, recorded_at, summary, topics };
+  for (const key of [
+    "material_id",
+    "attempt_id",
+    "accuracy_percent",
+    "question_count",
+    "manifest",
+  ]) {
+    if (Object.hasOwn(details, key)) result[key] = details[key];
+  }
+  return result;
+}
+
 function main() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -154,23 +170,35 @@ function main() {
       },
       learner: { type: "string", default: "default" },
       file: { type: "string" },
+      id: { type: "string" },
+      limit: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
   });
   if (values.help) {
     console.log(
-      "Usage: node learning-store.mjs [--root PATH] [--learner ID] <init|show|record --file EVENT.json>",
+      "Usage: node learning-store.mjs [--root PATH] [--learner ID] <init|context [--limit 5]|event --id ID|show|record --file EVENT.json>",
     );
     return;
   }
   const [command] = positionals;
   assert(
-    positionals.length === 1 && ["init", "show", "record"].includes(command),
-    "Choose init, show, or record; use --help for usage",
+    positionals.length === 1 && ["init", "context", "event", "show", "record"].includes(command),
+    "Choose init, context, event, show, or record; use --help for usage",
   );
   assert(
     command === "record" ? values.file : values.file === undefined,
     "--file is required for record and only valid for record",
+  );
+  assert(
+    command === "event" ? values.id : values.id === undefined,
+    "--id is required for event and only valid for event",
+  );
+  assert(command === "context" || values.limit === undefined, "--limit is only valid for context");
+  const limit = Number(values.limit ?? 5);
+  assert(
+    Number.isInteger(limit) && limit >= 0 && limit <= 20,
+    "--limit must be an integer from 0 to 20",
   );
   const directory = resolve(expand(values.root), "japanese", slug(values.learner));
   const profilePath = join(directory, "profile.json");
@@ -190,7 +218,11 @@ function main() {
     mkdirSync(join(directory, "events"), { recursive: true, mode: 0o700 });
     mkdirSync(join(directory, "artifacts"), { recursive: true, mode: 0o700 });
     console.log(directory);
-  } else if (command === "show") {
+  } else if (command === "event") {
+    console.log(
+      JSON.stringify(readJson(join(directory, "events", `${slug(values.id)}.json`)), null, 2),
+    );
+  } else if (command === "show" || command === "context") {
     const profile = readJson(profilePath);
     const eventDirectory = join(directory, "events");
     const events = existsSync(eventDirectory)
@@ -204,9 +236,36 @@ function main() {
     const counts = Object.fromEntries(
       [...types].sort().map((type) => [type, events.filter((event) => event.type === type).length]),
     );
-    console.log(
-      JSON.stringify({ path: directory, profile, event_counts: counts, events }, null, 2),
-    );
+    if (command === "context") {
+      // Operational notes remain in history without displacing learning evidence.
+      const evidence = events.filter(
+        (event) =>
+          ["self_report", "exercise_attempt", "feedback"].includes(event.type) ||
+          (event.type === "note" && event.details.memory_scope === "learning"),
+      );
+      const current = events.findLast(
+        (event) =>
+          event.type === "material_created" &&
+          event.details.material_id === profile.current_material_id,
+      );
+      console.log(
+        JSON.stringify(
+          {
+            path: directory,
+            profile,
+            current_material: summarize(current),
+            recent_learning: (limit === 0 ? [] : evidence.slice(-limit)).map(summarize),
+            omitted_learning_count: Math.max(0, evidence.length - limit),
+          },
+          null,
+          2,
+        ),
+      );
+    } else {
+      console.log(
+        JSON.stringify({ path: directory, profile, event_counts: counts, events }, null, 2),
+      );
+    }
   } else {
     assert(existsSync(profilePath), "Initialize this learner before recording an event");
     const event = readJson(expand(values.file));

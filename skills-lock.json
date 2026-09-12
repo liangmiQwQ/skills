@@ -63,6 +63,7 @@
     "japanese-learning": {
       "source": "liangmiQwQ/language-learning",
       "sourceType": "github",
+      "skillPath": "skills/japanese-learning/SKILL.md",
       "computedHash": "d0beae2b55ec9d85efd7af00c3f7e490e5a5e1f4a5252358e7f998950979b5e3"
     },
     "kill-ai-slop": {

@@ -24,8 +24,6 @@ I recommend you to clear it if you want to fork and custom your own skills.
 
 Please refer to the `SKILLS ADDING AREA` in [sync.sh](./sync.sh) to learn more.
 
-`japanese-learning` is fetched from [language-learning](https://github.com/liangmiQwQ/language-learning) during sync and published in `skills/`. Make changes in the source repository; personal learning records remain outside both repositories.
-
 ## License
 
 [MIT](./LICENSE) © Liang Mi

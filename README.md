@@ -20,11 +20,11 @@ Please refer to [my-skills](./my-skills) directory to learn more.
 
 I recommend you to clear it if you want to fork and custom your own skills.
 
-`my-skills/japanese-learning` is a managed copy from [language-learning](https://github.com/liangmiQwQ/language-learning). The sync job refreshes it before publishing the `skills/` collection. Make changes in the source repository; local learner profiles and exercise history stay outside both repositories.
-
 ### Third Party Skills
 
 Please refer to the `SKILLS ADDING AREA` in [sync.sh](./sync.sh) to learn more.
+
+`japanese-learning` is fetched from [language-learning](https://github.com/liangmiQwQ/language-learning) during sync and published in `skills/`. Make changes in the source repository; personal learning records remain outside both repositories.
 
 ## License
 

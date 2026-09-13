@@ -60,6 +60,12 @@
       "skillPath": "skills/hunt/SKILL.md",
       "computedHash": "42031e6a62e06984d3c8eb2800f99f407d4b870e192296114501f8e680d08eeb"
     },
+    "ielts-reading": {
+      "source": "liangmiQwQ/language-learning",
+      "sourceType": "github",
+      "skillPath": "skills/ielts-reading/SKILL.md",
+      "computedHash": "d76ed85c1f308fdec40e543e996d4bc42957b9fba9d8dac7222435b1d394aee7"
+    },
     "japanese-learning": {
       "source": "liangmiQwQ/language-learning",
       "sourceType": "github",

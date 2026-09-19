@@ -4,7 +4,7 @@ outline: deep
 
 # AI
 
-Void provides a typed AI client powered by Cloudflare's [AI Gateway](https://developers.cloudflare.com/ai-gateway/). Import `ai` from `void/ai` and run inference directly from your route handlers. Usage is metered through Void.
+Void provides a typed AI client for Workers AI and Cloudflare's [AI Gateway](https://developers.cloudflare.com/ai-gateway/). Import `ai` from `void/ai` and run inference directly from your route handlers. Direct deployments use your Cloudflare account; a team platform routes requests through its installation's proxy and usage controls.
 
 ```ts
 import { ai } from 'void/ai';
@@ -71,21 +71,34 @@ const result = await ai.toMarkdown([{ name: 'document.pdf', blob: pdfBytes }]);
 
 ## Local Development
 
-AI requires Void credentials for local development. Run `void auth login` and `void project link` (or follow the interactive setup during `vite dev`) to connect your project.
+For a direct Cloudflare project, connect your account and start development:
 
-Once linked, credentials are injected automatically as worker bindings. You do not need to configure them by hand. All inference traffic goes through the Void AI proxy over HTTPS, so usage is tracked and metered the same way it is in production.
+```sh
+void connect --platform cloudflare
+npm run dev
+```
+
+When the app imports `void/ai`, Void enables a remote Workers AI binding during
+development and preview. Requests use your Cloudflare account and its allowance;
+Workers AI has no local simulator. The session uses the same keychain-backed
+Cloudflare login as the CLI, or `CLOUDFLARE_API_TOKEN` in an automated environment.
+
+For a team platform, use `void connect <platform-url>` and link your project.
+Development requests use that platform's HTTPS proxy and usage controls.
+Credentials are injected into server bindings automatically.
 
 ## Usage Limits
 
-Workers AI usage is metered in [**neurons**](https://developers.cloudflare.com/workers-ai/platform/pricing/), which is Cloudflare's unit for inference cost. Usage resets at the start of each billing cycle.
+Workers AI usage is measured in [neurons](https://developers.cloudflare.com/workers-ai/platform/pricing/).
+On a direct deployment, usage belongs to your Cloudflare account. Provider-native
+requests also use your provider credentials and their billing terms.
 
-| Plan | Included      | At limit                           |
-| ---- | ------------- | ---------------------------------- |
-| Free | 100,000/month | Blocked until billing cycle resets |
-| Solo | 300,000/month | Overage billed                     |
-| Pro  | 500,000/month | Overage billed                     |
-
-On the **free tier**, AI requests return a `429` error once the limit is reached. On **paid tiers**, usage beyond the included allowance is tracked as overage on your monthly bill.
+A team platform tracks usage in its own account and can apply per-user limits.
+Fresh self-hosted installations assign the `custom` profile, which has no
+platform-imposed AI allowance. Administrators can select a quota profile through
+[Platform Administration](./platform-administration.md). These profiles do not
+subscribe users to a commercial plan or charge them automatically; the operator
+remains responsible for its infrastructure and provider accounts.
 
 ## Cloudflare Gateway Models
 
@@ -126,11 +139,16 @@ const result = await ai.run(
 );
 ```
 
-Void always injects the `void` gateway ID and project metadata for metering.
+Managed requests use the installation's gateway and project metadata. Direct
+requests use your Workers AI binding; provider-native requests require your own
+`ai.gateway` configuration.
 
 ## Provider-Native Requests
 
-Use `ai.provider(provider).fetch(path, init)` when you want to call a provider-native API with your own provider key. The request still routes through Cloudflare AI Gateway and Void metering, but the request shape is the provider's native HTTP API.
+Use `ai.provider(provider).fetch(path, init)` for a provider-native API with your
+own provider key. The request goes through the configured Cloudflare AI Gateway
+and retains the provider's native HTTP shape. On a team platform, it also passes
+through that installation's proxy.
 
 ### OpenAI
 
@@ -266,7 +284,7 @@ For production, add your API key as a project secret:
 void secret put OPENAI_API_KEY=sk-...
 ```
 
-For local development, add it to `.env.local` in your project root:
+For local development, add it to `.env` in your project root:
 
 ```
 OPENAI_API_KEY=sk-...

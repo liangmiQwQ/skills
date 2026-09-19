@@ -14,10 +14,10 @@ Set `output: "static"` in `void.json` to prerender all pages at build time:
 
 When `output` is `"static"`:
 
-- All pages default to `prerender = true`, so they are rendered during `vite build` and written as HTML files to `dist/client/`.
+- All pages default to `prerender = true` and are written as HTML files to `dist/client/`. A standalone `vite build` renders them during the build; managed `void deploy` renders immediately afterward in its trusted parent process.
 - Use `export const prerender = false` in a page's `.server.ts` to opt out. That page will be server-rendered on request.
 - Dynamic pages without `getPrerenderPaths()` are implicitly not prerendered (the paths aren't known at build time).
-- The build output is self-contained and works for `wrangler deploy`, self-hosting, or `void deploy`.
+- The build output is self-contained and works for direct Cloudflare deployment, self-hosting, or `void deploy`.
 
 ## How it works
 
@@ -48,9 +48,11 @@ Dynamic pages **without** `getPrerenderPaths()` are not prerendered because the 
 | `output` value       | Default prerender | Per-page override                | Prerender timing           |
 | -------------------- | ----------------- | -------------------------------- | -------------------------- |
 | `"server"` (default) | `false`           | `export const prerender = true`  | Deploy-time (platform ISR) |
-| `"static"`           | `true`            | `export const prerender = false` | Build-time (`vite build`)  |
+| `"static"`           | `true`            | `export const prerender = false` | Build or deploy post-build |
 
 When `output` is omitted or set to `"server"`, behavior is unchanged. `export const prerender = true` opts individual pages into deploy-time [edge prerendering](./edge/prerendering.md).
+
+Managed deploy keeps its deployment credential out of project-controlled build scripts and Vite plugins. When static rendering needs remote D1, KV, R2, or AI, the trusted deploy process supplies the built worker with a five-minute credential scoped to that project's binding proxy only.
 
 ## Deployment behavior
 

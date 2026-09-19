@@ -586,9 +586,34 @@ The typed client is built on [ofetch](https://github.com/unjs/ofetch) with a typ
 
 `headers` and `signal` are passed through to the underlying fetch unchanged.
 
+## Durable State
+
+Imported from `"void/durable"`. See [Durable State](../guide/durable-state.md) for the complete file convention and deployment support.
+
+### `defineDurableState(definition)`
+
+Defines a typed, persisted Durable Object state machine. The returned object must be the default export of a module under `durable-objects/`; named-export the same object for typed RPC calls elsewhere in the app.
+
+```ts
+function defineDurableState<TState, TEnv, TMethods>(definition: {
+  initialState: TState | ((env: TEnv) => TState | Promise<TState>);
+  version?: number;
+  migrations?: Array<{
+    version: number;
+    migrate(state: unknown): TState | Promise<TState>;
+  }>;
+  methods: TMethods;
+  fetch?: (context, request: Request) => Response | Promise<Response>;
+  alarm?: (context) => void | Promise<void>;
+  storageKey?: string;
+}): DurableStateApi<TMethods>;
+```
+
+`DurableStateApi` exposes `class`, `get(name)`, `get(namespace, name)`, `getById(id)`, and `getById(namespace, id)`. Stubs returned by the lookup helpers contain the definition's methods with their argument types preserved and return values wrapped in `Promise`.
+
 ## Database
 
-Imported from `"void/db"`. The `db` export is a [Drizzle ORM](https://orm.drizzle.team) instance for the configured database dialect: [Cloudflare D1](https://developers.cloudflare.com/d1/) by default, or PostgreSQL when `void.json` sets `"database": "pg"` / `"postgresql"`. See the [Database guide](../guide/database.md) for usage and the [Drizzle docs](https://orm.drizzle.team/docs/select) for the full query API.
+Imported from `"void/db"`. The `db` export is a [Drizzle ORM](https://orm.drizzle.team) instance for the configured database dialect: [Cloudflare D1](https://developers.cloudflare.com/d1/) by default, PostgreSQL with `"database": "pg"`, or MySQL with `"database": "mysql"`.
 
 ### `db`
 
@@ -605,6 +630,7 @@ When the Void plugin is active, `void/db` is served as a virtual module that aut
 
 - D1 projects resolve the `DB` binding and expose `DrizzleD1Database<Schema>`.
 - PostgreSQL projects use `DATABASE_URL` during local development and Hyperdrive's `connectionString` in production, exposing `NodePgDatabase<Schema>`.
+- MySQL projects use the same connection sources and expose `MySql2Database<Schema>`.
 
 The published npm fallback uses a lazy D1 proxy that resolves the `DB` binding at first access.
 
@@ -621,7 +647,7 @@ import { env } from 'cloudflare:workers';
 const db = createDb(env.MY_OTHER_DB);
 ```
 
-For PostgreSQL projects, pass a connection string.
+For PostgreSQL and MySQL projects, pass a connection string.
 
 ```ts
 import { createDb } from 'void/db';
@@ -637,6 +663,9 @@ function createDb(d1: D1Database): DrizzleD1Database<Schema>;
 
 // PostgreSQL
 function createDb(connectionString: string): NodePgDatabase<Schema>;
+
+// MySQL
+function createDb(connectionString: string): MySql2Database<Schema>;
 ```
 
 ### Query Operators
@@ -876,10 +905,10 @@ Register an env schema and return the typed [`env`](#env) proxy. Void auto-disco
 import { defineEnv, string, number, oneOf, url } from 'void/env';
 
 export default defineEnv({
-  STRIPE_KEY: string().secret(),
+  STRIPE_KEY: string(),
   PORT: number().default(3000),
   NODE_ENV: oneOf(['development', 'production']),
-  VITE_PUBLIC_URL: url().public(),
+  VITE_PUBLIC_URL: url(),
 });
 ```
 
@@ -895,7 +924,9 @@ const port = env.PORT;
 
 ### Schema helpers
 
-`void/env` includes Standard Schema-compatible helpers: `string()`, `number()`, `boolean()`, `url()`, `email()`, `oneOf([...])`, and `json<T>()`. Each helper supports `.optional()`, `.default(value)`, `.secret()`, and `.public()`.
+`void/env` includes Standard Schema-compatible helpers: `string()`, `number()`, `boolean()`, `url()`, `email()`, `oneOf([...])`, and `json<T>()`. Each helper supports `.optional()` and `.default(value)`.
+
+Non-client keys are server values and use remote secret storage in production. `VITE_*` keys are public build-time client values. Invalid input is redacted uniformly; storage is not selected with schema modifiers.
 
 ### Types
 
@@ -958,6 +989,8 @@ Imported from `"@void/vue"`.
 | `useShared()`                      | Returns shared data injected by middleware via `c.set("shared", {...})`.                                                                                                                                                                          |
 
 Vue `Link` GET `data` is merged into the rendered `href` query string. Primitive values are serialized with `String(value)`, arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw. `prefetch` and `reloadDocument` are GET-only and throw for mutation links.
+
+Vue GET navigation remounts the page so `useForm()` picks up the destination record's URL and defaults; layouts persist. Mutations and `router.refresh()` preserve page state by default. Set `preserveState` explicitly to override the default for navigation within the same record.
 
 ### `@void/react`
 
@@ -1153,6 +1186,7 @@ This table lists app-facing imports. Exported implementation subpaths such as `v
 | `void/client`             | `fetch`, `fetchStream`, `FetchError`, `auth`, `createAuthClient`, `AuthUser`, `AuthSession`, `AuthState`                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `void/client/{framework}` | Same as `void/client`, with framework-specific Better Auth clients for `react`, `vue`, `svelte`, and `solid`                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `void/ws`                 | `defineRoom`, `defineWebSocket`, `connect`, WebSocket context and connection types                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `void/durable`            | `defineDurableState`, typed state/RPC/context/migration types                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `void/sse`                | `eventStream`, `formatSse`, `formatSseText`, `getLastEventId`, `SseStreamClosedError`, SSE message and stream types                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `void/sse/client`         | `connectEventStream`, browser `EventSource` wrapper types                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `void/live`               | `defineLiveStream`, SSE topic fanout runtime types. Server-only.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -1164,7 +1198,9 @@ This table lists app-facing imports. Exported implementation subpaths such as `v
 | `void/drizzle-arktype`    | Re-exports [`drizzle-arktype`](https://orm.drizzle.team/docs/arktype) for schema-derived ArkType validators for Drizzle tables                                                                                                                                                                                                                                                                                                                                                                                           |
 | `void/schema-d1`          | Re-exports [`drizzle-orm/sqlite-core`](https://orm.drizzle.team/docs/column-types/sqlite) for D1 table and column builders                                                                                                                                                                                                                                                                                                                                                                                               |
 | `void/schema-pg`          | Re-exports [`drizzle-orm/pg-core`](https://orm.drizzle.team/docs/column-types/pg) for PostgreSQL table and column builders                                                                                                                                                                                                                                                                                                                                                                                               |
-| `void/db`                 | `db` (Drizzle D1 or PostgreSQL instance for the active dialect), `createDb`, query operators (`eq`, `and`, `or`, `desc`, `like`, `inArray`, etc.)                                                                                                                                                                                                                                                                                                                                                                        |
+| `void/schema-mysql`       | Re-exports `drizzle-orm/mysql-core` for MySQL table and column builders                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `void/database-provider`  | `defineDatabaseProvider` and adapter types for `void db connect --provider`                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `void/db`                 | `db` (Drizzle D1, PostgreSQL, or MySQL instance for the active dialect), `createDb`, query operators (`eq`, `and`, `or`, `desc`, `like`, `inArray`, etc.)                                                                                                                                                                                                                                                                                                                                                                |
 | `void/seed`               | `defineSeed`, `SeedContext`, `SeedFn` for programmatic `void db seed` modules                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `void/kv`                 | `kv`, `createKV`, typed KV client/map types                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `void/storage`            | `storage`, `createStorage` for the inferred R2 binding or a specific `R2Bucket`                                                                                                                                                                                                                                                                                                                                                                                                                                          |

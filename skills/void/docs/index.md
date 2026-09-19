@@ -23,16 +23,16 @@ features:
     details: Database, KV storage, object storage, AI inference, authentication, queues, and cron jobs. All built-in. Import what you need, skip what you don't.
   - iconify: lucide:wand-sparkles
     title: Your Code is Your Infra
-    details: Void scans your source code, detects what you use, and automatically provisions every resource. No config files. No dashboard clicks. Locally and in the cloud.
+    details: Void detects supported resources from your code and provisions them when you deploy. Use explicit configuration for existing infrastructure and services that need additional setup.
   - iconify: lucide:shield-check
     title: Performant and Reliable
-    details: Built on Cloudflare's battle tested, global network. Fast, secure, and always available from day one.
+    details: Build on Cloudflare Workers with checked migrations, versioned deployments, and tools to inspect and roll back application releases.
   - iconify: lucide:blocks
     title: Your Framework, Your Rendering
     details: React, Vue, Svelte, Solid, Vite-based meta-frameworks. SSR, SSG, ISR, islands with partial hydration, and markdown.
   - iconify: lucide:bot
     title: AI-Native
-    details: Built-in skills, MCP support, and reference prompts let coding agents scaffold and ship full-stack apps in a single prompt.
+    details: Built-in skills and reference prompts let coding agents scaffold and ship full-stack apps in a single prompt.
 
 footer_heading: Deploy at Warp Speed
 footer_subheading: Vite. Optimized. Isomorphic. Deploy.

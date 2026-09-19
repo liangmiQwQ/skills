@@ -14,7 +14,7 @@ The type is auto-detected from your project structure, or you can set it explici
 
 ## Void Apps
 
-A Vite app powered by Void's framework layer. In this mode, **Void is both the framework and the platform**. It is opinionated in the backend and deployment story, while still staying frontend-framework-agnostic. You can use it with React, Vue, Svelte, Solid, or any frontend that works with Vite.
+In a Void app, Void handles server routing and deployment. Use React, Vue, Svelte, or Solid for server-rendered pages, or build a frontend with any library that works with Vite.
 
 All Void features that involve backend logic are available in this mode, including [server routing](./server-routing.md), [pages mode](./pages-routing/overview.md), [authentication](./auth.md), [typed fetch](./typed-fetch.md), [cron jobs](./jobs.md), and [queues](./queues.md).
 
@@ -26,7 +26,7 @@ Your worker handles API routes, page rendering, and (optionally) [custom SSR](./
 
 Void apps can also use [`output: 'static'`](./ssg.md) to pre-render all pages at build time. That gives you a fully static site that can be deployed anywhere, with no Cloudflare Worker required.
 
-**Deploy:** `void deploy` builds via Vite, infers bindings, provisions D1/KV/R2 resources, applies migrations, uploads assets and worker, and makes the site live at `{slug}.void.app`. See [Deployment](./deployment.md) for details.
+**Deploy:** `void deploy` builds the app, provisions resources, applies migrations, and uploads it to your saved Cloudflare or Void target. See [Deployment](./deployment.md) for setup.
 
 **Detected when any of these exist:**
 
@@ -52,7 +52,7 @@ Void supports deploying Vite-based meta-framework apps with `void deploy`. The f
 
 Add `voidPlugin()` to the framework's Vite config to get binding inference, typed DB generation, migration management, cron jobs, queues, and caching. Void-managed auth is not supported in framework mode; use Better Auth's official integration for your framework. See the [Meta Frameworks Integration](../integrations/frameworks/overview.md) for the full feature matrix, deploy pipeline, and per-framework setup guides.
 
-**Deploy:** `void deploy` runs the framework build, packages the output, and deploys to Void. The framework still owns routing and SSR, while Void handles resource provisioning, migrations, and edge hosting.
+**Deploy:** `void deploy` runs your framework's build, provisions resources, applies migrations, and deploys to the selected target. Your framework continues to handle routing and rendering.
 
 **Detected when** any of the above packages is in your dependencies.
 
@@ -75,9 +75,9 @@ At the edge, the resolution order is:
 
 ## Adding a backend to a static site
 
-A static site generator plus a few API routes is a Void app, not a static site. Auto-detection sees the SSG dependency first (priority 2 below), so if you leave `inference.appType` unset, `void deploy` refuses rather than deploying the site and silently dropping `routes/`. Tell it which you meant.
+If you add API routes to a static site generator, tell Void whether to deploy the backend too. Auto-detection sees both the SSG dependency and backend files, and stops until you set `inference.appType`.
 
-To deploy the site **and** the backend, run both builds from one command and let Void's build fold the generated site into its client output:
+To deploy both, set `appType` to `"void"` and build the static site before the Void app:
 
 ```json
 // void.json
@@ -109,7 +109,7 @@ Because the worker now owns unmatched requests, add [`routing.notFound`](../refe
 { "routing": { "notFound": "404-page" } }
 ```
 
-To deploy the static output only and **not** the backend, say so explicitly:
+To deploy only the static output, set:
 
 ```json
 { "inference": { "appType": "static" } }

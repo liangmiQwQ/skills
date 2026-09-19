@@ -56,9 +56,9 @@ Define custom response headers in [`void.json`](../../reference/config) using th
 
 ## Scope
 
-Header rules apply to **all responses** served through the dispatch worker, including static assets, SSR pages, API routes, and hashed asset responses (which browsers fetch over `GET` from the immutable edge cache). Serving headers on hashed assets is what lets a cross-origin-isolated app attach `Cross-Origin-Embedder-Policy` and `Cross-Origin-Resource-Policy` to its hashed worker and wasm files — without them, a module worker spawned from a `require-corp` document is blocked.
+The dispatch Worker applies header rules to static assets, SSR pages, and API responses, including hashed assets served from cache. For example, you can add the cross-origin headers a page needs for Worker or WebAssembly files.
 
-On hashed (content-addressed, immutable) assets, rules are **additive**. You can add headers such as COOP/COEP/CORP or other security headers, but the platform-managed caching, representation, and framing headers are preserved so an immutable asset cannot be mis-cached or corrupted: `Cache-Control`, `Content-Type`, `Content-Encoding`, `Content-Length`, `Content-Range`, `Accept-Ranges`, and `Transfer-Encoding` keep their platform values even if a broad rule tries to overwrite them. (This is the one case where a user `Cache-Control` does not override the default.)
+For hashed assets, you can add headers, but the platform keeps control of caching and response encoding. Rules cannot replace `Cache-Control`, `Content-Type`, `Content-Encoding`, `Content-Length`, `Content-Range`, `Accept-Ranges`, or `Transfer-Encoding` on these files.
 
 Header rules do not apply to:
 
@@ -66,7 +66,7 @@ Header rules do not apply to:
 
 ### Blocked headers
 
-Two headers can never be set through rules: `Set-Cookie` and `Clear-Site-Data`. On the shared `*.void.app` domain, `void.app` is the registrable domain, so a cookie operation from one project would reach every project's subdomain. Both are dropped from rule output to keep that tenant boundary intact.
+`Set-Cookie` and `Clear-Site-Data` are ignored in header rules. On a shared domain such as `*.void.app`, a rule could otherwise affect cookies or data belonging to another project's subdomain.
 
 ## Framework `_headers` files
 
@@ -81,6 +81,6 @@ No configuration is needed. If the framework generates a `_headers` file, it is 
 
 1. `void deploy` reads header rules from the framework `_headers` file (if present) and `routing.headers` in `void.json`, then includes them in the deploy manifest.
 2. The platform stores the rules in the KV routing entry for your project.
-3. The dispatch worker applies matching rules to matching responses before returning them. Most cacheable responses are cached with the final headers; hashed assets are the exception — their rules are applied on every serve (including cache hits), so a later header-rule change takes effect even when the content hash, and thus the cache entry, is unchanged.
+3. The dispatch Worker adds matching headers before returning a response. Most cached responses include those headers. Hashed assets get header rules on each response, including cache hits, so a rule change takes effect without changing the file.
 
-Because rules are evaluated at the edge, there is no extra latency cost. Headers are applied inline before the response is returned and cached.
+Headers are applied at the edge as part of serving the response; no separate network request is needed.

@@ -18,17 +18,20 @@ This runs once before plugins initialize, so the results are available to config
 
 ## Detected Bindings
 
-| Binding   | Type                              | Detected by import                                                                                                                                               | Detected by env access           |
-| --------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `DB`      | `D1Database`                      | `import { db } from "void/db"`                                                                                                                                   | `env.DB` or `c.env.DB`           |
-| `KV`      | `KVNamespace`                     | `import { kv } from "void/kv"`                                                                                                                                   | `env.KV` or `c.env.KV`           |
-| `STORAGE` | `R2Bucket`                        | `import { storage } from "void/storage"`                                                                                                                         | `env.STORAGE` or `c.env.STORAGE` |
-| `AI`      | `Ai`                              | `import { ai } from "void/ai"`                                                                                                                                   | `env.AI` or `c.env.AI`           |
-| `SANDBOX` | `DurableObjectNamespace<Sandbox>` | `import { getSandbox } from "void/sandbox"`                                                                                                                      | `env.SANDBOX` or `c.env.SANDBOX` |
-| Auth      | none                              | `import { ... } from "void/auth"` or `import { auth } from "void/client"` / `void/client/react` / `void/client/vue` / `void/client/svelte` / `void/client/solid` | none                             |
-| `QUEUE_*` | `Queue`                           | `import { queues } from "void/queues"`                                                                                                                           | `env.QUEUE_*`                    |
+| Binding          | Type                              | Detected by import                                                                                                                                               | Detected by env access           |
+| ---------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `DB`             | `D1Database`                      | `import { db } from "void/db"`                                                                                                                                   | `env.DB` or `c.env.DB`           |
+| `KV`             | `KVNamespace`                     | `import { kv } from "void/kv"`                                                                                                                                   | `env.KV` or `c.env.KV`           |
+| `STORAGE`        | `R2Bucket`                        | `import { storage } from "void/storage"`                                                                                                                         | `env.STORAGE` or `c.env.STORAGE` |
+| `AI`             | `Ai`                              | `import { ai } from "void/ai"`                                                                                                                                   | `env.AI` or `c.env.AI`           |
+| `SANDBOX`        | `DurableObjectNamespace<Sandbox>` | `import { getSandbox } from "void/sandbox"`                                                                                                                      | `env.SANDBOX` or `c.env.SANDBOX` |
+| Auth             | none                              | `import { ... } from "void/auth"` or `import { auth } from "void/client"` / `void/client/react` / `void/client/vue` / `void/client/svelte` / `void/client/solid` | none                             |
+| `QUEUE_*`        | `Queue`                           | `import { queues } from "void/queues"`                                                                                                                           | `env.QUEUE_*`                    |
+| filename-derived | `DurableObjectNamespace`          | A default-exported `defineDurableState()` module in `durable-objects/`                                                                                           | n/a                              |
 
 Auth detection also triggers when importing the `auth` specifier from `void/client` or a framework-specific client subpath such as `void/client/react` (but not when importing only `fetch`).
+
+Durable state uses a filesystem convention rather than the import scanner. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and adds a `new_sqlite_classes` migration. See [Durable State](../guide/durable-state.md).
 
 ## Scanned Directories
 
@@ -65,6 +68,7 @@ Regardless of mode, these are always checked:
 
 - **SSR entry** such as `src/main.ssr.ts`, for SSR apps that access bindings during rendering
 - **`src/`**, which is always scanned for auth imports unless it is already in the scan list for framework mode
+- **`durable-objects/`**, which is scanned for typed Durable Object state modules in native Void apps
 
 ## Custom Scan Directories
 

@@ -4,15 +4,15 @@ outline: deep
 
 # Pages Routing
 
-Pages routing provides the server-rendered, components-as-pages, collocated-data-loading routing system that is seen in many existing JavaScript meta frameworks. However, pages routing in Void is different from most in that it is **rendering framework agnostic.** It is built on patterns inspired by [Inertia.js](https://inertiajs.com/): The server returns the data, and the component receives it as props. The client-side routing logic is minimal, allowing Void to support any rendering framework Vite can support. Today, React, Vue, Svelte, and Solid have first-party adapters.
+Put UI components in `pages/` to make them routes. A page's server loader returns data, and the component receives it as props. This pattern is inspired by [Inertia.js](https://inertiajs.com/) and works with React, Vue, Svelte, and Solid.
 
-Pages mode activates when a `pages/` directory exists. It coexists with `routes/`. Use `pages/` for UI pages and `routes/` for APIs. Components in `pages/` are server-rendered, which means **they run in both Cloudflare Workers and browsers**.
+Pages mode starts when a `pages/` directory exists. It can live alongside `routes/`: use pages for UI and routes for APIs. Page components normally run on the server for the first render and in the browser for navigation and interaction.
 
-Pages mode is also entirely optional - you can use any client-side router to build a pure client-side SPA that interacts with the backend API via the [typed fetch](../typed-fetch.md) utility.
+You can also use your own client-side router and call Void's APIs with [typed fetch](../typed-fetch.md). Pages mode is optional.
 
 ## Setup
 
-If you start in a scaffoldable empty directory, `void init` can generate this setup for you: it asks whether to scaffold with Vite+ (the default) or plain Vite, asks whether you want React, Vue, Svelte, or Solid Pages mode, then lets you pick a D1 starter, a PostgreSQL starter, or Static Pages. The database-backed starters write the adapter-aware `vite.config.ts`, `pages/`, and `db/` starter files; Static Pages writes just the basic `pages/` setup so you can grow into server features later.
+In an empty project, `void init` can set up Pages for you. Choose Vite+ or plain Vite, then React, Vue, Svelte, or Solid and a database or static starter. The generated app includes the matching Vite config and page files.
 
 If you're adding Pages mode manually, install a framework adapter alongside `void`:
 
@@ -86,7 +86,7 @@ export default defineConfig({
 
 :::
 
-That is the full setup. You do not need an SSR entry, a client entry, or hydration boilerplate because the adapter generates them for you.
+The adapter generates the server entry, client entry, and hydration code.
 
 Each adapter plugin includes the framework's Vite plugin (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`, `vite-plugin-solid`) so you don't need to install or configure it separately. Pass framework plugin options via `voidReact({ react: { ... } })`, `voidVue({ vue: { ... } })`, `voidSvelte({ svelte: { ... } })`, or `voidSolid({ solid: { ... } })` if needed.
 
@@ -106,7 +106,7 @@ File-based routing rules are the same as [server routing](../server-routing.md):
 
 ## How Navigation Works
 
-Pages uses an Inertia-style protocol under the hood:
+The first page load and later navigations use the same server loaders:
 
 | Request               | Response                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ Pages uses an Inertia-style protocol under the hood:
 | Subsequent navigation | JSON with component name + props. Client component swap or re-render.                                          |
 | Form submission       | Runs action, then returns fresh props or a redirect.                                                           |
 
-This means the first page load is server-rendered for SEO and performance, while later navigations stay fast without full page reloads.
+The first request receives rendered HTML. Later navigations load page data and update the UI without reloading the whole document.
 
 To opt a specific route out of server-rendered component HTML, export `ssr = false` from its companion `.server.ts` file:
 

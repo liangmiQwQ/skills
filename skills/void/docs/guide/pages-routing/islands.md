@@ -45,9 +45,9 @@ function mixedItems(ext) {
 
 # Islands
 
-Islands mode is a partial hydration architecture inspired by [Astro](https://docs.astro.build/en/concepts/islands/). Instead of hydrating the whole page on the client, only the interactive components, or "islands," ship JavaScript to the browser. The rest of the page stays as static server-rendered HTML.
+Islands let you add interactive components to an otherwise static page. The server renders the page as HTML, and only the components marked as islands send JavaScript to the browser. This approach is inspired by [Astro](https://docs.astro.build/en/concepts/islands/).
 
-This gives you the best of both worlds: fast initial page loads with minimal client-side JavaScript, plus rich interactivity exactly where you need it.
+For example, a blog post can keep its article content static while loading JavaScript for a comment form or audio player.
 
 ::: tip Prerequisites
 Islands mode builds on top of [Pages Routing](./overview). You need a working Pages setup (framework adapter installed, `pages/` directory, Vite config) before using islands.
@@ -214,7 +214,7 @@ export const action = defineHandler(async (c) => {
 });
 ```
 
-The key difference is what happens after a successful action. On a regular page, the Inertia protocol redirects and the Void Router fetches fresh props as JSON. On an island page, there is no Void Router, so successful actions cause a full page reload or a redirect through `window.location`.
+After a successful action, an island page reloads or redirects through `window.location`. Regular Pages routes use the Void Router to fetch fresh props instead.
 
 ## Forms
 

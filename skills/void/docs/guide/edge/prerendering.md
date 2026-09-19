@@ -61,6 +61,8 @@ export default defineRender(async (c, assetTags) => {
 
 ## Relationship to revalidation
 
+Setting `routing.isr: false` in `void.json` disables ISR and this edge-prerendering behavior, including per-page exports. It does not disable build-time HTML generation with `output: "static"`.
+
 Pages with long revalidate TTLs (e.g. 1 year) are effectively static, but the first visitor after a deploy hits a cold cache. This is where prerendering helps - it ensures your users never get slow requests.
 
 Enabling prerendering for a page automatically sets `revalidate` to 1 year, so you don't need to export it yourself. Since the ISR cache is cleared on every deploy, the TTL only needs to be long enough to last between deploys.

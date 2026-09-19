@@ -4,7 +4,7 @@ outline: deep
 
 # Object Storage
 
-Void provides a typed `storage` export for [Cloudflare R2](https://developers.cloudflare.com/r2/). Import it from `void/storage` and use the full R2 API directly.
+Store files in [Cloudflare R2](https://developers.cloudflare.com/r2/) with `storage` from `void/storage`. It gives you the typed R2 API for uploads, downloads, and metadata.
 
 ## Basic Operations
 
@@ -62,6 +62,6 @@ export const GET = defineHandler(async (c) => {
 
 ## How It Works
 
-Unlike the [database](./database.md) and [KV](./kv.md) clients, `storage` doesn't add any abstraction over the underlying API. The R2 API is already well-designed for direct use, so `storage` is simply a lazy reference to `env.STORAGE` that you can import without manually accessing bindings.
+`storage` resolves the `env.STORAGE` binding when you use it. It exposes the R2 API directly, so methods and options work as described in Cloudflare's documentation.
 
 The `createStorage()` factory exists for testing and for frameworks that manage their own routing. It accepts an `R2Bucket` and returns it directly.

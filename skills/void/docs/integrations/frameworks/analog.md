@@ -4,7 +4,7 @@ outline: deep
 
 # Analog
 
-[Analog](https://analogjs.org/) is a Vite-based Angular meta-framework powered by Nitro. Add `voidPlugin()` to the Vite config for binding inference, typed DB, and migrations during development.
+Use Void with [Analog](https://analogjs.org/) for resource detection, typed database queries, and migrations. Analog keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
 
 ## Setup
 
@@ -18,10 +18,10 @@ cd my-app
 ### 2. Install dependencies
 
 ```bash
-npm install -D void wrangler nitro-cloudflare-dev
+npm install -D void nitro-cloudflare-dev
 ```
 
-The `wrangler` dependency is needed for local Cloudflare bindings. `nitro-cloudflare-dev` creates a Cloudflare platform proxy during dev so that `void/db`, `void/kv`, and other runtime helpers can access bindings.
+Void provides the local Cloudflare binding runtime. `nitro-cloudflare-dev` creates the platform proxy during development so that `void/db`, `void/kv`, and other runtime helpers can access bindings.
 
 ### 3. Configure `vite.config.ts`
 
@@ -162,7 +162,7 @@ export default defineQueue<{ to: string; subject: string }>(async (batch) => {
 
 ### Environment Variables
 
-Void gives you a typed env layer: declare keys in `env.ts`, read them via `import { env } from "void/env"`, and get schema validation at build + deploy time plus a client-leak guard that fails the build if a server-only key reaches the browser. See the [env vars guide](../../guide/env-vars.md) for the full feature set.
+Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
 
 `void/env` replaces the H3 event context and `import { env } from "cloudflare:workers"` for env-var access. Keep those around when you need raw binding access (D1, KV, R2, etc.).
 

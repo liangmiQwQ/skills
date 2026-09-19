@@ -4,7 +4,7 @@ outline: deep
 
 # TanStack Start
 
-[TanStack Start](https://tanstack.com/start/latest) is a Vite-based full-stack React framework. `voidPlugin()` composes directly with the TanStack Start plugin in the Vite pipeline, so there is no separate adapter to install.
+Add `voidPlugin()` alongside the [TanStack Start](https://tanstack.com/start/latest) Vite plugin to use Void's database, storage, and deployment features. You don't need a separate Cloudflare adapter.
 
 ## Setup
 
@@ -127,7 +127,7 @@ export default defineQueue<{ to: string; subject: string }>(async (batch) => {
 
 ### Environment Variables
 
-Void gives you a typed env layer: declare keys in `env.ts`, read them via `import { env } from "void/env"`, and get schema validation at build + deploy time plus a client-leak guard that fails the build if a server-only key reaches the browser. See the [env vars guide](../../guide/env-vars.md) for the full feature set.
+Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
 
 ## Accessing Bindings Directly
 

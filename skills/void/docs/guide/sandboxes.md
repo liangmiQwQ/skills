@@ -4,7 +4,24 @@ outline: deep
 
 # Sandboxes
 
-Void can wire Cloudflare Sandboxes into Void apps. A sandbox gives each session an isolated container for running commands, working with files, and exposing ports from server-side code.
+> **Managed platform beta paused:** New managed Sandbox deployments and retained
+> Sandbox rollbacks are currently disabled. Native Cloudflare deployments keep
+> using Cloudflare Sandboxes directly. Platform operators upgrading an existing
+> installation must preview and complete
+> `void platform system sandbox-drain` before reopening platform traffic. The
+> preview is bounded; pass its `nextCursor` back with `--cursor` to inspect later
+> pages. Apply is resumable through a leased database checkpoint: rerun it after
+> active deployments settle, after it advances a page, or after resolving any
+> ownership verification blocker.
+
+For an `unverified_container` blocker, use the reported resource, project,
+binding, application ID, and application name to compare the application's
+Durable Object namespace with the project's managed dispatch script. Never
+delete an account application by name alone. Remove the application and stale
+resource row only after proving that both belong to this platform installation,
+then rerun the drain.
+
+Use a Cloudflare Sandbox to run commands, work with files, and expose ports from server code. Each session gets an isolated container.
 
 ```ts
 import { defineHandler } from 'void';
@@ -23,7 +40,7 @@ Importing from `void/sandbox` enables the `SANDBOX` Durable Object binding, expo
 
 ## Configuration
 
-Most apps do not need config. The default binding is `SANDBOX`, the Durable Object class is `Sandbox`, local development uses the Dockerfile bundled with `@cloudflare/sandbox`, and `void deploy` uses the matching published sandbox image.
+Most apps do not need config. The default binding is `SANDBOX`, the Durable Object class is `Sandbox`, and local development, native Cloudflare deploys, and Void Platform all use the published image matching the installed `@cloudflare/sandbox` version.
 
 Use `void.json` when you need a custom image or container size:
 
@@ -40,16 +57,16 @@ Use `void.json` when you need a custom image or container size:
 
 Available fields:
 
-| Field               | Default                        | Description                                              |
-| ------------------- | ------------------------------ | -------------------------------------------------------- |
-| `binding`           | `SANDBOX`                      | Worker binding name                                      |
-| `className`         | `Sandbox`                      | Durable Object class exported by the Worker              |
-| `containerName`     | `void-sandbox`                 | Cloudflare container app name                            |
-| `image`             | Bundled sandbox SDK Dockerfile | Dockerfile path or registry image used by Wrangler/local |
-| `imageBuildContext` | Directory of `image`           | Docker build context for Wrangler/local                  |
-| `platformImage`     | Matching sandbox SDK image     | Registry image used by `void deploy`                     |
-| `instanceType`      | `lite` on Void deploy          | Container size, such as `lite`, `basic`, `standard-1`    |
-| `maxInstances`      | `20` on Void deploy            | Maximum number of container instances                    |
+| Field               | Default                    | Description                                                           |
+| ------------------- | -------------------------- | --------------------------------------------------------------------- |
+| `binding`           | `SANDBOX`                  | Worker binding name                                                   |
+| `className`         | `Sandbox`                  | Durable Object class exported by the Worker                           |
+| `containerName`     | `void-sandbox`             | Cloudflare container app name                                         |
+| `image`             | Matching sandbox SDK image | Dockerfile path or registry image for local and native Cloudflare use |
+| `imageBuildContext` | Directory of `image`       | Docker build context for local and native Cloudflare use              |
+| `platformImage`     | Matching sandbox SDK image | Registry image used by `void deploy`                                  |
+| `instanceType`      | `lite` on Void deploy      | Container size, such as `lite`, `basic`, `standard-1`                 |
+| `maxInstances`      | `20` on Void deploy        | Maximum number of container instances                                 |
 
 ## Runtime API
 
@@ -68,13 +85,13 @@ You can also use the namespace directly from `c.env.SANDBOX` when you need lower
 
 ## State persistence
 
-There are two distinct layers to think about: stable Durable Object identity, and ephemeral container state.
+A sandbox has a persistent Durable Object identity and a container that can restart:
 
-`getSandbox(id)` always resolves to the same Durable Object instance for a given `id`, regardless of how many times the project has been deployed or rolled back. Anything written through the DO's persistent storage (`ctx.storage`, the embedded SQLite database) survives deploys, rollbacks, and container restarts. That layer is the durable home for sandbox metadata, session ids, and any data you need to outlive the container.
+`getSandbox(id)` selects the same Durable Object for that ID across deploys and rollbacks. Data saved in its persistent storage, including its SQLite database, survives container restarts. Use that storage for session metadata and other state you need to keep.
 
-The container itself — filesystem, running processes, exposed ports, in-memory shell sessions — is tied to a single container lifetime and is **not** durable. Cloudflare Containers idle out after inactivity (the SDK default is `sleepAfter: "10m"`), and a container can also restart on a process crash or a platform-side reschedule. When that happens, files in the container filesystem, background processes, and previously exposed ports are lost. Setting `keepAlive: true` disables the idle timer but does not protect against crashes or infrastructure restarts.
+Files, running processes, exposed ports, and in-memory shell sessions last only as long as the container. It can stop after inactivity (the SDK defaults to `sleepAfter: "10m"`), crash, or restart during platform scheduling. `keepAlive: true` disables the idle timer but doesn't prevent other restarts.
 
-Treat the sandbox container as a working environment, not a source of truth. Persist anything you cannot afford to lose to DO storage, your database, KV, or R2 (the SDK also offers backup/restore helpers for snapshotting a directory to R2). Project deletion destroys both layers, but plenty of routine events destroy only the container layer.
+Save anything you need to keep in Durable Object storage, your database, KV, or R2. The SDK also provides helpers to back up and restore directories through R2. Deleting the project on a Void platform removes both layers; routine container restarts only lose container state.
 
 ## Deployment
 

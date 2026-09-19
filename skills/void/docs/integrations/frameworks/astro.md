@@ -4,12 +4,12 @@ outline: deep
 
 # Astro
 
-[Astro](https://astro.build/) has its own CLI and Cloudflare adapter (`@astrojs/cloudflare`). Add `voidPlugin()` to Astro's Vite config for binding inference, typed DB, and migrations during development.
+Use Void with [Astro](https://astro.build/) for resource detection, typed database queries, and migrations. Astro keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
 
 ::: warning Astro 6 required
 
 - [Astro 6+](https://astro.build/blog/astro-6/) is required to use `import { x } from "void/x"` helpers in Astro apps.
-- You also need to enable `"nodejs_als"` under `compatibility_flags` in your wrangler config.
+- You also need to enable `"nodejs_als"` under `compatibility_flags` in your Cloudflare config.
   :::
 
 ## Setup
@@ -40,7 +40,7 @@ export default defineConfig({
 });
 ```
 
-By default, Astro Cloudflare runtime and `voidPlugin()` migrations share Wrangler's local state at `.wrangler/state/v3`, so no extra persistence configuration is required.
+By default, Astro's Cloudflare runtime and `voidPlugin()` migrations share local state at `.wrangler/state/v3`, so no extra persistence configuration is required.
 
 ### 4. Create `wrangler.jsonc`
 
@@ -162,9 +162,9 @@ export default defineQueue<{ to: string; subject: string }>(async (batch) => {
 
 ### Environment Variables
 
-Void gives you a typed env layer: declare keys in `env.ts`, read them via `import { env } from "void/env"`, and get schema validation at build + deploy time plus a client-leak guard that fails the build if a server-only key reaches the browser. See the [env vars guide](../../guide/env-vars.md) for the full feature set.
+Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
 
-Astro-specific note: the client prefix is `PUBLIC_*` (Astro's default `envPrefix`), not `VITE_*` — name client-exposed keys accordingly and the leak guard + constant folding honour the prefix automatically.
+Void always uses `VITE_*` for client-exposed schema keys, including in Astro projects. Astro's separate `PUBLIC_*` convention still applies to direct `import.meta.env` access, but it does not change the `void/env` server/client boundary.
 
 `void/env` replaces [`astro:env`](https://docs.astro.build/en/guides/environment-variables/) and `Astro.locals.runtime.env` for env-var access. Keep `Astro.locals.runtime.env` around when you need raw binding access (D1, KV, R2, etc.).
 

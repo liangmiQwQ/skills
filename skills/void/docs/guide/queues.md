@@ -4,17 +4,17 @@ outline: deep
 
 # Queues
 
-Void supports Cloudflare Queues for asynchronous message processing from a top-level `queues/` directory.
+Use queues to process work asynchronously, such as sending emails or handling uploads. Define a consumer in `queues/`, then send it typed messages from your app.
 
 ## Defining queues
 
-Create files in `queues/**/*.ts`; `.mts`, `.js`, and `.mjs` also work. The queue name is inferred from the filename. For example, `queues/emails.ts` creates a queue named `"emails"`, and `queues/order/notifications.ts` creates `"order/notifications"`.
+Create files in `queues/**/*.ts`; `.mts`, `.js`, and `.mjs` also work. The queue name is inferred from its path, with nested path segments joined by `-`. For example, `queues/emails.ts` creates a queue named `"emails"`, and `queues/order/notifications.ts` creates `"order-notifications"`. A nested path must not normalize to the same name as another file: `queues/order/notifications.ts` and `queues/order-notifications.ts` conflict, so Void reports the collision and asks you to rename one.
 
-::: warning Nested files produce a name that cannot be deployed
-Cloudflare queue names allow only letters, digits and `-`, so a name containing `/` is rejected when the queue is provisioned — on both the managed platform and a self-hosted `--backend cloudflare` deploy. Nested files work in local development, but keep queue files flat (`queues/order-notifications.ts` → `"order-notifications"`) for any app you intend to deploy.
-:::
+The resulting name must follow Cloudflare's queue naming rules: 1–63 characters, only letters, digits, and `-`, beginning and ending with a letter or digit.
 
-Each queue file should export a default handler wrapped with [`defineQueue`](../reference/api.md#definequeuet-handler). The generic `<T>` parameter defines the message body type. That is the type of each `msg.body` in the batch, and it is also used by the typed `queues` proxy for `send()` calls.
+If you previously used a nested queue locally, update producer calls from `queues['order/notifications']` to `queues['order-notifications']`. The derived binding remains `QUEUE_ORDER_NOTIFICATIONS`.
+
+Each queue file should export a default handler wrapped with [`defineQueue`](../reference/api.md#definequeue-t-handler). The generic `<T>` parameter defines the message body type. That is the type of each `msg.body` in the batch, and it is also used by the typed `queues` proxy for `send()` calls.
 
 ```ts
 // queues/emails.ts
@@ -56,7 +56,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-The binding name is derived automatically: `QUEUE_` + queue name uppercased with non-alphanumeric characters replaced by `_`. For example, `queues/emails.ts` creates binding `QUEUE_EMAILS`.
+The binding name is derived automatically: `QUEUE_` + queue name uppercased with non-alphanumeric characters replaced by `_`. For example, `queues/emails.ts` creates binding `QUEUE_EMAILS`, while `queues/order/notifications.ts` creates binding `QUEUE_ORDER_NOTIFICATIONS`.
 
 ## Per-message acknowledgment
 
@@ -120,7 +120,7 @@ On deploy, Void includes all discovered queues in the deploy manifest. The platf
 
 ## Local development
 
-In **default Void mode**, Miniflare delivers queue batches natively — produce a message via the binding and the consumer fires automatically. The worker's `queue()` export serializes the batch and routes it to the same internal `/__queue` handler used in production, so behavior is consistent across environments.
+In native Void apps, sending a message through a queue binding automatically invokes the consumer in Miniflare. Local delivery uses the same handler as production.
 
 You can also manually dispatch a batch by POSTing to the dev endpoint Void exposes:
 
@@ -139,6 +139,6 @@ curl -X POST http://localhost:5173/__void/queue \
   -d '{"queue":"my-queue","messages":[{"id":"1","timestamp":'"$(date +%s000)"',"body":{"hello":"world"},"attempts":1}]}'
 ```
 
-If you set `__VOID_PROXY_TOKEN` in `.dev.vars`, that explicit token takes precedence and the printed curl command uses `x-void-internal: <your-token>` instead.
+If you set `__VOID_PROXY_TOKEN` in `.env`, that explicit token takes precedence and the printed curl command uses `x-void-internal: <your-token>` instead.
 
-In **framework mode** (SvelteKit, Nuxt, Analog, Astro, TanStack Start, React Router, vinext), the `/__void/queue` endpoint runs inside the framework adapter's request pipeline (or the dev miniflare for Class A frameworks), so the consumer sees whatever bindings the adapter exposes (D1, KV, R2, queue producers, etc.). Native Miniflare queue delivery is not wired up in framework mode — use the manual dispatch endpoint to exercise a consumer.
+In supported meta-frameworks, use `/__void/queue` to test a consumer manually. It runs inside the framework adapter's development runtime with that adapter's bindings. Sending to a queue binding doesn't automatically invoke the consumer in this mode.

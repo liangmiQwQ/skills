@@ -4,11 +4,11 @@ outline: deep
 
 # Meta-Frameworks
 
-Use this section when your app already has a framework that owns routing and rendering. Void does not try to replace that layer. Instead, it plugs into the Vite build and deployment pipeline so you still get the platform features that matter on the backend.
+Keep your framework's routes and rendering, and add Void for databases, storage, jobs, and deployment. The guides in this section show how to connect each framework to Void.
 
-Void supports deploying meta-framework apps with `void deploy`. Add `voidPlugin()` to your framework's Vite config to get binding inference, typed DB generation, migration management, cron jobs, queues, and caching.
+Add `voidPlugin()` to the framework's Vite config. It detects resource usage, generates database types, manages migrations, and prepares the app for `void deploy`.
 
-Some frameworks, such as TanStack Start and React Router, compose directly with `@cloudflare/vite-plugin`, which Void already covers. Others, such as SvelteKit, Nuxt, Analog, and Astro, bring their own Cloudflare integrations. In both cases, the framework stays in charge of routing and rendering. Void handles the platform-facing pieces around it.
+TanStack Start and React Router use the Cloudflare Vite plugin provided by Void. SvelteKit, Nuxt, Analog, and Astro use their own Cloudflare adapters. The setup differs, but your framework continues to handle routing and rendering.
 
 ![void relationships with meta frameworks and deployment targets](./void-relationships.svg)
 

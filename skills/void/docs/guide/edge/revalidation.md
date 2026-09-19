@@ -4,9 +4,11 @@ outline: deep
 
 # Revalidation (ISR)
 
-For SSR and [Pages mode](../pages-routing/overview) projects, Void supports stale-while-revalidate caching for dynamically rendered pages. Cached pages are served instantly from the edge while the worker re-renders in the background when the cache is stale. This is the equivalent of [Incremental Static Regeneration (ISR)](https://vercel.com/docs/incremental-static-regeneration) in other frameworks.
+Revalidation caches rendered pages and refreshes them in the background. When a cached page becomes stale, visitors can keep reading it while the Worker renders an updated version. This is often called [Incremental Static Regeneration (ISR)](https://vercel.com/docs/incremental-static-regeneration).
 
 This requires [SSR](../ssr.md) or [Pages mode](../pages-routing/overview) to be configured.
+
+To disable Void's ISR caching across the app while keeping your per-page settings, set `"routing": { "isr": false }` in `void.json`. This overrides per-page revalidate and prerender policies. Set `isr` back to `true` to enable those policies again. Build-time HTML generation with `output: "static"` is unaffected.
 
 ## Enabling revalidation
 
@@ -78,7 +80,7 @@ When multiple sources set a revalidate TTL, the most specific wins:
 
 3. **Subsequent requests (stale):** the stale cached response is served immediately, and the worker re-renders in the background. The next request gets the fresh version.
 
-This means users never wait for a stale page to re-render. They always get an immediate response.
+While a stale entry is available, visitors can receive it without waiting for the refresh. A request without a cached entry still needs to render the page.
 
 ## Per-response TTL override
 
@@ -96,7 +98,10 @@ export const GET = defineHandler(async (c) => {
 - `x-revalidate: 0`: skip caching for this response
 - `x-revalidate: 300`: cache for 5 minutes instead of the default
 
-Only successful responses (2xx) are cached.
+Only complete `200` responses are cached. A response with `Cache-Control: private`,
+`no-store`, or `no-cache`, or any `Set-Cookie` header, stays private to that request.
+If a previously public page starts returning one of those headers during background
+revalidation, Void removes its HTML, Pages JSON, and KV cache entries.
 
 ## Cache bypass
 
@@ -104,11 +109,21 @@ Requests with `Cookie` or `Authorization` headers bypass the ISR cache entirely 
 
 ## Cache keys and rewrites
 
-If a request is rewritten at dispatch (`routing.rewrites`, `routing.fallbacks`, or `_redirects` 200/200!), the ISR cache slot is keyed on the **rewritten** pathname **plus** the original request URL's pathname. Query parameters are dropped from rewrite variant keys by default; use `routing.revalidateQueryAllowlist` to keep selected query params when they should vary cached output. So a direct request to `/en/docs/foo` and a rewrite from `/docs/foo → /en/docs/foo` no longer share a slot — each renders and caches independently. Middleware `c.rewrite()` runs after ISR lookup, so it observes rewrite metadata but does not create a separate ISR variant.
+For a dispatch rewrite, the cache key includes both the destination and original pathname. A direct request to `/en/docs/foo` therefore uses a different entry from `/docs/foo` rewritten to that destination.
 
-`revalidate({ paths })` operates on the rewritten pathname (the slot's primary key). Purging `/en/docs/foo` removes **all variants** (direct + every rewrite source) under that path. Purging the source path (`/docs/foo`) invalidates nothing, because no slot was ever written under it.
+Query parameters are excluded by default. Add `routing.revalidateQueryAllowlist` when specific parameters should produce separate cached responses. Middleware `c.rewrite()` runs after the ISR lookup, so it doesn't create an additional cache variant.
 
-**Migration note:** the ISR cache key format bumped to a versioned `v2` prefix alongside this feature, with no reader-side fallback to the previous unversioned format. The first time a project deploys on the new dispatch, **every** pre-existing ISR entry becomes unreachable — not only paths that gained a rewrite rule. Cache slots warm up normally under the new key as traffic comes in; you'll see a one-time cache-miss wave proportional to your traffic × TTL, then the hit rate returns to normal. No manual purge is required, and the stranded entries expire on their own via their original TTLs and deployment age-out. Additionally, if you introduce a rewrite on an existing path (e.g. `/docs/foo` → `/en/docs/foo`), the cache slot for that path moves to the rewritten pathname, so the source path's `v2` slot will cold-start too.
+Purge the destination pathname with `revalidate({ paths })`. Purging `/en/docs/foo` clears both direct and rewritten variants. Purging only `/docs/foo` won't clear them, because the entries are stored under the destination.
+
+::: details Upgrading from the older ISR cache format
+
+The current format uses a `v3` host-scoped prefix and a cache-policy version in its
+metadata. Entries written before the current response-privacy policy are treated as
+cold misses and refill only from responses that are safe to share.
+
+Adding a rewrite also changes the affected page's cache key, so that page starts with a cold cache again.
+
+:::
 
 ## On-demand revalidation
 

@@ -4,7 +4,7 @@ outline: deep
 
 # Node.js, Bun, and Deno
 
-Void apps default to Cloudflare Workers, but you can target Node.js, Bun, or Deno instead by setting `target` in `void.json`. This is useful when you want to deploy to a traditional server, run in a container, or use a runtime that isn't Cloudflare.
+Set `target` in `void.json` to build for Node.js, Bun, or Deno. You can run the resulting server on your own machine, in a container, or with a hosting provider.
 
 ```json
 { "target": "node" }
@@ -66,7 +66,9 @@ deno run -A npm:vite build
 deno run -A dist/ssr/index.js
 ```
 
-The server listens on `PORT` (env variable) or `3000` by default.
+Run these commands from your app directory. The server listens on `PORT` (env variable) or `3000` by default.
+
+Pages builds load their client manifest from `dist/client/.vite/manifest.json` and serve the generated JavaScript, CSS, and public assets. Keep `dist/ssr` and `dist/client` together when deploying. Asset paths resolve from the emitted server module, so the app also works when imported or started from another working directory.
 
 ## Build Output
 
@@ -78,6 +80,7 @@ dist/
     app.js       ← Hono app with static asset middleware (default export)
     index.js     ← imports app.js and starts the HTTP server
   client/        ← static assets (pages mode only)
+    .vite/manifest.json
     assets/
       ...
 ```
@@ -123,17 +126,21 @@ Void-managed WebSocket route files (`*.ws.ts`) are still Cloudflare-only because
 
 You can still define [cron jobs](../guide/jobs.md) in `crons/` and they will compile into the bundle, but there is no built-in scheduler to invoke them. On Cloudflare, Workers Cron Triggers call the `scheduled` handler automatically. On Node.js, you'll need an external scheduler (e.g. `node-cron`, systemd timers, or your hosting platform's cron) to trigger the exported handler.
 
+### No inbound email
+
+Inbound [email handlers](../guide/email.md#inbound) in `email/` need Cloudflare Email Routing to invoke the worker's `email()` export, and the Node.js entry exposes HTTP only. An `email/` directory fails the build with guidance. Outbound `sendEmail` has no send transport on these targets either: it returns a `BINDING_MISSING` error.
+
 ### No prerendering
 
 [Prerendering](../guide/edge/prerendering.md) is a platform feature that relies on Cloudflare's edge cache and the Void deploy pipeline. It is not available for non-CF targets.
 
 ### No `void deploy`
 
-The `void deploy` CLI deploys to the Void platform on Cloudflare. For non-CF targets, build with `vite build` and deploy the `dist/` directory using your hosting provider's workflow, whether that is Docker, systemd, PM2, Fly.io, Railway, or any other Node.js host.
+`void deploy` handles Cloudflare and Void platform deployments. For Node.js, Bun, or Deno, run `vite build` and deploy `dist/` using your hosting provider's workflow.
 
 ### Ignored config fields
 
-These `void.json` fields are silently ignored (with a warning) when using a non-CF target:
+Void warns and ignores these Cloudflare-specific `void.json` fields on other targets:
 
 - `inference.bindings`: Cloudflare binding configuration
 - `remote`: remote binding proxy

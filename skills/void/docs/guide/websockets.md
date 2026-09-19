@@ -5,12 +5,14 @@ outline: deep
 # WebSockets
 
 ::: warning ⚠️ Void Apps Only
-Void-managed WebSockets currently works only for Void apps. Meta-framework mode is not supported yet.
+Typed WebSocket routes currently work in native Void apps. They aren't available in meta-framework mode yet.
 :::
 
-Void supports typed WebSockets from file-based `.ws.ts` routes. Each WebSocket route compiles to a Cloudflare Durable Object, so the feature is currently Cloudflare-only. If you set `target` to `node`, `bun`, or `deno`, builds fail when `.ws.ts` routes are present.
+Create a `.ws.ts` route to add a typed WebSocket endpoint. Void runs each route instance in a Cloudflare Durable Object, which coordinates the clients connected to it. These routes require the Cloudflare target; Node.js, Bun, and Deno builds reject them.
 
-Use WebSockets for chat, presence, collaborative rooms, notifications, AI/live-log streaming, and other realtime flows where one connection target maps cleanly to one route instance.
+New route classes use SQLite-backed Durable Objects on both deployment platforms. Void preserves legacy key-value-backed migration history for existing hosted projects and never reclassifies an already-created class.
+
+For example, a chat route at `/rooms/[id]` gives each room its own instance. Use it for chat, presence, collaborative documents, or notifications.
 
 ## Route files
 
@@ -34,7 +36,7 @@ The environment suffix goes **before** `.ws`. `chat.ws.dev.ts` is not recognised
 
 ## `defineRoom()`
 
-Use `defineRoom()` when many clients should share one route-scoped room or document.
+Use `defineRoom()` when clients should share a room or document identified by the route.
 
 ```ts
 // routes/chat/[room].ws.ts
@@ -115,7 +117,7 @@ export default defineWebSocket({
 
 ## Typed messages
 
-WebSocket messages are schema-backed in both directions:
+Define schemas for messages sent by the client and server:
 
 - `messages.client` validates what the browser may send
 - `messages.server` validates what the server may send
@@ -182,7 +184,7 @@ socket.send({ type: 'chat.message', text: 'hello' });
 
 ## Constraints
 
-This first release intentionally focuses on the Durable Object sweet spot:
+WebSocket routes currently support:
 
 - Cloudflare-only
 - one route-derived connection target per socket
@@ -190,4 +192,10 @@ This first release intentionally focuses on the Durable Object sweet spot:
 - no global pub/sub abstraction
 - JSON event messages only
 
-That covers most realtime app shapes Void is targeting without exposing Durable Objects directly.
+Each socket connects to one route instance. Applications that need to switch rooms should manage that connection change explicitly.
+
+## Deployment
+
+`void deploy --platform cloudflare` persists the required binding and append-only SQLite class migration in `wrangler.jsonc`, then deploys the generated Worker directly to your account. Commit this migration history and never delete or reorder a step after deployment.
+
+`void deploy --platform void` uses the same shared migration planner in the hosted uploader. Existing hosted WebSocket classes created on legacy storage remain there; only genuinely new classes use SQLite.

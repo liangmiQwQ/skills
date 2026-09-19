@@ -4,7 +4,7 @@ outline: deep
 
 # Actions & Forms
 
-Actions handle mutations (POST, PUT, PATCH, DELETE) in companion `.server.ts` files. They use the same `defineHandler` API as [loaders](./loaders) and [server routes](../server-routing.md), with the same typed `c.env` bindings, `withValidator()` support, and Hono context methods.
+Use an action to change server data from a form or button. Define it in the page's `.server.ts` file with `defineHandler`, just like a [loader](./loaders) or [server route](../server-routing.md). Actions handle `POST`, `PUT`, `PATCH`, and `DELETE` requests.
 
 ## Defining an Action
 
@@ -263,7 +263,7 @@ const form = useForm('/users/:id?update', { name: '' }, { params: { id } });
 <form action={form.put}>{/* submits to /users/42?update */}</form>
 ```
 
-The URL, body fields, and error keys are typed per action. Each named action gets its own validator schema. See [Type Safety: Action -> useForm](../type-safety#action-useform) for the full typing story.
+Each named action has its own validator schema, which supplies types for its URL, body, and error keys. See [Type Safety](../type-safety#action-%E2%86%92-useform) for an example.
 
 ## `action()` Helper
 
@@ -285,13 +285,17 @@ if (!result.ok) {
 }
 ```
 
-`action()` is useful in event handlers such as button clicks, confirmation dialogs, or any place where you want to call a server action without managing form state. It uses `POST` by default and accepts `{ data, method, params }`, where `method` can be `'PUT'`, `'PATCH'`, or `'DELETE'` for alternate HTTP methods. It returns `{ ok: true, pageData }` for successful actions and `{ ok: false, error }` for call-site errors such as validation, conflicts, or missing resources.
+Call `action()` from a button or another event handler when you don't need form state. It defaults to `POST`; pass `{ data, method, params }` to set the body, route parameters, or a `PUT`, `PATCH`, or `DELETE` method.
+
+A successful call returns `{ ok: true, pageData }`. Expected errors, such as validation failures or conflicts, return `{ ok: false, error }`.
 
 ## Validation Errors
 
 When an action throws a `ValidationError`, or validation fails through `withValidator`, the errors are automatically available on `form.errors`. You do not need to wire that up manually.
 
-Void separates action failures into call-site errors and boundary errors. Call-site errors are expected local failures such as `400`, `404`, `409`, `422`, and `429`; `useForm` stores them in `form.errors` or `form.error`, and `action()` returns `{ ok: false, error }`. Boundary errors such as `401`, `403`, `500`, `502`, and unknown network/protocol failures are thrown so React error boundaries, or your framework's error handling, can handle them at a higher level.
+Expected errors such as `400`, `404`, `409`, `422`, and `429` stay with the form or action call. `useForm` stores them in `form.errors` or `form.error`; `action()` returns `{ ok: false, error }`.
+
+Authentication errors (`401`, `403`), server errors (`500`, `502`), and unknown network or protocol failures are thrown. Handle them with your framework's error boundary or error handling.
 
 Actions can throw `ValidationError` for custom validation logic:
 

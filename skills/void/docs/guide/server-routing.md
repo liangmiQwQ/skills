@@ -4,7 +4,7 @@ outline: deep
 
 # Server Routing
 
-Full-stack Void apps uses file-based routing powered by [Hono](https://hono.dev). Drop files in `routes/` and they become endpoints. Add global middleware in `middleware/`.
+Create a file in `routes/` to add an endpoint, and export a handler for each HTTP method you want to support. Void uses [Hono](https://hono.dev) for routing and middleware.
 
 ## Route Files
 
@@ -27,7 +27,7 @@ routes/
 
 `dev` is the Vite dev server. `prod` is every build, `void deploy`, and `vite preview` — preview serves a production build, so it uses the production routes.
 
-An excluded route is stripped from the worker bundle, from the generated types, and from the generated route and WebSocket config. It is not compiled and it is not deployed.
+Excluded routes aren't included in the Worker bundle, generated types, or route and WebSocket configuration.
 
 Two things do not follow the suffix:
 
@@ -109,7 +109,7 @@ export const POST = defineHandler.withValidator({
 
 See [Database: Schema-Derived Validators](./database.md#schema-derived-validators) for how to set up `createInsertSchema` with column refinements.
 
-You can validate multiple slots at once:
+You can validate the body, query, and route parameters together:
 
 ```ts
 // routes/api/users/[id].ts
@@ -167,7 +167,7 @@ Validator schemas also power the [typed fetch client](./typed-fetch.md), so `bod
 
 ## Middleware
 
-Void middlewares are just Hono middlewares. `defineMiddleware()` is a thin typing helper around the standard Hono `(c, next)` shape, and `defineHandler()` also accepts raw Hono middleware directly.
+Void uses Hono middleware. `defineMiddleware()` adds types to the usual `(c, next)` function, and `defineHandler()` also accepts Hono middleware directly.
 
 ```ts
 import { defineMiddleware } from 'void';
@@ -261,7 +261,7 @@ Now every route handler can call `c.get("requestId")` and get `string` back, wit
 
 ### Per-route middleware
 
-Pass one or more middleware to `defineHandler` before the final handler:
+Pass middleware to `defineHandler` before the final route handler:
 
 ```ts
 defineHandler(middleware1, middleware2, handler);

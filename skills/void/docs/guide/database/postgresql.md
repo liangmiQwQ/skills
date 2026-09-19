@@ -4,13 +4,13 @@ outline: deep
 
 # PostgreSQL
 
-Void supports PostgreSQL via [Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/). You bring the Postgres database, and Void handles connection pooling plus deployment wiring through the same Drizzle-based workflow used for D1.
+Connect your PostgreSQL database through [Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/), then use the same Drizzle schema and query workflow as D1.
 
 ## What is Hyperdrive?
 
-Hyperdrive is Cloudflare's connection pooling and caching layer for PostgreSQL. It maintains persistent connections from the edge to your database, dramatically reducing connection latency. Instead of establishing a new TCP + TLS connection on every request, your Worker reuses pooled connections through Hyperdrive.
+Hyperdrive pools connections between your Worker and PostgreSQL. Requests reuse an existing connection instead of opening a new TCP and TLS connection each time.
 
-Void manages the Hyperdrive configuration automatically. You only provide the connection string.
+Void can provision the Hyperdrive configuration from your connection string. Direct Cloudflare deploys also need an API token for first-time provisioning; see the [Cloudflare guide](../../integrations/cloudflare.md#databases-and-secrets).
 
 ## Configuration
 
@@ -26,7 +26,7 @@ Add to your `void.json`:
 
 ### 2. Add your connection string
 
-For local development, add `DATABASE_URL` to `.env.local`:
+For local development, add `DATABASE_URL` to `.env`:
 
 ```
 DATABASE_URL=postgresql://user:password@host:5432/mydb?sslmode=require
@@ -36,17 +36,17 @@ This connects directly to your Postgres database during local Vite development.
 
 ### 3. Deploy
 
-On your first deploy, the CLI will prompt for your connection string:
+When deploying to a Void platform, the CLI asks for a connection string if Hyperdrive isn't configured:
 
 ```
 Your project uses PostgreSQL. Enter your connection string:
 > postgresql://user:password@host:5432/mydb?sslmode=require
 ```
 
-Void provisions a Hyperdrive configuration and stores only the config ID. Your connection string is sent directly to Cloudflare's API and is never stored by Void.
+Void provisions Hyperdrive and records its config ID. The connection string isn't written to `wrangler.jsonc` or generated Worker config.
 Both `postgres://` and `postgresql://` URLs are supported, including provider-supplied query strings such as `?sslmode=require`.
 
-You can also set the connection string ahead of time with `void db set-url`.
+For a linked Void project, you can also configure the connection with `void db set-url`. For a direct Cloudflare deploy, export the production `DATABASE_URL` in your shell.
 
 ## Schema Definition
 
@@ -88,7 +88,7 @@ The main difference is that PostgreSQL supports **transactional DDL**. Each migr
 
 ## Deploy Workflow
 
-When you run `void deploy` with a PostgreSQL project:
+When deploying a PostgreSQL project to a Void platform:
 
 1. The app is built
 2. Migration files are collected from `db/migrations/`
@@ -96,9 +96,14 @@ When you run `void deploy` with a PostgreSQL project:
 4. Pending migrations run inside the deployed worker via Hyperdrive
 5. The new worker goes live
 
+When deploying to your own account with `void deploy --platform cloudflare`, export the production
+connection string as `DATABASE_URL`. Void uses it to provision Hyperdrive and apply the checked-in
+migrations transactionally before it uploads the Worker. The connection string is not written to
+`wrangler.jsonc` or the generated Worker config.
+
 ## Updating the Connection String
 
-To update the connection string for an existing deployment (e.g. migrating to a new database host):
+To update a linked Void project's connection, for example after moving the database to another host:
 
 ```bash
 void db set-url

@@ -4,9 +4,9 @@ outline: deep
 
 # Server-Sent Events
 
-Void provides `void/sse` for producing and consuming Server-Sent Events from ordinary route handlers. It handles event formatting, response headers, keepalives, stream closure, request aborts, and browser `EventSource` parsing.
+Use `void/sse` to stream events from a route handler to the browser. Void formats messages, sends keepalives, and closes the stream when the request ends.
 
-Use SSE when one HTTP request owns the producer: AI token streaming, progress updates, command output, deployment logs, or incremental status messages. Use `void/live` or an application-level Durable Object when multiple requests need shared fanout, replay, or subscription state.
+SSE is a good fit for AI tokens, progress updates, or logs produced by one request. If other requests need to publish to connected clients, see [Live Event Streams](./live.md). Store events yourself if clients need to replay them.
 
 ## Server streams
 
@@ -67,7 +67,7 @@ await stream.comment('still connected');
 
 `data` may be a string or JSON-serializable value. Strings are sent as-is; other values are serialized with `JSON.stringify()`. Multi-line strings are split into multiple `data:` lines. Binary data is rejected because SSE is text-only.
 
-`event`, `id`, and `retry` are validated before writing so accidental frame injection is rejected. Writes after close reject with `SseStreamClosedError`.
+Void validates `event`, `id`, and `retry` before writing, so their values can't accidentally introduce extra SSE fields or events. Writing to a closed stream throws `SseStreamClosedError`.
 
 If you already serialized the payload, use `formatSseText()` for lower-level formatting while keeping the same `id`, `event`, and `retry` validation:
 
@@ -184,4 +184,4 @@ Plain SSE is enough when the producer belongs to the same request that opened th
 - Per-request deployment or build logs
 - Incremental status for a long-running action
 
-Use a higher-level realtime primitive when you need cross-request fanout, rooms, replay buffers, subscriptions, database change streams, or multi-region coordination.
+For shared topics and subscriptions, use [Live Event Streams](./live.md). For rooms with two-way communication, use [WebSockets](./websockets.md). Replay and database change streams need an application-level storage or delivery layer.

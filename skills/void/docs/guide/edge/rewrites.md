@@ -4,7 +4,9 @@ outline: deep
 
 # Rewrites
 
-Define URL rewrites in [`void.json`](../../reference/config) using the `routing.rewrites` field. Keys are source URL patterns, values are destination paths. A rewrite serves content from the destination path **without changing the URL in the browser** — the user sees the original URL, but the server resolves content from the destination.
+A rewrite serves one route's content at another URL while keeping the browser's address unchanged. For example, `/docs` can serve the content from `/en/docs`.
+
+Define source patterns and destination paths in `routing.rewrites` in [`void.json`](../../reference/config):
 
 ```json
 {
@@ -125,7 +127,7 @@ export default defineMiddleware(async (c, next) => {
 
 `c.rewrite(path)` re-dispatches the request through the router with the new pathname. You must `return` the result — same shape as `c.redirect()`. A queryless destination preserves the incoming query string; a destination with `?` replaces it, so `c.rewrite('/search')` keeps `?q=...` and `c.rewrite('/search?q=all')` forwards exactly `?q=all`.
 
-The `path` argument is typed as [`RewriteDestination`](../../reference/api#rewritedestination), a union of your generated route patterns plus `string`. Known route patterns (e.g. `/posts/[id]`, `/en/docs`) surface as autocomplete entries in your editor, while interpolated strings like ``c.rewrite(`/${locale}${c.req.path}`)`` stay accepted by design. Treat it as autocomplete, not a proof of reachability.
+`path` uses the [`RewriteDestination`](../../reference/api#rewritedestination) type. Your editor suggests known route patterns, and you can still pass dynamic strings. The suggestions don't guarantee that a destination exists.
 
 ### Runtime rewrites cannot reach static assets
 
@@ -143,13 +145,13 @@ The guarded extensions are:
 .pdf .txt .xml .json .wasm .map
 ```
 
-`.html` is deliberately **excluded** from this list. A path like `/about.html` is ambiguous — it may be a real SSR/SPA route handler rather than a static file — so banning `.html` would produce false positives for apps that route on explicit `.html` URLs. `c.rewrite('/about.html')` is allowed; if it 404s, the existing behavior stands and the dev `X-Void-Routing` trace header is your debug hook.
+`.html` is allowed because a path such as `/about.html` can be a route. If it returns `404`, inspect the development `X-Void-Routing` header to see how the request was resolved.
 
 Static rewrites are different: `_redirects` `200!` entries and `routing.rewrites` run at the platform layer **before** the asset handler, so they _can_ rewrite into assets. If you need "rewrite into an asset" behavior dynamically, model it as a static rule (possibly with a broader source pattern) rather than doing it from middleware.
 
-**Loop prevention:** Single-hop rewrite loops are prevented automatically. When `c.rewrite('/foo')` re-dispatches the request, the runtime records the new `Request` in an internal `WeakMap<Request, URL>` (keyed on the `Request` identity, value = pre-rewrite URL) so static routing rules are skipped on the second pass — even if `/foo` would itself match a rewrite rule, it won't rewrite again. The guard is identity-based on the in-memory `Request` object, so client-supplied headers cannot spoof or bypass it. The pre-rewrite URL is exposed to re-dispatched handlers via [`c.originalUrl()`](#original-url-access).
+After `c.rewrite()`, Void skips static rewrite rules on the second router pass. It tracks the request itself, so a client-supplied header can't bypass this check. Use [`c.originalUrl()`](#original-url-access) to read the URL before the rewrite.
 
-What the guard **doesn't** catch are multi-hop user-written loops across separate middleware: middleware A rewrites `/a → /b`, middleware B rewrites `/b → /c`, middleware C rewrites `/c → /a`. Each hop constructs a fresh `Request`, so the per-request guard can't see the cycle. If you chain rewrites across middleware, write each hop so it only rewrites paths that aren't already in its target shape.
+Your middleware still runs on each pass. Avoid cycles such as `/a → /b → /c → /a` across middleware: Void can't detect those automatically. Each middleware should skip paths that are already in its intended form.
 
 Also avoid deep rewrite chains for performance: every hop re-runs all middleware from the top, so `/a → /b → /c → /d` costs four router passes.
 
@@ -157,19 +159,19 @@ Also avoid deep rewrite chains for performance: every hop re-runs all middleware
 
 - Static `routing.rewrites` and `routing.fallbacks` rules are evaluated in order, first-match-wins, at O(rules) per request. The list is small in practice, but keep it bounded — don't programmatically generate thousands of entries.
 - Each `c.rewrite()` hop replays the full middleware stack against a fresh `Request`. A chain of three middleware rewrites with four middleware in the stack is roughly twelve middleware invocations, not four.
-- The WeakMap loop guard is keyed on the `Request` identity and only suppresses the _static rules_ middleware on re-dispatched requests. User middleware is not guarded: if `c.rewrite('/a')` lands on `/a`, and middleware on `/a` calls `c.rewrite('/b')`, that second hop runs — each hop allocates a new `Request`, so the guard never matches. Chain depth is your responsibility.
+- The loop check skips static rules after a rewrite, but it doesn't skip your middleware. Keep middleware rewrite chains short and ensure they terminate.
 
 ### Side effects in re-dispatched middleware
 
-Because every hop replays the full middleware stack, any side-effectful middleware fires twice (or N times for deep chains): DB lookups, session/auth checks, rate-limiter increments, and request loggers all double-count. For example, an auth middleware that logs every request will log twice for every rewritten request.
+Every rewrite runs middleware again. Database lookups and auth checks repeat, and counters or loggers may record the same request more than once.
 
-To skip idempotent-unsafe work on the second pass, use `c.isRewritten()`:
+For work that should happen only before a rewrite, check `c.isRewritten()`. Keep access checks wherever the destination needs them:
 
 ```ts
 if (c.isRewritten()) return next();
 ```
 
-`c.isRewritten()` returns `true` when the request was re-dispatched by a rewrite (whether from a static rule at the edge or `c.rewrite()` in middleware). Internally the framework tracks rewrites in an in-worker `WeakMap<Request, URL>` keyed on `c.req.raw` — the helper just checks whether the current `Request` has an entry. The `X-Void-Original-URL` header is only the wire format between the edge dispatcher and the worker; entry middleware migrates it into the WeakMap once per request, and from that point on the map is the single source of truth.
+`c.isRewritten()` returns `true` after either a static edge rewrite or `c.rewrite()` in middleware. Void records this on the request after accepting the edge's rewrite metadata.
 
 ::: tip
 This is the recommended approach for i18n libraries. The library can export a middleware factory that handles locale detection and rewriting, and users just drop it into their `middleware/` directory.
@@ -187,13 +189,13 @@ export default defineHandler((c) => {
 });
 ```
 
-Internally this reads the pre-rewrite URL from an in-worker `WeakMap<Request, URL>` keyed on `c.req.raw`. When a request crosses the edge, Void's dispatcher sets `X-Void-Original-URL` on the forwarded request; entry middleware migrates that header into the WeakMap once, and every subsequent `c.rewrite()` hop writes straight into the map. The header on the wire is only the hand-off format — in-worker, the WeakMap is the single source of truth, so there's no per-call header parse.
+On managed Void deployments, the edge passes the original URL to the Worker as trusted request metadata. On direct Cloudflare deployments, the generated Worker records that metadata when it applies the rewrite itself. Further middleware rewrites update the same metadata without requiring you to parse headers.
 
 ## Fallbacks
 
 `routing.fallbacks` shares the same shape as `rewrites` but runs **only when no static asset or route matched** — i.e. the request would otherwise return a 404. This lets you add catch-all rewrites without preempting real routes.
 
-In Void apps, production dispatch only treats generated no-route 404s as fallback-eligible. A route handler or API endpoint that intentionally returns `404` is returned as-is, so catch-all fallbacks do not turn missing API resources into HTML. Third-party framework deployments do not expose Void's no-route marker, so their fallback rules still apply after the framework worker returns `404`.
+Void only treats generated no-route 404s as fallback-eligible, whether the check runs in managed dispatch or in a native Cloudflare Worker. A route handler or API endpoint that intentionally returns `404` is returned as-is, so catch-all fallbacks do not turn missing API resources into HTML. Third-party framework deployments do not expose Void's no-route marker, so their fallback rules still apply after the framework worker returns `404`.
 
 ```json
 {
@@ -270,7 +272,7 @@ Rules are bucketed by phase before merging:
 - **Pre-asset phase** (always fires, runs before static asset lookup): `routing.redirects` + `routing.rewrites` + `_redirects` 3xx entries + `_redirects` `200!` entries.
 - **Post-asset phase** (only fires on an asset miss): `routing.fallbacks` + `_redirects` plain `200` entries. For SPA app types, the synthetic `/* → /index.html` rule is **appended last** in this phase, so user fallbacks evaluated earlier take precedence under first-match-wins.
 
-Within each phase, the order is always: **`void.json` rules first, then `_redirects` file rules**. Because evaluation is first-match-wins, **`void.json` rules override `_redirects` rules for the same source**. This holds even though `_redirects` is "closer to the build output" — intuitions like "file wins" or "whichever I wrote later in the file wins" are both wrong.
+Within each phase, `void.json` rules run first, followed by `_redirects` rules. The first matching rule wins, so a `void.json` rule takes precedence over the same source pattern in `_redirects`.
 
 ### Concrete example
 
@@ -296,11 +298,13 @@ To confirm precedence in practice, check the [`X-Void-Routing` dev header](#debu
 
 ## How rewrites work
 
-**Static rewrites** (`void.json` and `_redirects` file):
+**Static rewrites** (`void.json` and `_redirects` file) on managed Void deployments:
 
 1. `void deploy` reads rewrite rules from the `_redirects` file (status `200` entries) and `routing.rewrites` in `void.json`, then includes them in the deploy manifest alongside redirect rules.
 2. The platform stores the rules in the KV routing entry for your project.
 3. The dispatch worker evaluates all routing rules (redirects and rewrites) before any worker invocation. If a rewrite matches, the request pathname is updated internally and the request continues through the normal pipeline (static assets, ISR, worker). The original URL is passed as `X-Void-Original-URL`.
+
+On direct Cloudflare deployments of native Void apps, Vite compiles the same merged redirects, rewrites, headers, and fallbacks into the generated Worker. They run there without managed dispatch, and rewrite metadata remains internal to the Worker.
 
 **Middleware rewrites** (`c.rewrite()`):
 
@@ -308,7 +312,7 @@ To confirm precedence in practice, check the [`X-Void-Routing` dev header](#debu
 2. Your middleware calls `c.rewrite(newPath)`, which constructs a new request with the rewritten pathname and re-dispatches it through the Hono router.
 3. The re-dispatched request runs through all middleware and route handlers as if it were a fresh request to the new path.
 
-Static rewrites are evaluated at the edge (zero-cost). Middleware rewrites run inside the worker (adds a re-dispatch but enables dynamic logic).
+Static rewrites run before application routes: in dispatch for managed deployments and in generated middleware for direct Cloudflare deployments. Middleware rewrites repeat routing inside the Worker, which lets them use request-specific logic.
 
 ## Caveat: client navigation skips rewrites
 

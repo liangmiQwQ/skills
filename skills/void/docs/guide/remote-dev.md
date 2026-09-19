@@ -4,16 +4,16 @@ outline: deep
 
 # Remote Development
 
-During local development, Void uses local emulations of D1, KV, and R2 through [Miniflare](https://miniflare.dev/). That covers most work, but sometimes you need real data for debugging a production issue, testing against a populated database, or validating R2 uploads end to end.
+Void normally uses local D1, KV, and R2 through [Miniflare](https://miniflare.dev/). Remote mode lets you run local code against a project deployed to your Void platform, for example to test with existing data or investigate an issue.
 
-Remote development mode connects your local dev server to the **real bindings** from your deployed project. Your code does not change. `db.select()`, `env.KV.get()`, and `env.STORAGE.get()` work the same way, but they hit remote resources instead of local emulations.
+Calls such as `db.select()` and `env.KV.get()` use the deployed resources without changing your application code. Writes affect real data, so use a staging project when possible.
 
 ## Prerequisites
 
 Before enabling remote mode, you need:
 
-1. **Logged in:** run `void auth login` if you have not already
-2. **Project linked:** run `void deploy` at least once to create and link a project
+1. Connect to your team's platform with `void connect <url>`. It signs you in when needed.
+2. Link a project with `void project link`. Deploy it at least once so its resources exist.
 
 ## Enabling Remote Mode
 
@@ -46,7 +46,7 @@ AI inference is always routed through the proxy regardless of remote mode. There
 
 ## How It Works
 
-When remote mode is active, the dev server replaces local Miniflare bindings with proxy-backed versions at runtime. Every binding call is forwarded to your deployed resources via Void's proxy service, authenticated with your login token. The proxy resolves which D1 database, KV namespace, or R2 bucket to use based on your project's binding configuration.
+In remote mode, binding calls go through your platform's proxy, authenticated with your login token. The proxy uses the linked project's configuration to choose the D1 database, KV namespace, or R2 bucket.
 
 You don't need to change any code. Imports like `import { db } from "void/db"` and direct binding access via `c.env.KV` both work transparently.
 
@@ -61,7 +61,9 @@ When the dev server starts with remote mode active, it prints:
 
 ## Limitations
 
-- **Network latency:** every binding call goes over the network, so local dev is slower than local emulation. This is expected.
+- **Network latency:** each binding call makes a network request, so responses may be slower than local development.
 - **R2 multipart uploads:** `createMultipartUpload()` and `resumeMultipartUpload()` are not supported in remote mode.
+- **R2 conditional writes:** `put(..., { onlyIf })` requires a current Void platform and an active deployment with the native remote-binding handler. Update the platform and redeploy the project if this operation is unavailable. Failed preconditions return `null`; Void never retries a conditional write as an unconditional REST upload.
 - **D1 dump:** `db.dump()` is not supported in remote mode.
+- **D1 batch compatibility:** `db.batch()` requires an active deployment with the native remote-binding handler. Void does not split a batch into REST calls because that would lose D1's atomic all-or-nothing behavior.
 - **Writes affect real data:** remote mode connects to your actual deployed resources. Inserts, updates, and deletes are real, so use it carefully or point it at a staging project.

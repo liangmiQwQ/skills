@@ -4,7 +4,7 @@ outline: deep
 
 # React Router v7
 
-[React Router v7](https://reactrouter.com/) is a Vite-based full-stack React framework. `voidPlugin()` composes directly with the React Router plugin in the Vite pipeline, so there is no separate adapter to install.
+Add `voidPlugin()` alongside the [React Router v7](https://reactrouter.com/) Vite plugin to use Void's database, storage, and deployment features. You don't need a separate Cloudflare adapter.
 
 ## Setup
 
@@ -122,9 +122,9 @@ export default defineQueue<{ to: string; subject: string }>(async (batch) => {
 
 ### Environment Variables
 
-Void gives you a typed env layer: declare keys in `env.ts`, read them via `import { env } from "void/env"`, and get schema validation at build + deploy time plus a client-leak guard that fails the build if a server-only key reaches the browser. See the [env vars guide](../../guide/env-vars.md) for the full feature set.
+Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
 
-React Router-specific caveat: because `loader()` and the component live in the same route file, the leak guard treats the module as client-reachable. Reading `env.SERVER_ONLY_KEY` inside `loader()` is safe at runtime (RR strips loaders from the client bundle), but the guard flags it as a potential leak. Move server-only secrets into a `.server.ts` companion file to silence the guard cleanly.
+React Router keeps loaders and components in the same route file. Void's client check therefore treats that file as reachable from the browser, even though React Router removes loaders from the client bundle. Read server secrets in a `.server.ts` companion module to keep that separation explicit.
 
 ## Accessing Bindings Directly
 

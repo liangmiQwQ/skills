@@ -4,17 +4,13 @@ outline: deep
 
 # Live Event Streams
 
-`void/live` provides Durable Object-backed fanout over Server-Sent Events. Use it
-when one browser tab needs a single SSE connection that can subscribe and
-unsubscribe from many application topics over time.
+`void/live` lets a browser subscribe to several topics over one SSE connection. Publish an event from a route, scheduled job, or queue consumer, and Void delivers it to connected subscribers using Durable Objects.
 
-Use `void/sse` for request-owned streams where the producer lives inside the same
-route handler. Use `void/live` when later requests, mutations, scheduled jobs, or
-queue consumers need to publish to clients that are already connected.
+For example, a page can subscribe to updates for a post and its comments, then change those subscriptions as the user navigates. If a single request produces the whole stream, such as an AI response, [`void/sse`](./sse.md) is enough.
 
 ## Define A Stream
 
-Create a server-only live stream descriptor:
+Define a stream in a server-only module:
 
 ```ts
 // src/live.ts
@@ -95,9 +91,7 @@ await live.publish(
 );
 ```
 
-Topics are opaque strings. Payloads are application-owned JSON. `type` and
-`eventId` are copied into the JSON envelope; `void/live` does not interpret
-them, persist them, or use native SSE `id` fields.
+Choose your own topic names and JSON payloads. Void includes `type` and `eventId` in the event envelope without interpreting or storing them. It doesn't use native SSE `id` fields.
 
 If you are outside an active request/runtime context, pass env explicitly:
 
@@ -209,12 +203,11 @@ export const live = defineLiveStream({
 });
 ```
 
-`maxSubscriptionsPerTopic` cannot be raised above `256`. For larger broadcast
-workloads, shard topics in userland or use a dedicated realtime system.
+`maxSubscriptionsPerTopic` cannot be raised above `256`. For larger broadcasts, split subscribers across application topics or use a dedicated realtime system.
 
 ## Delivery Semantics
 
-`void/live` is an at-most-once live fanout primitive:
+Live delivery is at most once: clients may miss events, and Void doesn't replay them automatically.
 
 - one SSE connection can hold many topic subscriptions
 - publish cost is proportional to subscribers of the topic
@@ -222,8 +215,7 @@ workloads, shard topics in userland or use a dedicated realtime system.
 - clients using the raw HTTP protocol must resubscribe after reconnect
 - deploys, rollbacks, Worker restarts, browser reconnects, and network changes
   can drop live state
-- durable replay, cache invalidation, live queries, and client state management
-  belong in userland
+- your app handles replay, cache invalidation, live queries, and client state
 
 Use an application database, queue, or custom Durable Object for replay. Use
 `eventId` and caller-provided `lastEventId` values as application protocol

@@ -4,39 +4,47 @@ outline: deep
 
 # Quickstart
 
+Let's create a Void app, run it locally, and deploy it. You can start in an empty directory or [add Void to an existing Vite app](#adding-to-an-existing-vite-app).
+
+Use Node.js 24.21.0 or later. New projects pin the SDK's tested Workers
+compatibility date, so the bundled local runtime can start them. An existing
+compatibility date in your project is preserved.
+
 ## Start in an Empty Directory
 
-Install the Void CLI from npm:
+Install Void in your project directory:
 
-`npm`
+::: code-group
 
-```sh
+```sh [npm]
 npm install -D void
 ```
 
-`pnpm`
-
-```sh
+```sh [pnpm]
 pnpm add -D void
 ```
 
-`yarn`
-
-```sh
+```sh [yarn]
 yarn add -D void
 ```
 
-`bun`
-
-```sh
+```sh [bun]
 bun add -D void
 ```
 
-In an empty directory, `void init` adds the matching Pages adapter and starter dependencies after you choose a scaffold toolchain and framework. Vite+ is the default toolchain and uses `vp` scripts.
+:::
 
-As part of `void init`, you'll choose Vite+ or plain Vite, then a Pages framework (React, Vue, Svelte, or Solid) and a starter type. D1 is the default top option and scaffolds a DB-backed page loader, schema, generated migration, `db/seed.ts`, and API route. PostgreSQL scaffolds the same starter and writes `"database": "pg"` to `void.json`. Static Pages skips the database and server starter files so you can start with static content and add Void features later.
+Then run the setup command:
 
-After installation, run the setup flow:
+With pnpm, you can also start with `pnpm create void my-app`; the scaffolder sets
+up the required native build permissions before installing Void. If a manual
+installation reports blocked build scripts, approve `esbuild`, `sharp`, and
+`workerd` with `pnpm approve-builds`. Set `better-sqlite3: false` in
+`pnpm-workspace.yaml`'s `allowBuilds`: Void uses version 13's bundled binaries,
+so it does not need a native rebuild.
+
+The setup install updates the pnpm lockfile to match the generated dependencies,
+including when setup runs in CI. Later builds can use `pnpm install --frozen-lockfile`.
 
 ::: code-group
 
@@ -58,36 +66,36 @@ bunx void init
 
 :::
 
-At the end of the full interactive flow, `void init` can also handle Void project setup by logging you in and linking or creating your Void project. That means the default first-time path is install packages, run `void init`, then `void deploy`.
+Void asks you to choose Vite+ or plain Vite, a UI framework, and a starter. Vite+ is the default. For a database app, D1 needs no local database server; PostgreSQL and MySQL are available if you want to use an external database. Static Pages starts with pages only.
 
-For the database-backed starters, D1 is the zero-config default for prototyping and read-heavy apps, while PostgreSQL is better when you already have Postgres infrastructure or need heavier writes and more complex queries.
+Setup also asks where you want to deploy. Choose Cloudflare to use your own account, or Void to connect to your team's platform. You can skip this and decide later.
 
 <details>
 <summary style="cursor:pointer">
 💡 <b>Notes on <code>void</code> binary usage</b>
 </summary>
 
-`void` is a local binary from the installed `void` package, so outside of npm scripts, you will have to invoke it with `npx`, `pnpm`, `yarn`, or `bunx`. For brevity, you will sometimes see unprefixed `void` usage throughout the docs. Just remember it needs to be invoked through a binary runner.
+The docs use `void` for brevity. Because it's installed in your project, run it through your package manager outside package scripts: `npx void`, `pnpm void`, `yarn void`, or `bunx void`.
 
 Alternatively, you can add `./node_modules/.bin` to your `PATH` so that you can invoke `void` directly when you are in the root directory of your app.
 
 :::warning ⚠️ Prefer local install
-We do not recommend installing `void` globally, because the CLI needs to be in sync with same version of the runtime framework. Always install `void` locally as a dev dependency of your project.
+Install `void` locally so the CLI and your app use the same version.
 :::
 
 </details>
 
 ## Using with Coding Agents
 
-`void init` detects your agent once and reuses that choice for instructions, skills linking, and MCP config.
+`void init` detects your coding agent and sets up the matching instructions and skills.
 
 If auto-detection fails, `void init` asks you to choose from a short list (Claude, Cursor, Codex, Gemini CLI, Generic).
 
-In supported agents such as Claude Code, you can invoke the `/void` skill to turn your agent into a Void export. Then, simply ask the agent to build an app with Void. See the [Coding Agents](../integrations/agents) guide for more details.
+In agents that support it, use the `/void` skill to load the relevant guidance, then describe the app you want to build. See [Coding Agents](../integrations/agents) for setup details.
 
 ## Meta Frameworks
 
-Void as a platform supports Vite-based meta frameworks, but the Void SDK itself is also a powerful and flexible meta framework via its [Pages routing](./pages-routing/overview) feature. If you only want to use an existing meta framework and deploy to Void, check out the [Framework Integration Guides](../integrations/frameworks/overview).
+You can build pages directly with Void's [Pages routing](./pages-routing/overview), or keep an existing framework such as TanStack Start, React Router, or SvelteKit. Follow the [framework integration guides](../integrations/frameworks/overview) for framework-specific setup.
 
 ## Adding to an Existing Vite App
 
@@ -111,7 +119,7 @@ bun add -D void
 
 :::
 
-Enable the plugin in `vite.config.ts`
+Enable the plugin in `vite.config.ts`:
 
 ```ts
 import { defineConfig } from 'vite';
@@ -122,7 +130,7 @@ export default defineConfig({
 });
 ```
 
-Then run the setup guide via `void` (Void CLI):
+Run setup to configure the remaining project files:
 
 ::: code-group
 
@@ -148,7 +156,7 @@ bunx void init
 
 ### 1. Edit the generated API route
 
-Your starter already includes `routes/api/hello.ts` with a named `GET` export:
+Database-backed starters include `routes/api/hello.ts`. You can edit its `GET` handler, or create this file if you started with Static Pages:
 
 ```ts
 import { defineHandler } from 'void';
@@ -169,61 +177,32 @@ Then visit:
 - App: `http://localhost:5173`
 - API route: `http://localhost:5173/api/hello`
 
-### 3. Finish Void project setup if you skipped it during `void init`
+### 3. Choose where to deploy
+
+If you chose a deployment target during setup, you're ready. If you skipped it, run `void init` again or choose Cloudflare for the first deploy:
 
 ```sh
-void auth login
+void deploy --platform cloudflare
 ```
 
-If you already logged in and linked a project during `void init`, you can skip this step.
+Void opens your browser to sign in when needed. To use your team's platform, connect using the API URL from your administrator:
+
+```sh
+void connect https://platform.example.com
+void project link
+```
 
 ### 4. Deploy
 
-Set secrets once before deploying, if any:
-
-```sh
-void secret put KEY=value
-```
-
-Then run:
+With your target configured, run:
 
 ```sh
 void deploy
 ```
 
-```sh
-┌  void deploy
-│
-◇  Building...
-│  (vite build output)
-│
-ℹ  Found N migration(s)
-│
-◇  Checking assets...
-◇  Uploading X/Y assets (Z cached)
-◇  Packaging...
-◇  Deploying...
-◇  Deployed!
-│
-│  ╭─────────────────────────────────────────╮
-│  │  https://my-app.void.app           │
-│  │                                         │
-│  │  2 worker module(s), 5 static asset(s)  │
-│  │  1 migration(s) applied                 │
-│  │  SSR enabled                            │
-│  ╰─────────────────────────────────────────╯
-│
-└  Done!
-```
+Void builds the app, provisions the resources it uses, applies pending migrations, and prints the deployed URL. If it reports a missing production secret, [configure that secret](./env-vars.md) and deploy again.
 
-On first deploy, Void will:
-
-- build your app
-- create or link a project if you did not already do that during `void init`
-- provision required resources (for example D1/KV/R2 when inferred)
-- deploy to `https://<slug>.void.app`
-
-Right now, only deploys via the CLI is supported. To setup push-to-deploy GitHub, run `void init --github`.
+Subsequent deploys use the same target. See [Deployment](./deployment.md) for CI setup, migrations, and rollback. To generate a supported push-to-deploy workflow, run `void init --github`.
 
 ## Next steps
 

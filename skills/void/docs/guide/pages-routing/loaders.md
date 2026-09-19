@@ -4,7 +4,7 @@ outline: deep
 
 # Loaders & Props
 
-Every page can have a companion `.server.ts` file that exports a `loader`. Server handlers use the same `defineHandler` API as [server routes](../server-routing.md), so you get the same typed `c.env` bindings and Hono context methods.
+A loader fetches the data a page needs. Define it in a companion `.server.ts` file using the same `defineHandler` API as [server routes](../server-routing.md).
 
 ## Defining a Loader
 
@@ -38,7 +38,7 @@ export const loader = defineHandler<Props>(async (c) => {
 
 ## Using the Data in Page Components
 
-The component receives loader data as props. Export the props type from your `.server.ts` file to keep the contract in one place:
+The page component receives the loader's result as props. Export the inferred type from the server file so the component stays in sync:
 
 ::: code-group
 
@@ -131,7 +131,7 @@ export const loader = defineHandler(async (c) => {
 });
 ```
 
-The page renders immediately with `projects` available. The `usage` prop is a framework-native deferred resource: React consumes it with Suspense and `use()`, while the other adapters expose a `{ loading, value, error }` state object.
+The page can render `projects` while `usage` is still loading. In React, read `usage` with `use()` inside Suspense. Other adapters expose it as `{ loading, value, error }`.
 
 ### Handling Deferred State
 
@@ -237,7 +237,9 @@ export default function Dashboard(props: Props) {
 
 ### How Streaming Works
 
-On the initial page load (SSR), React uses React 19 streaming SSR and renders the nearest Suspense fallback for deferred props; the other adapters render their loading state. As each deferred function resolves, the server streams an inline `<script>` tag that delivers the data, so no extra HTTP request is needed. Routes with `export const ssr = false` skip server-rendered component HTML but still stream deferred resolution scripts after the client-mounted shell. On SPA navigation, deferred data streams via NDJSON over the same response.
+On the first request, React renders the nearest Suspense fallback for deferred props; the other adapters render their loading state. As data becomes available, the server sends it in inline scripts on the same response.
+
+A route with `ssr = false` still receives those scripts, even though its component mounts in the browser. During client-side navigation, deferred data arrives as newline-delimited JSON on the navigation response.
 
 ### Deferred Props After Mutations
 

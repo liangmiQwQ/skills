@@ -4,9 +4,11 @@ outline: deep
 
 # What is Void?
 
-This guide explains how Void fits together before you dive into individual features. It starts with the mental model, then moves into routing, data, platform features, and deployment. If you want to get something running first, jump to [Quickstart](./quickstart).
+Void is a fullstack SDK for Vite apps. It connects your server code, database, and frontend types, and deploys your app to Cloudflare Workers. To try it, start with the [Quickstart](./quickstart).
 
-Void combines a Vite plugin, a backend SDK, and a deployment platform. Add one plugin to your app, and the imports in your code drive the infrastructure around it. A database, key-value store, object storage, AI inference, and deployment all line up without a separate layer of config files or dashboard setup.
+Add the Vite plugin to your app. As you use features such as a database, key-value storage, or queues, Void detects what you need and sets up the corresponding resources.
+
+The CLI and build tools require Node.js 24.21.0 or later.
 
 ```sh
 npm install -D vite void
@@ -22,34 +24,30 @@ export default defineConfig({
 ```
 
 ```sh
+void init   # choose your framework and deployment target
 void deploy
-# app live at <your-subdomain>.void.app!
 ```
 
 ## The idea
 
-With most stacks, your app and its platform do not talk to each other directly. You end up stitching them together with config files, environment setup, resource provisioning, and deployment scripts. Once the app is live, caching, scaling, and limits often live in a separate control plane too.
+Your code often already describes the resources it needs. Import `db` from `void/db`, for example, and Void provides a database for local development and provisions its production resource when you deploy. The same pattern applies to `kv`, `storage`, queues, and AI.
 
-Void closes that gap. It connects your app directly to the platform through Vite. Import `db` from `void/db` and you have a database in local development plus the matching production resource on deploy. The same idea applies to `kv`, `storage`, queues, and AI. In most cases, the code already describes what the platform needs to provision.
+Types follow your data through the app: from a Drizzle schema to a route handler, then to the frontend calling that route. You can change a field in one place and let TypeScript show you the code that needs updating.
 
-This is what it unlocks:
+Void brings these pieces together:
 
-- **Write code, not config:** no infrastructure files, no dashboard clicks, and no manual resource declarations. Your imports are the contract.
+- **Resources from your code:** imports tell Void which supported resources to provision. Use `void.json` or your Cloudflare config when you need to customize them.
 - **Types from database to frontend:** your Drizzle schema defines DB types, route handlers infer return types, and the [typed fetch client](./typed-fetch.md) checks calls at the usage site. One [Standard Schema](https://standardschema.dev/) validator can drive both runtime validation and compile-time types.
-- **Real runtime in development:** `vite dev` runs your server code in the same runtime used in production, with local database, KV, and storage.
+- **Local Cloudflare development:** native Void apps run server code in `workerd`, with local database, KV, and storage.
 - **Deploy that understands the app:** `void deploy` reads your migrations, provisions the resources you actually use, and ships the result to the edge.
 
 ## The platform
 
-Void deploys to [Cloudflare Workers](https://developers.cloudflare.com/workers/). Your server code runs at the edge, close to users, and scales without extra platform work on your side.
+Void deploys to [Cloudflare Workers](https://developers.cloudflare.com/workers/). You can use your own Cloudflare account or connect to a Void platform managed by your team. Both use the same SDK and CLI.
 
-- [Static assets](./edge/static-assets) are served from the edge with proper cache headers. [Incremental revalidation](./edge/revalidation) (ISR) and [prerendering](./edge/prerendering) let you cache dynamic pages while keeping data fresh.
-- Database reads are fast everywhere via D1's read replication.
-- Custom domains with automatic TLS.
-- Secrets and environment variables managed via CLI or dashboard, scoped per project.
-- A dashboard for deployments, usage metrics, and project settings.
+[Static assets](./edge/static-assets) are cached at the edge. [Prerendering](./edge/prerendering) builds pages ahead of time, while [incremental revalidation](./edge/revalidation) caches pages rendered on demand. Database, storage, secrets, and deployment commands are available through Void.
 
-You do not need a Cloudflare account or Cloudflare-specific knowledge to get started. If you want full control later, every build still produces a standard Cloudflare Worker, so you can [self-host](../integrations/cloudflare#deploy-to-your-own-cloudflare-account) with your own `wrangler.json`.
+For a single app, [deploy to your own account](../integrations/cloudflare#deploy-to-your-own-cloudflare-account). To give a team a shared deployment service, [install a Void platform](./self-hosted-platform.md), then let developers connect to its URL.
 
 ## How it works
 
@@ -61,7 +59,7 @@ import { storage }            →  R2 bucket (auto-provisioned)
 import { ai }                 →  Workers AI inference (metered)
 db/schema.ts                  →  Drizzle schema (source of truth for DB types)
 db/migrations/*.sql           →  Applied to D1 on deploy
-void deploy                   →  Live at https://<slug>.void.app
+void deploy                   →  Deploy to the saved Cloudflare or Void target
 ```
 
 The plugin scans your source code at build time, detects which imports you use, and provisions the corresponding Cloudflare bindings on deploy.
@@ -70,7 +68,7 @@ Void also works with existing frameworks. [TanStack Start](/integrations/framewo
 
 If you are building a full-stack app without a meta-framework, Void also gives you [file-based server routing](./server-routing) with method exports, dynamic params, middleware, and validation. It also includes [pages routing](./pages-routing/overview) for server-rendered UI, SPA navigation, co-located data loading, and typed forms across React, Vue, Svelte, and Solid.
 
-Void auto-detects your [app type](./app-types) and adapts accordingly.
+Void detects your [app type](./app-types) and chooses the appropriate build and deployment flow.
 
 ## Next steps
 

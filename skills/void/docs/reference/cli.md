@@ -46,6 +46,7 @@ Use this page as a command reference. If you are setting up a project for the fi
 | `void email destinations`         | List verified recipient addresses                                             |
 | `void email allow <address>`      | Add a recipient and send a verification email                                 |
 | `void email disallow <address>`   | Remove a recipient from the allowlist                                         |
+| `void email domain`               | Send and receive at your own domain on a Cloudflare zone                      |
 | `void init`                       | Setup wizard for new or existing projects                                     |
 
 ## Binary Invocation
@@ -742,6 +743,8 @@ Generate SQL migration files from schema changes.
 
 The command compares your current `db/schema.ts` or `db/schema/` modules against the last generated Drizzle snapshot and writes new migration artifacts under `db/migrations/`. When Void-managed auth is enabled, it also resolves the Better Auth schema in production mode and includes those tables automatically, including configured renames and plugin tables. This works for auth-only apps without an application schema. Review and commit the generated files before deploying.
 
+For SQLite, Void checks that the migration history applies to a fresh database. If generation fails this check, the previous SQL, snapshots, and journal are restored. If an existing migration fails, repair that unapplied migration first: rerunning generation compares snapshots and does not repair existing SQL. This check does not verify that a migration preserves existing data; review table rebuilds and foreign-key actions carefully.
+
 ### `void db status`
 
 Show migration status. Displays which migrations are applied or pending locally, then uses the saved deployment target for remote status: the hosted API for Void projects, the pinned D1 database and its configured migration table for direct Cloudflare SQLite projects, or the shell `DATABASE_URL` for direct Cloudflare PostgreSQL/MySQL projects. If the remote credential or service is unavailable, local status is still shown.
@@ -1318,6 +1321,54 @@ void email disallow <address> [--project <name>]
 ```
 
 Remove one recipient from the project's destination list. Sends to that address are refused within about a minute: the platform updates the project's allowlist as part of the command, and the proxy re-reads it every 60 seconds. No deploy is involved.
+
+### `void email domain`
+
+```
+void email domain <add|status|list|sync|remove> [<domain>] [--project <name>]
+```
+
+Send and receive at your own domain on a Cloudflare zone you own, registered to the project. Void platform only — on your own Cloudflare account the mail domain comes from `email.from` instead (see `void email setup`). The walkthrough is [Your own domain on the platform](../guide/email.md#your-own-domain-on-the-platform).
+
+#### `void email domain add`
+
+```
+void email domain add <domain> [--subdomain <label|host>] [--project <name>]
+```
+
+Register the domain with the project. One credential is required, granted two ways: an OAuth grant from Cloudflare's hosted consent page (the page names Wrangler — Void borrows its OAuth client), or, as the fallback Enter switches to at any point, a scoped API token created from a three-click template link and picked up from the clipboard or a masked paste. The credential is POSTed once and stored on the platform, encrypted for the project — nothing is kept locally. Needs an interactive terminal. The CLI proposes `mail.<domain>` when the apex already carries MX records and allows the apex only when it carries none; `--subdomain` overrides the proposal. One live email domain per zone and one project per domain are enforced — a conflict is refused with a 409. Re-running `add` on a `failed`, `token_revoked`, or `token_expired` row replaces the credential and retries; the routing rules stay.
+
+#### `void email domain status`
+
+```
+void email domain status <domain> [--project <name>]
+```
+
+Show one registered domain. The platform re-probes the stored credential and the relay worker on every call, so this doubles as the drift report. A `pending` row whose only remaining step is the dashboard's subdomain form (printed by `add`) self-clears to `active` once public MX on the domain names Cloudflare — which makes this command the poll for that one human step.
+
+#### `void email domain list`
+
+```
+void email domain list [--project <name>]
+```
+
+List the project's registered email domains with their status and mode.
+
+#### `void email domain sync`
+
+```
+void email domain sync <domain> [--project <name>]
+```
+
+Redeploy the domain's relay worker at the current version and rotate its secret — the fix when `status` reports the relay missing or drifted.
+
+#### `void email domain remove`
+
+```
+void email domain remove <domain> [--project <name>]
+```
+
+Delete the registration: the platform row, the stored credential, and the relay secret. Cloudflare-side cleanup is best-effort; any step that fails is named (`failed_steps`) so you can finish it in the Cloudflare dashboard.
 
 ### `void email status`
 

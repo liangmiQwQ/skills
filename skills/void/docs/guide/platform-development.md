@@ -232,4 +232,33 @@ Publishing requires both SDK CI and platform CI, including the platform unit and
 API integration suites. Release tags also run the Windows SDK checks; a passing
 SDK-only build cannot publish a changed control plane.
 
+### Retrying a Release
+
+To retry a failed release without moving an existing tag, add `+retry.N` to a
+new Git tag, with `N` starting at `1`. Keep the package versions unchanged:
+
+| Git tag                  | Package version | npm channel |
+| ------------------------ | --------------- | ----------- |
+| `v0.21.0`                | `0.21.0`        | `latest`    |
+| `v0.21.0+retry.1`        | `0.21.0`        | `latest`    |
+| `v0.21.0-beta.1+retry.2` | `0.21.0-beta.1` | `beta`      |
+
+For example, when the packages are at `0.21.0`, commit the release fix and tag
+that commit:
+
+```sh
+git tag -a 'v0.21.0+retry.1' -m 'Retry 0.21.0 publication.'
+git push origin 'refs/tags/v0.21.0+retry.1'
+```
+
+The retry suffix belongs only in the Git tag, not in `package.json`. A `-1`
+suffix is a distinct prerelease version, not a retry. Tag and package versions
+are checked before dependency installation and the full CI jobs; retries still
+run the normal release checks.
+
+Retries publish only package versions that are still missing from npm. They
+cannot replace an already-published version. If an earlier attempt partially
+published the release and you changed its package contents, bump the version
+instead of combining different contents under the same version.
+
 For implementation history, use the design archive at `platform/meta/design-docs/README.md`. Its proposals explain earlier decisions; the source and current guides define the supported behavior.

@@ -66,8 +66,39 @@ The project owner's email (the GitHub address you signed up with) is added autom
 ::: warning When this is the right fit
 The shared sender is great for: ops alerts to the team, notifications to the project owner, reply-by-email flows on top of inbound, internal/app-internal mail.
 
-For SaaS sending to arbitrary end-users (every signup gets a welcome email), the per-recipient verification model doesn't fit. On [your own Cloudflare account](#your-own-cloudflare-account) with Workers Paid, Void onboards your mail domain for Email Sending, which lifts the verified-recipient gate. Otherwise use [Resend](https://resend.com), [Postmark](https://postmarkapp.com), or [SES](https://aws.amazon.com/ses/) directly — install their SDK and call it from your handler. We may formalize this with a provider abstraction later if there is demand; until then, calling the SDK directly is simple enough that the wrapper would not earn its keep.
+For SaaS sending to arbitrary end-users (every signup gets a welcome email), the per-recipient verification model doesn't fit. On the platform, [registering your own domain](#your-own-domain-on-the-platform) lifts that gate for sends from that domain. On [your own Cloudflare account](#your-own-cloudflare-account) with Workers Paid, Void onboards your mail domain for Email Sending, which lifts the verified-recipient gate. Otherwise use [Resend](https://resend.com), [Postmark](https://postmarkapp.com), or [SES](https://aws.amazon.com/ses/) directly — install their SDK and call it from your handler. We may formalize this with a provider abstraction later if there is demand; until then, calling the SDK directly is simple enough that the wrapper would not earn its keep.
 :::
+
+## Your own domain on the platform
+
+The shared sender lives on the platform's `mail.void.cloud` zone. To send — and receive — at a domain you own, register its Cloudflare zone with the project:
+
+```sh
+void email domain add acme.com
+```
+
+`add` needs one credential for the zone and offers two ways to grant it. The default opens Cloudflare's hosted consent page for an OAuth grant — one Allow click; the page names Wrangler, whose OAuth client Void borrows for it. Pressing Enter at any point, or any failure of the consent flow, switches to the fallback: a three-click template link that creates a scoped API token, which the CLI watches for on the clipboard or takes as a masked paste. Either credential is POSTed to the platform once and stored there, encrypted for the project — nothing is kept on your machine.
+
+**Where the mail lives.** Void never enables routing over live mail: when `acme.com` already carries MX records, the CLI proposes `mail.acme.com` (`[change with --subdomain]`); the apex is used only when it carries no MX records. `--subdomain <label|host>` overrides the proposal outright.
+
+**The pending state.** Enabling Email Routing on a subdomain is the one step with no API path, so when it is the step that remains, `add` prints it — Cloudflare dashboard → Email Routing → acme.com → Settings → Subdomains → add the subdomain — and the row sits at `pending`. Poll with:
+
+```sh
+void email domain status acme.com
+```
+
+Once public MX on the domain names Cloudflare, the row flips itself to `active` — no second command. `status` also re-probes the stored credential and the relay worker on every call, so it doubles as the drift report.
+
+**When a row is not active.** `failed` names the step that failed; fix it and re-run `void email domain add acme.com` — adding again replaces the credential and retries, and the routing rules stay. `token_revoked` / `token_expired` mean the stored credential died at Cloudflare; re-run `add` with a fresh grant or token — rules and the relay stay.
+
+Two upkeep verbs:
+
+- `void email domain sync acme.com` redeploys the relay at the current version and rotates its secret — the answer when `status` reports the relay missing or drifted.
+- `void email domain remove acme.com` deletes the platform row, the stored credential, and the relay secret. Cloudflare-side cleanup is best-effort; anything that could not be finished is named so you can delete it by hand.
+
+Two rules bound registrations: one live email domain per Cloudflare zone (a second `add` on the same zone is refused until you `remove` the first), and one project per domain (a domain registered to another project is refused).
+
+Sends from a registered domain skip the verified-recipient allowlist — the domain's own Email Sending onboarding replaces it — while platform quota and abuse controls still apply. Inbound needs nothing further: once the domain is `active`, mail to any address on it reaches your `email/` handlers.
 
 ## Options
 
@@ -87,7 +118,7 @@ At most 100 recipients across `to`, `cc` and `bcc` per call. Each address is che
 
 `Address` accepts either a string (`"hello@acme.dev"` or `"Name <hello@acme.dev>"`) or an object (`{ email, name? }`). Display names with non-ASCII characters are RFC 2047 encoded automatically.
 
-On the platform the sender is pinned to your project. `from` must be your project's own platform address — `<project-slug>@mail.void.cloud` or `<project-slug>+<tag>@mail.void.cloud`, optionally with a display name (`Acme <acme+noreply@mail.void.cloud>`). Anything else is rejected with `INVALID_FROM`. Omit `from` and Void fills in `<project-slug>+noreply@mail.void.cloud` for you. Sending from your own domain on the platform is not supported yet.
+On the platform the sender is pinned to your project. `from` must be your project's own platform address — `<project-slug>@mail.void.cloud` or `<project-slug>+<tag>@mail.void.cloud`, optionally with a display name (`Acme <acme+noreply@mail.void.cloud>`) — or any address on a domain registered with `void email domain add` (see [Your own domain on the platform](#your-own-domain-on-the-platform)). Anything else is rejected with `INVALID_FROM`. Omit `from` and Void fills in `<project-slug>+noreply@mail.void.cloud` for you.
 
 On your own Cloudflare account, `from` defaults to `email.from` from `void.json` and must be on a domain your account can send from; Cloudflare rejects any other sender and `sendEmail` reports it as `INVALID_FROM`.
 
@@ -383,7 +414,7 @@ never throws, while `replyEmail` throws when it cannot determine a sender.
 
 ### Configuring inbound delivery
 
-In production, inbound runs on one shared mail facility. The platform routes `<slug>+anything@<mail domain>` to your worker's `email()` export — **there is nothing to configure in the Cloudflare dashboard and no per-project DNS work**. Your handlers are live as soon as the deploy lands.
+In production, inbound runs on one shared mail facility. The platform routes `<slug>+anything@<mail domain>` to your worker's `email()` export — **there is nothing to configure in the Cloudflare dashboard and no per-project DNS work**. Your handlers are live as soon as the deploy lands. A [registered custom domain](#your-own-domain-on-the-platform) lands on the same facility: once `void email domain add` reports it `active`, mail to any address on the domain reaches your `email/` handlers, with nothing further to configure.
 
 On your own Cloudflare account there is no shared facility: the deploy derives one Email Routing rule per handler and writes it into `wrangler.jsonc` for you — see [Your own Cloudflare account](#your-own-cloudflare-account).
 

@@ -60,6 +60,8 @@ Already have a Cloudflare Worker and a root `wrangler.jsonc` or `wrangler.json`?
 
 To connect to your team's platform and sign in, run `void connect <url>` using the URL from your administrator. Use `void connect --platform cloudflare` to set up your own Cloudflare account. Connecting preserves existing project links. New Void projects need a platform connection.
 
+Owners can [share a platform project](./project-collaboration.md) with readers, collaborators, and project administrators. This does not apply to direct Cloudflare deployments.
+
 ### Migrations
 
 If your app uses Drizzle, `void deploy` runs migrations as part of the deploy flow:

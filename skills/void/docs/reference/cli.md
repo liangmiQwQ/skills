@@ -41,7 +41,7 @@ Use this page as a command reference. If you are setting up a project for the fi
 | `void build logs`                 | Stream, tail, or download build logs                                          |
 | `void email status`               | Show email readiness on your own Cloudflare account (`--platform cloudflare`) |
 | `void email setup`                | Set email up on your own Cloudflare account, without deploying                |
-| `void email usage`                | Show monthly email send/receive counts and quota                              |
+| `void email usage`                | Show monthly recipient attempts, inbound receipts, and quota                  |
 | `void email logs`                 | Show recent email delivery activity                                           |
 | `void email destinations`         | List verified recipient addresses                                             |
 | `void email allow <address>`      | Add a recipient and send a verification email                                 |
@@ -166,7 +166,7 @@ In a non-interactive shell, supply a URL or explicit target. Cloudflare requires
 
 ### `void auth login`
 
-OAuth login. You choose GitHub or Google at the prompt, and the token is saved in the operating-system keychain, scoped to the platform origin. Login fails closed when no keychain is available instead of writing the token to a plaintext file; headless environments use `VOID_TOKEN` from their secret manager.
+Browser login through one of the platform's currently enabled methods. The token is saved in the operating-system keychain, scoped to the platform origin. Login fails closed when no keychain is available instead of writing the token to a plaintext file; headless environments use `VOID_TOKEN` from their secret manager.
 
 Set `VOID_API_URL` alongside `VOID_TOKEN` to identify the platform that issued it.
 A token without an API URL is only used for Void Cloud's production API; a saved
@@ -174,6 +174,13 @@ connection or project cannot forward it to another platform. To use a platform's
 saved login instead, unset `VOID_TOKEN`.
 
 This is optional if you already completed auth during `void connect` or the interactive `void init` flow.
+
+### `void auth link [connection-id]`
+
+Link another enabled login method to your current account. Sign in again if your
+session is no longer recent, complete the additional provider's browser login,
+and confirm the displayed identity. With no connection ID, choose an enabled
+method interactively. The optional dashboard exposes the same flow in **Account**.
 
 ### `void auth logout`
 
@@ -185,7 +192,11 @@ Prints your current login.
 
 ### `void auth token`
 
-Copies your auth token to the system clipboard. Useful for setting up CI secrets.
+Copies your human auth token to the system clipboard. It is intended for
+interactive troubleshooting and remains subject to login-method revocation. Do
+not combine it with a Cloudflare Access service token for CI; machine Access
+proof cannot turn a human Void token into an automation identity. Create a
+project-scoped credential with `void project token create` instead.
 
 ## Cloudflare authentication
 
@@ -217,7 +228,80 @@ Link current directory to an existing hosted Void project by slug, or select int
 
 ### `void project list`
 
-List all hosted projects (slug, mode, URL). For a saved Cloudflare target, this displays the current Worker's versions instead because there is no Void project registry.
+List all accessible hosted projects (slug, role, type, URL). Shared projects are included and the role column distinguishes them from projects you own. For a saved Cloudflare target, this displays the current Worker's versions instead because there is no Void project registry.
+
+### `void project team`
+
+Manage access to a project hosted on a Void platform:
+
+```sh
+void project team list [--project <slug>]
+void project team invite <email> --role <reader|collaborator|admin> [--project <slug>]
+void project team invitations [--project <slug>]
+void project team role <user-id> <reader|collaborator|admin> [--project <slug>]
+void project team remove <user-id> [--project <slug>]
+void project team revoke <invitation-id> [--project <slug>]
+void project team leave [--project <slug>]
+void project team pending
+void project team accept <invitation-id>
+void project team decline <invitation-id>
+```
+
+Project-scoped commands use `--project`, then `VOID_PROJECT`, then the linked project. Invitations can target only an email address already registered to a user on that platform; they do not create accounts or grant signup access. Only the invited account can accept or decline its invitation.
+
+Readers can view the project but cannot deploy. Collaborators can deploy and manage deploy prerequisites. Project administrators can additionally manage domains, email destinations, GitHub configuration, and the project team. The owner alone can delete the project. See [Project Collaboration](../guide/project-collaboration.md) for the full role boundaries.
+
+Project-scoped team management commands are not available for projects deployed
+directly to Cloudflare. The account-scoped `pending`, `accept`, and `decline`
+commands use the active connection selected by `void connect <url>`, regardless
+of the current project's link or deploy target. `VOID_API_URL` takes precedence;
+an unscoped `VOID_TOKEN` selects Void Cloud. These commands display their
+platform, and accepting an invitation leaves directory links intact. To link
+the invited application, run `void project link` in an unlinked checkout of
+that application.
+
+### `void project token <create|list|renew|revoke>`
+
+Manage revocable `aud: deploy` credentials for one Void platform project. The
+credential can only call the endpoints used by `void deploy`; it cannot access
+operator, account, secret-writing, project-deletion, or other projects' routes.
+
+```sh
+void project token create --name github-actions --expires-in 30
+void project token list
+void project token renew <credential-id> --expires-in 30
+void project token revoke <credential-id>
+```
+
+Pass `--project <name>` outside a linked project. Expiry is bounded to 1–90
+days. Create and renew display the bearer value once; replace the stored secret
+immediately after renewal because the previous credential is revoked in the
+same operation. Project deletion and owner suspension also stop its use. Login
+method disablement does not revoke these independent deploy credentials.
+
+Store the printed `VOID_TOKEN` and `VOID_API_URL` in the CI secret manager. The
+Access pair passes the perimeter; the scoped Void credential authorizes only
+this project's deploy workflow. When prerendering or remote proxy bindings are
+used on an Access-protected platform, store `VOID_ACCESS_CREDENTIALS` as an
+origin-keyed JSON secret containing both exact HTTPS origins, even if both use
+the same service-token pair:
+
+```json
+{
+  "https://void-company-api.example.workers.dev": {
+    "CF_ACCESS_CLIENT_ID": "<service-token client ID>",
+    "CF_ACCESS_CLIENT_SECRET": "<service-token client secret>"
+  },
+  "https://void-company-proxy.example.workers.dev": {
+    "CF_ACCESS_CLIENT_ID": "<service-token client ID>",
+    "CF_ACCESS_CLIENT_SECRET": "<service-token client secret>"
+  }
+}
+```
+
+`VOID_ACCESS_ORIGIN` scopes a pair to one origin, so selecting only the API
+origin is insufficient for a workflow that calls the proxy. Use distinct pairs
+in the two entries when the Access policies require them.
 
 ### `void project logs`
 
@@ -362,13 +446,78 @@ Void does not automatically retry changes. If a request loses its connection or 
 Sign in, inspect your session, or sign out:
 
 ```sh
-void platform auth login [--provider github|google] [--token-stdin]
+void platform auth login [--provider <connection-id>] [--token-stdin]
 void platform auth status
 void platform auth logout
 void platform auth token [--token-stdin]
 ```
 
-Browser login defaults to GitHub; Google is available when enabled on the platform. Login saves a one-hour administrator session in your system keychain. Logout revokes that session and removes its local credential.
+With no `--provider`, browser login offers the platform's enabled login methods.
+
+#### Authentication configuration
+
+`void platform config auth` opens interactive configuration. These commands use
+your administrator session from `void platform auth login`:
+
+```sh
+void platform config auth list
+void platform config auth show company
+void platform config auth add google
+void platform config auth add oidc --id company
+void platform config auth add cloudflare-access --id access
+void platform config auth configure company
+void platform config auth test company
+void platform config auth link company
+void platform config auth enable company
+void platform config auth disable github
+void platform config auth admission
+void platform config auth protection show
+void platform config auth protection enable --installation <id>
+void platform config auth protection disable --installation <id>
+void platform config auth recover company --installation <id> --file recovery.json
+```
+
+When configuring an existing installation for the first time, run
+`void platform config auth initialize`, then sign in again. Its current login
+methods and signup policy are preserved.
+
+Adding or editing a method saves a pending configuration. Enabling it verifies the
+login in your browser before applying it. Linking the verified identity to your
+account is a separate, explicit action. Before disabling a method, verify a linked
+alternative; the last method cannot be disabled. Disabling revokes human sessions
+created through that method, including operator sessions. Scoped deployment tokens
+remain valid; a human login token used as `VOID_TOKEN` is still revoked.
+
+Commands accept `--connection <registered-id-or-url>` and `--json`. Changes accept
+`--plan` or `--yes`. For scripted configuration, use `--file <path>` for the
+nonsecret fields and `--client-secret-env <name>` for the environment variable
+containing the secret. Omit the secret when editing to retain its saved value.
+For `enable` or `link` in scripts, supply `--test-id <id>` from a completed test.
+`test --json` returns a browser URL, test ID, and expiry without waiting for completion.
+
+`admission` chooses invited/allowlisted, company-approved, or public signup.
+Company-approved signup creates ordinary accounts automatically when a user
+passes a configured company rule. Select an enabled, company-restricted OIDC or
+Google Workspace method, or an enabled Cloudflare Access gate. In scripts,
+`admission --file <path> --yes` reads a policy such as
+`{"mode":"company","connections":["company"],"access":false}`.
+
+Browser login offers the platform's enabled methods; `--provider <connection-id>` selects one. Login saves a one-hour administrator session in your system keychain. Logout revokes that session and removes its local credential.
+
+`protection enable` creates or connects Cloudflare Access applications independently
+of login methods. Its `--file` accepts the `cloudflareAccess` object described in
+[installation setup](../guide/self-hosted-platform.md#configure-github-oauth).
+Protection changes require installation ownership, the saved recovery credentials,
+and a human administrator session. They revoke current human sessions. Before
+removing protection, change any signup rule that depends on that gate. Cloudflare
+applications are retained for deliberate cleanup.
+
+`recover <connection-id>` restores an existing administrator when normal login is
+unavailable. Its file contains `administratorUserId`, optional nonsecret provider
+`configuration`, and an `expectedIdentity` object with exact `issuer` and `subject`
+when using `--yes`. Recovery requires Cloudflare management/database authority,
+original recovery keys, and a successful browser provider test. Use
+`--client-secret-env <name>` for new or rotated credentials.
 
 `auth token` prints your current operator token. With `--token-stdin`, it exchanges a full administrator API login session from standard input for a new operator token. `auth login --token-stdin` saves the exchanged token to the keychain instead of printing it.
 
@@ -407,9 +556,12 @@ List projects across the platform, filter them by owner, or inspect one project'
 void platform project list [--user <user-id>] [--search <text>] [--page <n>] [--limit <n>]
 void platform project show <id>
 void platform project delete <id>
+void platform project owner <project-id> <user-id>
 ```
 
 Search matches a project's slug, ID, or owner's login. `show` includes resources, domains, the latest 10 deployments, and the latest 20 builds. `delete` removes the project and its resources.
+
+`owner` transfers a project to another registered user. Preview it with `--plan`; apply it interactively or with `--yes`. The preview reports active-work blockers and the account plan that will apply. The former owner becomes a project administrator, existing project-scoped CI deploy credentials are revoked, and usage already incurred remains with the former owner.
 
 #### Deployments {#operator-deployments}
 
@@ -456,14 +608,24 @@ void platform signup open
 void platform signup restrict
 ```
 
-Add and remove entries by their type and pattern:
+Add and remove GitHub or email entries by their type and pattern:
 
 ```sh
 void platform signup allow <github|email> <pattern> [--note <text>]
+void platform signup disallow <github|email> <pattern>
 void platform signup remove <github|email> <pattern>
 ```
 
-GitHub entries match a login. Email entries match an address or a domain pattern such as `*@example.com`, across sign-in providers. Quote wildcard patterns in your shell. With restrictions enabled and an empty allowlist, nobody new can sign up.
+`remove` remains available as an alias for existing scripts. GitHub entries match a login. Email entries match an address or a domain pattern such as `*@example.com`, across sign-in providers. Quote wildcard patterns in your shell.
+
+For an OIDC identity that has no verified email, grant access using its configured connection ID and stable provider subject:
+
+```sh
+void platform signup allow identity <connection-id> <subject> [--note <text>]
+void platform signup disallow identity <connection-id> <subject>
+```
+
+Connection IDs are shown by `void platform config auth list`. Identity subjects match exactly and case-sensitively; wildcards, email inference, and account linking are not applied. The login method's domain or group restrictions must still pass, and a newly admitted account has the ordinary user role. With restrictions enabled and an empty allowlist, nobody new can sign up.
 
 #### Invitations {#operator-invitations}
 
@@ -476,6 +638,61 @@ void platform invitation revoke <id>
 ```
 
 Send accepts up to 100 comma-separated addresses. Invitations grant signup access even if email delivery is unavailable or fails; delivery is reported separately. Revoking a pending invitation removes its exact email grant. A broader domain entry can still allow that person to sign up.
+
+#### Email {#operator-email}
+
+Decide who mail from the shared sender may reach, who registers email domains, and a project's outbound caps:
+
+```sh
+void platform email policy
+void platform email policy-set <verified|domains|any> [--domains <domain[,domain...]>]
+void platform email settings
+void platform email settings-set --domains <self-serve|admin>
+void platform email limit <project-id|slug> [--monthly <n>] [--burst <n>]
+void platform email logs <project-id|slug> [--page <n>] [--limit <n>] [--json]
+void platform email attempts [--project <id|slug>] [--page <n>] [--limit <n>]
+void platform email attempt-resolve <attempt-id> --ended --reason <text>
+void platform email operation-resolve <operation-id> --ended --outcome <applied|not-applied> --reason <text>
+```
+
+`policy` decides which recipients a project's `<slug>+tag@<mail domain>` sender reaches: `verified` (the default) means only that project's verified destinations; `domains` adds every address on the listed domains; `any` lifts the check. Neither widens delivery to addresses on the platform's own mail domain: those stay verified-destination-only, so no project reaches another project's inbox without its consent. Cloudflare still refuses a destination it has not verified until the platform mail domain is onboarded for Email Sending, so under `domains` or `any` such refusals arrive as per-recipient `UNVERIFIED_DESTINATION` results. Custom-domain sends are not affected.
+
+`settings-set --domains admin` tells `void email domain add` to print the administrator's command instead of starting token setup. `limit` overrides the project's monthly and rolling 60-second caps (defaults 200 and 10); a project page in the admin UI shows and clears them.
+
+`logs` inspects retained receipt and recipient outcomes, including operation IDs, provider references, error codes, and policy versions. Pages contain at most 100 records, newest first; use `--json` for all fields. After project deletion, use its project ID to inspect metadata until the 30-day retention period expires. Message content and credentials are never included.
+
+`attempts` lists interrupted provider calls and their earliest resolution time. Once
+the original Worker execution has ended and the attempt is at least 24 hours old,
+`attempt-resolve` records `outcome_unknown`, retains its quota charge, and releases
+the project/domain cleanup fence. `--ended` is your attestation that the call is no
+longer active; `--reason` is stored in the operator audit log. Keep recipient
+addresses and message content out of the reason. The send is never retried. Use
+`--plan` to preview and `--yes` to apply without a prompt.
+
+`operation-resolve` recovers a Cloudflare routing, Worker, secret, catch-all, or
+Sending mutation whose outcome remains unknown. After the original execution
+has ended and the operation is at least 24 hours old, inspect the exact resource
+named by the preview and attest whether its write was `applied` or `not-applied`.
+Applied writes continue at the next step; not-applied writes retry the same
+persisted intent. The running platform version must match that intent, so restore
+the matching version before recovering an operation created by older code. The
+preview pins the step, attempt, connection and route generations, resource
+identity, and digest used by the apply request. Time alone never retries a write.
+
+Register and maintain email domains for projects whose owners hold no Cloudflare credential:
+
+```sh
+void platform email domains [--project <id|slug>]
+void platform email domain-add <domain> --project <id|slug> [--token-stdin]
+void platform email domain-status <domain>
+void platform email domain-sync <domain>
+void platform email domain-rotate-secret <domain>
+void platform email domain-remove <domain> [--token-stdin]
+```
+
+`domain-add` uses the platform's Cloudflare credential for zones in its account. For another account, pipe a scoped Cloudflare API token on standard input with `--token-stdin --yes`. Name the exact mail domain (`mail.example.com`, or the apex when it receives no mail yet). `domain-status` shows inbound, outbound, and credential-management readiness with the latest operation. A blocked operation resumes through `domain-sync`; a blocked rotation resumes through `domain-rotate-secret`, preserving already confirmed steps and its staged credential. An uncertain operation remains stopped until read-back proves the result or an administrator uses `operation-resolve`. Domains an administrator adds show `managed_by: admin`; their owners can list and inspect them but use these commands for `sync`, `domain-rotate-secret`, and `remove`.
+
+If project deletion leaves cleanup blocked by an expired or revoked Cloudflare token, use `domain-remove <domain> --token-stdin --yes` with a replacement scoped to the same account and zone. This resumes the retained cleanup only when no other project uses the connection. For a live project, renew its token through `domain-add` instead.
 
 #### System {#operator-system}
 
@@ -517,6 +734,7 @@ void platform install [options] [--yes]
 | `--name <slug>`                   | Installation name used in `void-<name>-<role>` resource names; choose an unused name |
 | `--display-name <name>`           | Human-readable platform name                                                         |
 | `--account <id>`                  | Cloudflare account id                                                                |
+| `--auth-config <path>`            | Login methods, signup policy, and environment references for provider secrets        |
 | `--application-domain <domain>`   | Base domain for deployed apps                                                        |
 | `--workers-dev`                   | Explicit testing mode; add an application domain later                               |
 | `--zone <domain>`                 | Cloudflare zone containing the application domain                                    |
@@ -533,7 +751,9 @@ Read-only plans, workers.dev installations with the default API hostname, and su
 
 The installed platform needs a separate runtime token to provision resources for apps. The interactive installer prompts for it and the other setup values. For non-interactive installs, inject the variables listed in [Install from CI](../guide/self-hosted-platform.md#install-from-ci).
 
-`--plan` prints the actual resource names, GitHub callback, and direct setup links without opening credential pages or saving a draft; Cloudflare browser login still opens if needed. New platform resources use `void-<name>-<role>` names without random suffixes. Existing installations keep their recorded names, and unowned name conflicts stop installation without overwriting resources. After you confirm an interactive install, Void opens each missing credential's setup page and shows a short permission/checklist fallback. The runtime-token link preselects all required account permissions, including Workers Tail, Hyperdrive, and AI Gateway when needed; domain installations must also select the indicated zone. Supplied credentials skip browser opening. Setup drafts pin Worker names and the GitHub callback and save partial credentials encrypted locally. Interactive installs list unfinished installations, including interrupted provisioning, or offer a new install. Entering an existing unfinished name asks to resume it; declining returns to name entry. Starting new leaves previous setup, credentials, and resources untouched. Completed platforms are not offered for resumption. `--resume` skips the choice and is required for non-interactive recovery.
+To enable email during install or upgrade, set both `VOID_EMAIL_SENDER_DOMAIN` and `VOID_EMAIL_SHARED_ZONE_ID`. Void records the pair for later upgrades; supplying only one is an error.
+
+`--plan` prints the actual resource names, selected login methods, login callback, and direct setup links without opening credential pages or saving a draft; Cloudflare browser login still opens if needed. New platform resources use `void-<name>-<role>` names without random suffixes. Existing installations keep their recorded names, and unowned name conflicts stop installation without overwriting resources. After you confirm an interactive install, Void opens each missing credential's setup page and shows a short permission/checklist fallback. The runtime-token link preselects all required account permissions, including Workers Tail, Hyperdrive, and AI Gateway when needed; domain installations must also select the indicated zone. Supplied credentials skip browser opening. Setup drafts pin Worker names and the login callback and save partial credentials encrypted locally. Interactive installs list unfinished installations, including interrupted provisioning, or offer a new install. Entering an existing unfinished name asks to resume it; declining returns to name entry. Starting new leaves previous setup, credentials, and resources untouched. Completed platforms are not offered for resumption. `--resume` skips the choice and is required for non-interactive recovery.
 
 Use an empty PostgreSQL database dedicated to the installation. You can correct a failed initial connection, but after the database is claimed or Hyperdrive is provisioned, commands reject a different URL.
 
@@ -575,7 +795,7 @@ void platform uninstall [id] [--plan] [--purge-data] [--keep-zone] [--yes]
 
 Omit `id` when only one installation is configured, or choose from the interactive picker. Non-interactive commands need an ID when several installations exist. Commands that make changes also require `--yes`; `--plan` only previews changes.
 
-After discovery on another machine, set `VOID_PLATFORM_DATABASE_URL`. Normal upgrades preserve deployed Worker secrets. Restore the original runtime, GitHub, R2, JWT, and project-encryption values only if repair needs to recreate a missing API or proxy Worker.
+After discovery on another machine, set `VOID_PLATFORM_DATABASE_URL`. An upgrade that preserves every deployed Worker also preserves its secrets. For an email-enabled installation without its encrypted recovery file, restore `VOID_PLATFORM_EMAIL_SIGNING_SECRET`; recreating only the email gateway needs that key and does not need the Cloudflare runtime token or JWT signing key. Recreating the API or proxy also requires the email key when email is enabled, in addition to their normal secrets. Recreating the API requires its original runtime-token, GitHub, R2, JWT, and project-encryption values; recreating the proxy requires the runtime token and JWT signing key.
 
 | Command     | Behavior                                                                                      |
 | ----------- | --------------------------------------------------------------------------------------------- |
@@ -599,7 +819,7 @@ Platform migrations only move forward. Void checks compatibility before updating
 
 An upgrade completes after the new Workers pass health checks. If rollout fails, Void attempts to restore the previous Workers. Retrying does not repeat completed migrations.
 
-`platform rollback` restores a compatible earlier runtime without reversing database migrations. Pass its files with `--runtime`. If the installed version is a custom build, also supply that version with `--from-runtime`. Void refuses rollbacks that are incompatible with the current database. A later `upgrade` can move forward again.
+`platform rollback` restores a compatible earlier runtime without reversing database migrations. Pass its files with `--runtime`. If the installed version is a custom build, also supply that version with `--from-runtime`. Void refuses targets that are incompatible with the current database or predate installed authentication, sandbox-drain, or ownership-aware usage protocols. A later `upgrade` can move forward again.
 
 Uninstall verifies remote ownership before removing anything. Data resources are retained unless you pass `--purge-data`. Workers, R2, AI Gateway, DNS records, routes, custom domains, adopted resources, external PostgreSQL, and zones are always retained for manual review.
 
@@ -725,7 +945,7 @@ Provisioning reuses known resource IDs and writes newly resolved IDs into `wrang
 
 Existing remote secrets are preserved. Void also preserves or creates `BETTER_AUTH_SECRET` for auth apps.
 
-**Email.** When the app uses email (`sendEmail()` or `email/` handlers) and `void.json` has `email.from`, the deploy reads the state of that address's zone before the build — session scopes, zone, MX records, Email Routing, subaddressing, routing rules, Email Sending, and what `wrangler.jsonc` holds — prints a checklist of what it would change in your account, and asks once (default Yes). On Yes it enables what is missing, writes `send_email: [{ "name": "SEND_EMAIL" }]`, the `__VOID_EMAIL_FROM` var and the `addresses` array into `wrangler.jsonc`, and lets wrangler create the routing rules when the activated version's triggers are synchronized; the deploy ends with the address map. A deploy with nothing left to set up asks nothing. Without `email.from` the deploy prints `add "email": { "from": "you@mail.acme.com" } to void.json` and continues without email. Non-interactive runs (CI, or stdin/stdout not a terminal) never prompt: they print the checklist plus `Run void email setup --platform cloudflare once locally, commit wrangler.jsonc, then redeploy` and deploy without email (or with the setup `wrangler.jsonc` already carries, when the binding is committed; a committed `addresses` array whose routing is off is removed first, since wrangler's plan on it would fail after the upload) — unless `--require-email` is passed, which fails instead. A deploy whose account rows all read ready reconciles the two config rows — `addresses` against the current derivation and `vars.__VOID_EMAIL_FROM` against `email.from` — with a plain file write and no prompt. See [Your own Cloudflare account](../guide/email.md#your-own-cloudflare-account) for the whole flow, including the subdomain-vs-apex rule and what stays manual.
+**Email.** When the app uses email (`sendEmail()` or `email/` handlers) and `void.json` has `email.from`, the deploy reads the state of that address's zone before the build — session scopes, zone, MX records, Email Routing, subaddressing, routing rules, Email Sending, and what `wrangler.jsonc` holds — prints a checklist of what it would change in your account, and asks once (default Yes). On Yes it enables what is missing, writes `send_email: [{ "name": "SEND_EMAIL" }]`, the `__VOID_EMAIL_FROM` var and the `addresses` array into `wrangler.jsonc`, and lets wrangler create the routing rules when the activated version's triggers are synchronized; the deploy ends with the address map. A deploy with nothing left to set up asks nothing. Without `email.from` the deploy prints `add "email": { "from": "you@mail.acme.com" } to void.json` and continues without email. Non-interactive runs (CI, or stdin/stdout not a terminal) never prompt: they print the checklist plus `Run void email setup --platform cloudflare once locally, commit wrangler.jsonc, then redeploy` and deploy without email (or with the setup `wrangler.jsonc` already carries, when the binding is committed) — unless `--require-email` is passed, which fails instead. If setup has committed the exact subdomain `addresses` plan but the deploy's resolver still sees no MX records, Void preserves the plan and stops before build or upload until DNS can be verified. A deploy whose account rows all read ready reconciles the two config rows — `addresses` against the current derivation and `vars.__VOID_EMAIL_FROM` against `email.from` — with a plain file write and no prompt. See [Your own Cloudflare account](../guide/email.md#your-own-cloudflare-account) for the whole flow, including the subdomain-vs-apex rule and what stays manual.
 
 See the [Cloudflare guide](../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account) for the complete deployment sequence, first-deploy exceptions, secret precedence, and recovery behavior.
 
@@ -1286,7 +1506,7 @@ Project resolution for email commands follows the same order as deploy (`--proje
 void email usage [--project <name>]
 ```
 
-Show the current month's outbound and inbound counts, the monthly outbound limit, and how much of it is left. A suspended project is flagged in the output.
+Show the current month's recipient attempts and inbound receipts, the monthly attempt limit, and how much of it is left. Reserved submissions count toward the limit; started attempts remain charged even if delivery fails or its outcome is unknown. A suspended project is flagged in the output.
 
 ### `void email logs`
 
@@ -1294,7 +1514,7 @@ Show the current month's outbound and inbound counts, the monthly outbound limit
 void email logs [--limit <n>] [--project <name>]
 ```
 
-Show recent email activity — timestamp, direction, sender, recipient, status, and subject. `--limit` takes a positive integer. Email activity logs are not available yet on the platform; the command says so. Console output from your email handler appears in `void project logs`, like any other invocation of your worker.
+Show recent email operation metadata retained for 30 days: timestamp, direction, operation ID, recipient, and state. `--limit` accepts 1–100. Subjects, bodies, and attachments are not stored. Provider acceptance does not confirm mailbox delivery; inspect unknown outcomes before retrying.
 
 ### `void email destinations`
 
@@ -1320,12 +1540,12 @@ The project owner's email is added automatically when the project is created, so
 void email disallow <address> [--project <name>]
 ```
 
-Remove one recipient from the project's destination list. Sends to that address are refused within about a minute: the platform updates the project's allowlist as part of the command, and the proxy re-reads it every 60 seconds. No deploy is involved.
+Remove one recipient from the project's destination list. New sends to that address are refused immediately; previously admitted attempts may finish. No deploy is involved.
 
 ### `void email domain`
 
 ```
-void email domain <add|status|list|sync|remove> [<domain>] [--project <name>]
+void email domain <add|status|list|sync|rotate-secret|remove> [<domain>] [--project <name>]
 ```
 
 Send and receive at your own domain on a Cloudflare zone you own, registered to the project. Void platform only — on your own Cloudflare account the mail domain comes from `email.from` instead (see `void email setup`). The walkthrough is [Your own domain on the platform](../guide/email.md#your-own-domain-on-the-platform).
@@ -1336,7 +1556,7 @@ Send and receive at your own domain on a Cloudflare zone you own, registered to 
 void email domain add <domain> [--subdomain <label|host>] [--project <name>]
 ```
 
-Register the domain with the project. One credential is required, granted two ways: an OAuth grant from Cloudflare's hosted consent page (the page names Wrangler — Void borrows its OAuth client), or, as the fallback Enter switches to at any point, a scoped API token created from a three-click template link and picked up from the clipboard or a masked paste. The credential is POSTed once and stored on the platform, encrypted for the project — nothing is kept locally. Needs an interactive terminal. The CLI proposes `mail.<domain>` when the apex already carries MX records and allows the apex only when it carries none; `--subdomain` overrides the proposal. One live email domain per zone and one project per domain are enforced — a conflict is refused with a 409. Re-running `add` on a `failed`, `token_revoked`, or `token_expired` row replaces the credential and retries; the routing rules stay.
+Register an exact domain with the project using a scoped Cloudflare API token. The CLI opens a token template, accepts a masked paste or newly copied token, and asks you to confirm account and zone restrictions. Credentials are encrypted for the zone connection. The CLI proposes `mail.<domain>` when the apex already has MX records; `--subdomain` overrides that proposal. Several domains can share a zone connection, but each domain belongs to one project. Setup returns an operation ID so an interrupted request can be checked without restarting the operation.
 
 #### `void email domain status`
 
@@ -1344,7 +1564,7 @@ Register the domain with the project. One credential is required, granted two wa
 void email domain status <domain> [--project <name>]
 ```
 
-Show one registered domain. The platform re-probes the stored credential and the relay worker on every call, so this doubles as the drift report. A `pending` row whose only remaining step is the dashboard's subdomain form (printed by `add`) self-clears to `active` once public MX on the domain names Cloudflare — which makes this command the poll for that one human step.
+Show the recorded inbound, outbound, and management readiness, observation times, and latest operation. Use `sync` to reconcile setup and refresh readiness.
 
 #### `void email domain list`
 
@@ -1352,7 +1572,7 @@ Show one registered domain. The platform re-probes the stored credential and the
 void email domain list [--project <name>]
 ```
 
-List the project's registered email domains with their status and mode.
+List the project's registered email domains and readiness.
 
 #### `void email domain sync`
 
@@ -1360,7 +1580,15 @@ List the project's registered email domains with their status and mode.
 void email domain sync <domain> [--project <name>]
 ```
 
-Redeploy the domain's relay worker at the current version and rotate its secret — the fix when `status` reports the relay missing or drifted.
+Reconcile the domain connection and refresh readiness. Sync does not rotate its secret. A blocked or uncertain operation exits unsuccessfully and names the operation to inspect.
+
+#### `void email domain rotate-secret`
+
+```sh
+void email domain rotate-secret <domain> [--project <name>]
+```
+
+Rotate the ingress secret for the zone connection shared by this domain and its siblings. Inbound must be ready; run `void email domain sync <domain>` first if setup is incomplete. The platform accepts the staged secret before updating the Worker and promotes it only after verifying the deployed generation. An uncertain update stays recorded for reconciliation.
 
 #### `void email domain remove`
 
@@ -1368,7 +1596,7 @@ Redeploy the domain's relay worker at the current version and rotate its secret 
 void email domain remove <domain> [--project <name>]
 ```
 
-Delete the registration: the platform row, the stored credential, and the relay secret. Cloudflare-side cleanup is best-effort; any step that fails is named (`failed_steps`) so you can finish it in the Cloudflare dashboard.
+Disable the domain assignment and record cleanup. Zone resources used by another domain remain available. Unfinished or uncertain cleanup remains recorded until it can be reconciled safely.
 
 ### `void email status`
 

@@ -4,17 +4,17 @@ outline: deep
 
 # Install a Void Platform
 
-A Void platform lets your team deploy apps into a shared Cloudflare account. As an administrator, you install and maintain the platform. Developers connect the Void CLI to its URL, sign in with GitHub, and deploy their apps.
+A Void platform lets your team deploy apps into a shared Cloudflare account. As an administrator, you install and maintain the platform. Developers connect the Void CLI to its URL, sign in through an enabled login method, and deploy their apps.
 
 If you're deploying an app for yourself, [deploy directly to Cloudflare](../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account). You don't need to install a platform first.
 
-The core platform supports GitHub login, CLI deploys, D1, KV, R2, Queues, cron jobs, Workers AI, WebSockets, SSE, ISR, routing, logs, and rollback.
+The core platform supports GitHub, Google, generic OIDC, and Cloudflare Access login, CLI deploys, D1, KV, R2, Queues, cron jobs, Workers AI, WebSockets, SSE, ISR, routing, logs, and rollback.
 
-The user dashboard, GitHub builds and webhooks, build Containers, email, Google login, custom project domains, and sandbox orchestration aren't part of the core installation.
+The core installation includes an email gateway; email is enabled when you configure a shared mail domain and zone. The user dashboard, GitHub builds and webhooks, build Containers, custom project domains, and sandbox orchestration aren't part of the core installation. Source-built platforms that add the optional GitHub services should follow the [isolated webhook ingress setup](./platform-development.md#optional-github-webhook-ingress-for-access-protected-apis) when Access protects the API.
 
 ## Before You Start {#prerequisites}
 
-Start with a Cloudflare account you can administer, a GitHub account, and an empty hosted PostgreSQL database. A domain is recommended. If yours is not ready, choose **Use workers.dev for testing** during installation and [add a domain later](#add-a-domain-later). The steps below explain how to get the credentials the installer asks for.
+Start with a Cloudflare account you can administer, an account with your chosen login provider, and an empty hosted PostgreSQL database. GitHub is the default and is optional when another method is selected. A domain is recommended. If yours is not ready, choose **Use workers.dev for testing** during installation and [add a domain later](#add-a-domain-later). The steps below explain how to get the credentials the installer asks for.
 
 Void creates the Workers, storage, queues, routing, and database tables through the CLI.
 
@@ -134,6 +134,12 @@ Use the following permissions for the core platform. Cloudflare may label write 
 
 The management token also needs **Zone Edit** with authority to create zones if you ask Void to create the zone. If it already exists, use the selected zone with Zone Read and DNS Edit. Nested application domains additionally need **SSL and Certificates: Read** on the management token. A custom runtime that enables custom project domains needs **SSL and Certificates: Edit** on the runtime token; the core runtime does not enable that feature.
 
+Enabling email lets administrators [register email domains for projects](./platform-administration.md#registering-email-domains-for-projects) and lets projects register destination addresses through the runtime token. That needs **Email Routing Addresses: Edit** and **Email Sending: Edit** on the account, plus **Zone: Read**, **Zone Settings: Edit** and **Email Routing Rules: Edit** on the zones that will carry mail; the token link preselects them when email is enabled. Email Sending onboarding itself needs Workers Paid on the account.
+
+To enable email, set `VOID_EMAIL_SENDER_DOMAIN` to the shared sender domain and `VOID_EMAIL_SHARED_ZONE_ID` to its Cloudflare zone ID when installing or upgrading. Void records both values for later upgrades and rejects attempts to replace them during an ordinary upgrade. The mail zone can differ from the application zone, but it must belong to the selected platform Cloudflare account; without an explicit mail-zone identity, shared inbound delivery stays unavailable. The dedicated email gateway is deployed in the platform account. Each customer zone uses its own ingress Worker to forward mail to that gateway.
+
+The installer prepares the shared mail route and verifies inbound readiness before it opens platform traffic. If that setup fails, the installation remains disabled. Correct the reported Cloudflare permission, mail-zone configuration, or routing conflict, then rerun the same install or upgrade command; a fresh install resumes with `void platform install --resume --name <installation-id>`.
+
 Void checks access before provisioning. If it reports a missing permission, update the token's permissions for the selected account or zone and retry.
 
 :::
@@ -164,6 +170,8 @@ Paste it into your password manager as **JWT signing key**. Run the command agai
 
 :::
 
+When email is enabled, Void also creates an independent **Email signing key** for confirmation links and service-to-service email requests. The installer keeps it in encrypted recovery state. Set `VOID_PLATFORM_EMAIL_SIGNING_SECRET` to a separate value of at least 32 random bytes when you need an externally custodied copy, including a headless installation whose local recovery files will not persist.
+
 ## 5. Install and Connect GitHub {#install}
 
 For workers.dev testing, start the interactive install and continue to the GitHub setup below:
@@ -193,7 +201,107 @@ void platform install
 
 Use the same name, account, and domain as the preview, then confirm the installation plan. Void saves a local setup draft and opens the runtime-token page when that token is missing. Paste the token into the masked prompt. As you continue, it opens GitHub and R2 at their respective steps. Each page has a short checklist and a clickable fallback link in the terminal. Values already supplied through the environment or saved setup are reused without opening their pages again.
 
-### Configure GitHub OAuth {#configure-github-oauth}
+### Choose login methods {#configure-github-oauth}
+
+The installer offers GitHub, Google, generic OIDC, and Cloudflare Access login.
+Cloudflare Access protection is a separate choice from Access login. The
+GitHub-only setup below retains the existing workflow.
+
+For Google, create an OAuth client and register the printed callback URL. You
+can restrict it to named Google Workspace domains. For OIDC or Access login,
+provide the issuer URL, client ID, and client secret. Select **Company-approved
+users** when the configured company policy should allow colleagues to create
+accounts automatically without individual invitations.
+
+When using the configurable setup, installation prints a one-time setup code
+and a `/setup` URL. Enter the code, authenticate with the chosen administrator
+method, and review the identity before confirming its administrator role. That
+method becomes enabled; additional selected methods are saved as pending
+configurations to test and enable in Settings. No GitHub account is required
+for a Google-only or OIDC-only installation.
+
+For scripts, pass `--auth-config <path>` with nonsecret configuration and
+environment-variable references for secrets. For example:
+
+```json
+{
+  "connections": [
+    {
+      "configuration": {
+        "id": "google",
+        "kind": "google",
+        "label": "Company Google",
+        "clientId": "your-google-client-id",
+        "allowedDomains": ["example.com"]
+      },
+      "clientSecretEnv": "GOOGLE_CLIENT_SECRET"
+    }
+  ],
+  "administratorConnectionId": "google",
+  "admission": {
+    "mode": "company",
+    "connections": ["google"],
+    "access": false
+  }
+}
+```
+
+`--plan` reads this configuration without requiring the referenced secret.
+Supply the secret through your secret manager when applying the installation.
+
+#### Cloudflare Access {#cloudflare-access-setup}
+
+Choose Access login, platform protection, or both. Protection can also be used
+with GitHub or another login method. With company-approved signup, a colleague
+who passes the company gate can create an ordinary account using GitHub even
+when their GitHub email differs from their company email.
+
+Automatic setup uses an existing Zero Trust organization, selected identity
+providers, and existing company policies. Void creates dedicated applications
+and a scoped service token for protected installation checks. It preserves your
+company policies, including device and MFA requirements.
+
+The setup credential needs **Access: Apps and Policies Write** and
+**Access: Organizations, Identity Providers, and Groups Read** in the identity
+account. Creating protection also needs **Access: Service Tokens Write**.
+Provide a separate setup token through `VOID_PLATFORM_ACCESS_SETUP_TOKEN` if
+your Cloudflare management credential lacks these permissions. These permissions
+are not required by the platform's runtime token. See Cloudflare's
+[Access API](https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/applications/)
+and [service-token permissions](https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/service_tokens/methods/create/).
+
+To automate Access setup, add this to the authentication configuration file:
+
+```json
+{
+  "protection": true,
+  "cloudflareAccess": {
+    "mode": "create",
+    "identityProviderIds": ["your-company-identity-provider-id"],
+    "policyIds": ["your-company-allow-policy-id"]
+  }
+}
+```
+
+Keep the file's `connections` list from the example above, or use a connection
+with `{"id":"access","kind":"cloudflare-access","label":"Company Access"}`
+to create Access login as well. Omit `protection` for login-only setup.
+
+To connect applications managed elsewhere, select **Connect existing applications**.
+Scripts use `mode: "existing"`, optional `accountId`, and `loginApplicationId`
+and/or `protectionApplicationId`. For login, set `loginClientSecretEnv`. For
+protection, supply `serviceToken` with `id`, `clientIdEnv`, and `clientSecretEnv`
+for a token already admitted by the application. The selected policies must
+cover both printed API and proxy origins. Connecting existing resources needs
+read access to their applications, policies, organization, identity providers,
+groups, and service tokens; Void leaves their policies unchanged.
+
+Access login alone can connect to another account using only its issuer, client
+ID, and secret, without a `cloudflareAccess` block or Cloudflare management token.
+Follow Cloudflare's [OIDC application guide](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/saas-apps/generic-oidc-saas/)
+and register the exact callback printed by Void.
+
+For the default GitHub-only setup:
 
 1. The installer opens [GitHub's new OAuth App form](https://github.com/settings/applications/new) when it needs OAuth credentials. Sign in as the account that will own the login integration.
 2. Set **Application name** to your platform's display name and **Homepage URL** to the API URL Void just printed.
@@ -251,7 +359,40 @@ void deploy --platform void --project my-first-app
 
 The CLI stores login credentials in your system keychain, separately for each platform URL. With no URL, `void connect` offers Cloudflare or a Void platform; `void connect --platform void` offers saved platforms and an option to enter another URL.
 
-In CI, use `void connect <url> --no-login` to register the platform, and supply `VOID_TOKEN` and `VOID_API_URL` for deployment. To verify authentication during connection, omit `--no-login` and set both variables to credentials for that same platform.
+For CI, create a bounded, project-scoped deploy credential while signed in as
+the project owner:
+
+```sh
+void project token create --name ci --expires-in 30
+```
+
+Store the printed `VOID_TOKEN` and `VOID_API_URL` in the CI secret manager, then
+use `void connect <url> --no-login` in a fresh checkout if connection metadata
+is not committed. Rotate with `void project token renew <id>` and revoke with
+`void project token revoke <id>`. A human login token is not a CI credential.
+
+If Cloudflare Access protects the platform, Access proof and the project
+credential are both required; the service token does not grant Void user or
+operator authority. A deploy that uses prerendering or remote bindings calls
+both the API and proxy, so store `VOID_ACCESS_CREDENTIALS` in the CI secret
+manager with entries for both exact HTTPS origins. Include both entries even
+when the same admitted service-token pair is used for both origins:
+
+```json
+{
+  "https://void-company-api.example.workers.dev": {
+    "CF_ACCESS_CLIENT_ID": "<service-token client ID>",
+    "CF_ACCESS_CLIENT_SECRET": "<service-token client secret>"
+  },
+  "https://void-company-proxy.example.workers.dev": {
+    "CF_ACCESS_CLIENT_ID": "<service-token client ID>",
+    "CF_ACCESS_CLIENT_SECRET": "<service-token client secret>"
+  }
+}
+```
+
+`VOID_ACCESS_ORIGIN` can scope credentials to one origin only; setting it to
+the API origin does not authorize proxy requests.
 
 Use these commands to inspect connections and installations:
 
@@ -272,7 +413,7 @@ void platform signup allow github teammate
 
 Void shows the proposed access change and asks you to confirm it. Once approved, `teammate` can connect to the platform's API URL and sign in with GitHub.
 
-To see who can join, run `void platform signup show`. You can also allow an email address or a domain such as `*@example.com`. `void platform signup open` permits public signup; `void platform signup restrict` requires an allowlist match again.
+To see who can join, run `void platform signup show`. You can also allow an email address or a domain such as `*@example.com`. For an OIDC user without verified email, use `void platform signup allow identity <connection-id> <subject>`; the subject match is exact and the provider's domain or group restrictions still apply. Remove that grant with `void platform signup disallow identity <connection-id> <subject>`. `void platform signup open` permits public signup; `void platform signup restrict` requires an allowlist match again.
 
 Your administrator session lasts for one hour. Use it to inspect users, projects, logs, and platform health. The [Platform Administration guide](./platform-administration.md) walks through those workflows, previews, and automation. You can also open `<API origin>/admin/login` to use the browser admin UI.
 
@@ -325,17 +466,17 @@ The management token needs **SSL and Certificates: Read** (or Edit) on that zone
 
 Resources use a `void-<installation-name>-<random-suffix>-*` prefix where Cloudflare allows names. This keeps installations recognizable and avoids predictable Worker names colliding during setup.
 
-| Resource                                  |                                 Count | Purpose                                                                        |
-| ----------------------------------------- | ------------------------------------: | ------------------------------------------------------------------------------ |
-| Workers                                   | 4, plus one per app using workers.dev | API/control plane, proxy, tail ingestion, dispatch, and test-origin forwarders |
-| KV namespaces                             |                                     3 | Routing, ISR cache, and static asset storage                                   |
-| R2 buckets                                |                                     1 | Static and deployment assets                                                   |
-| Queues                                    |                                     2 | Usage events and cron firing                                                   |
-| Workers for Platforms dispatch namespaces |                                     1 | User application Workers                                                       |
-| Hyperdrive configurations                 |                                     1 | External platform PostgreSQL                                                   |
-| AI Gateways                               |                                     1 | Installation-isolated AI routing and metering                                  |
-| Proxied wildcard DNS records              |                                0 or 1 | Created only when an application domain is configured                          |
-| Zones                                     |                                0 or 1 | Created only when the requested application zone is absent                     |
+| Resource                                  |                                 Count | Purpose                                                                                       |
+| ----------------------------------------- | ------------------------------------: | --------------------------------------------------------------------------------------------- |
+| Workers                                   | 5, plus one per app using workers.dev | API/control plane, proxy, tail ingestion, dispatch, email gateway, and test-origin forwarders |
+| KV namespaces                             |                                     3 | Routing, ISR cache, and static asset storage                                                  |
+| R2 buckets                                |                                     1 | Static and deployment assets                                                                  |
+| Queues                                    |                                     2 | Usage events and cron firing                                                                  |
+| Workers for Platforms dispatch namespaces |                                     1 | User application Workers                                                                      |
+| Hyperdrive configurations                 |                                     1 | External platform PostgreSQL                                                                  |
+| AI Gateways                               |                                     1 | Installation-isolated AI routing and metering                                                 |
+| Proxied wildcard DNS records              |                                0 or 1 | Created only when an application domain is configured                                         |
+| Zones                                     |                                0 or 1 | Created only when the requested application zone is absent                                    |
 
 The API Worker uses four Durable Object classes for usage, cron scheduling, error monitoring, and concurrency. Worker bindings create the request and log datasets in Analytics Engine. The core installation doesn't create Container applications, a GitHub App, a dashboard Worker, or build Workers.
 
@@ -357,18 +498,26 @@ You can correct the database URL if the initial connection failed. Once Void has
 
 If installation reports **Default-Deny (error 1050)**, Cloudflare blocked the HTTP health check before it reached Void. This is separate from the API token used to deploy the Workers.
 
-For a test platform intended to be publicly reachable:
+Keep the company protection in place. Automatic Access setup saves its scoped
+service credentials with the installation's encrypted recovery material. For an
+existing gate, verify that its service policy admits the installation token and
+that the application covers the printed API and proxy origins. A Cloudflare
+management API token does not authenticate an Access-protected HTTP request.
 
-1. Select the account named in the error and open **Zero Trust → Access controls → Applications → Create new application**.
-2. Choose **Self-hosted**. When adding destinations, choose **Worker** and select the API, proxy, and dispatch Workers listed in the error.
-3. Add a policy with **Action → Bypass** and **Include → Everyone**.
-4. Save the policy and application, then run the resume command shown by Void.
+For externally supplied credentials, set `VOID_ACCESS_CREDENTIALS` from your
+secret manager to an object keyed by each exact API/proxy origin, with
+`CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` in each entry. Then rerun
+`void platform install --resume --name <id>`. Void retains the saved resources
+and stops if the gate still rejects its checks. Account-wide Default-Deny and
+deployed-application policies remain your responsibility.
 
-This removes Cloudflare Access protection for those Workers, not just their health-check URLs. Void's own authentication remains enabled. Keep account-wide Default-Deny on. Deployed apps will also need appropriate access rules.
+### Expired administrator setup code
 
-Once access is configured, rerun `void platform install --resume --name <id>`. You do not need to delete the installation or recreate its resources.
-
-If your platform must remain Access-protected, **do not add a Bypass policy**. The installer does not yet support Access authentication for self-hosted platform health checks; a browser login or Cloudflare API token does not authenticate those requests. Keep the protection in place until that integration is supported.
+Resume an unfinished installation with `void platform install --resume --name <id>`.
+For completed provisioning whose administrator setup is still pending, run
+`void platform repair <id>`. Void prints a fresh setup code if the earlier code
+expired. Enter it at `/setup`, sign in, and confirm the displayed identity.
+An installation that already has an administrator does not reopen setup.
 
 ### Repair missing resources
 
@@ -428,7 +577,7 @@ void platform discover --account <account-id> --installation <id-or-name>
 
 Discovery restores local installation records after verifying the resources belong to your platform. It also works for interrupted or disabled installations. If infrastructure is missing, run `void platform repair [id]` after discovery. If ownership cannot be verified, the command stops without changing resources.
 
-After discovery, provide `VOID_PLATFORM_DATABASE_URL` for migrations and to coordinate administrator commands. You don't need to re-enter the other secrets for a normal upgrade. If repair must recreate a missing API or proxy Worker, supply its original runtime token, GitHub, R2, JWT, and project-encryption secrets through the `VOID_PLATFORM_*` variables. Cloudflare can't return those values, so keep them in your organization's secret manager.
+After discovery, provide `VOID_PLATFORM_DATABASE_URL` for migrations and to coordinate administrator commands. You don't need to re-enter the other secrets for an upgrade that preserves every deployed Worker. For an email-enabled installation without its encrypted recovery file, restore `VOID_PLATFORM_EMAIL_SIGNING_SECRET`; recreating only the email gateway needs that key and no Cloudflare runtime token or JWT signing key. Recreating the API or proxy also requires the email key when email is enabled, in addition to their normal secrets. Recreating the API requires its original runtime token (`VOID_PLATFORM_RUNTIME_CLOUDFLARE_API_TOKEN`), GitHub, R2, JWT, and project-encryption values through the `VOID_PLATFORM_*` variables; recreating the proxy requires the runtime token and JWT signing key. Cloudflare can't return these values, so keep them in your organization's secret manager.
 
 If you have not rotated the project-encryption key, restore it with `VOID_PLATFORM_PROJECT_SECRET_KEY`. After rotation, supply `VOID_PLATFORM_PROJECT_SECRET_KEYS_JSON` with all retained keys and `VOID_PLATFORM_PROJECT_SECRET_ACTIVE_KEY_VERSION` with the active key's name. Keep older keys needed to decrypt existing project secrets. These values are used to recreate a missing API Worker; they do not replace the live keys during an ordinary upgrade. Supply them from your secret manager.
 
@@ -439,7 +588,7 @@ If you have not rotated the project-encryption key, restore it with `VOID_PLATFO
 Keep a coordinated recovery set for each installation:
 
 - a PostgreSQL backup;
-- the installation identity—the JWT signing secret and complete project-encryption keyring—in a secret manager;
+- the installation identity—the JWT signing secret, the email signing secret when email is enabled, and the complete project-encryption keyring—in a secret manager;
 - provider-supported backups or exports for every data-bearing provider resource;
 - the immutable runtime artifacts and manifest for the installed version or custom source revision.
 
@@ -451,7 +600,7 @@ During a restore, keep platform and application traffic disabled before changing
 
 Installation records live in `~/.void/platforms/`. Credentials are stored separately in encrypted recovery files, with the encryption key in your operating system's keychain. Keep your original secrets in a password manager for recovery on another machine.
 
-If the keychain isn't available, Void stops before writing secrets. Headless environments can supply `VOID_PLATFORM_RECOVERY_KEY`: a canonical base64-encoded 32-byte key from a secret manager. A temporary CI runner can use a new recovery-encryption key for each run only when every original credential remains available in protected CI secrets, including `VOID_PLATFORM_JWT_SECRET` and either the original `VOID_PLATFORM_PROJECT_SECRET_KEY` or the complete rotated keyring and active-version pair.
+If the keychain isn't available, Void stops before writing secrets. Headless environments can supply `VOID_PLATFORM_RECOVERY_KEY`: a canonical base64-encoded 32-byte key from a secret manager. A temporary CI runner can use a new recovery-encryption key for each run only when every original credential remains available in protected CI secrets, including `VOID_PLATFORM_JWT_SECRET`, `VOID_PLATFORM_EMAIL_SIGNING_SECRET` for an email-enabled installation, and either the original `VOID_PLATFORM_PROJECT_SECRET_KEY` or the complete rotated keyring and active-version pair.
 
 ::: details Ownership and interrupted maintenance
 
@@ -480,10 +629,15 @@ Inject the following values from protected CI secrets. Do not commit them in a w
 | `VOID_PLATFORM_R2_ACCESS_KEY_ID`             | R2 Access Key ID                                                                            |
 | `VOID_PLATFORM_R2_SECRET_ACCESS_KEY`         | R2 Secret Access Key                                                                        |
 | `VOID_PLATFORM_JWT_SECRET`                   | Original JWT signing secret                                                                 |
+| `VOID_PLATFORM_EMAIL_SIGNING_SECRET`         | Dedicated email signing secret when email is enabled                                        |
 | `VOID_PLATFORM_PROJECT_SECRET_KEY`           | Original base64-encoded project-encryption key                                              |
 | `VOID_PLATFORM_RECOVERY_KEY`                 | Base64-encoded 32-byte key for local encrypted recovery state when no keychain is available |
+| `VOID_EMAIL_SENDER_DOMAIN`                   | Optional shared mail domain; requires `VOID_EMAIL_SHARED_ZONE_ID`                           |
+| `VOID_EMAIL_SHARED_ZONE_ID`                  | Cloudflare zone ID for that mail domain; requires `VOID_EMAIL_SENDER_DOMAIN`                |
 
 Use that installation's saved signing and encryption keys on every resume or repair that needs them. After a keyring rotation, use the [complete keyring recovery inputs](#manage-an-installation-from-another-machine). The database claim and tables remain after uninstall; use a fresh database for a different installation.
+
+Set both email values to enable email during install or upgrade. Later upgrades reuse the recorded values. If an email-enabled installation has no recorded values, supply both before upgrading.
 
 ```sh
 void platform install \

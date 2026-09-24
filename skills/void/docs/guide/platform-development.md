@@ -83,7 +83,18 @@ CF_ACCESS_APP_URL=https://platform.example.com
 SITE_DOMAIN=apps.example.com
 ```
 
-The helper refreshes an Access session before the dev server starts. A configured `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` pair can be used for automation instead. This is dashboard development configuration; Access credentials are separate from platform login credentials.
+The helper refreshes an Access session before the dev server starts. Human
+dashboard requests require the user's Access session as well as their Void login;
+a service token does not represent that user. Service-token pairs are for scoped
+machine operations. This is dashboard development configuration; Access
+credentials are separate from platform login credentials.
+
+For a deployed dashboard, bind its `API` service to your platform API, configure
+`DASHBOARD_URL` on both the dashboard and API, and include that exact dashboard origin in the
+platform's Access protection application. The dashboard passes the browser's
+company identity to the API using that service binding. Its login page shows
+the platform's currently enabled methods, and **Account** supports adding an
+additional login identity.
 
 ## Testing Changes
 
@@ -144,6 +155,57 @@ void-dev platform upgrade <installation-id> \
 
 Then run it without `--plan` to apply the upgrade. Source-built runtimes go through the same artifact, database, ownership, and health checks as released runtimes. The CLI preserves a disabled installation's state and records the source revision in its installation checkpoint.
 
+## Optional GitHub Webhook Ingress for Access-Protected APIs
+
+The core installer does not deploy the dashboard, GitHub App, build Containers,
+or webhook ingress. If a source-built installation adds those optional services
+and Cloudflare Access protects its API hostname, GitHub cannot deliver directly
+to `/webhooks/github`: GitHub does not present your Access credentials. Do not add
+an Everyone or bypass policy to the API application.
+
+The API source package includes an optional, path-isolated Worker for this case.
+It accepts only `POST /github`, validates GitHub's signature over the raw body,
+and forwards one authenticated internal operation over an API service binding.
+The API independently verifies both that internal proof and GitHub's signature
+before running the normal webhook handler. Installations without perimeter
+protection can continue using the API's direct `/webhooks/github` endpoint.
+
+To deploy the optional ingress:
+
+1. Deploy the source API/build runtime containing the internal operation and its
+   build bindings, then finish the separate GitHub App/build-service
+   configuration. A core install or upgrade alone does not add managed builds.
+   Enable the platform's managed-build capability only when that infrastructure
+   is ready.
+2. Edit `platform/packages/api/wrangler.github-webhook-ingress.jsonc`. Give the
+   ingress a name unique to the installation and set its `API` service binding to
+   the exact installed API Worker name. Keep its public hostname separate from
+   every human/API hostname covered by Access.
+3. Deploy it from the repository root:
+
+   ```sh
+   vp run --filter @voidcloud/api deploy:github-webhook-ingress --env production
+   ```
+
+   Use `--env staging` for the staging entries in the same config.
+
+4. In the Cloudflare dashboard, add encrypted Worker secrets. Set the GitHub
+   App's existing `GITHUB_WEBHOOK_SECRET` on both the API and ingress Workers.
+   Generate a separate high-entropy value, such as `openssl rand -base64 32`,
+   and set it as `GITHUB_WEBHOOK_INGRESS_SECRET` on both Workers. Do not reuse a
+   platform management, JWT, Access, or GitHub webhook credential for that value.
+5. In the GitHub App settings, keep **Content type** set to `application/json`,
+   keep the same webhook secret, and change **Webhook URL** to the isolated
+   ingress URL ending in `/github`. Use GitHub's test delivery and confirm a 2xx
+   response before relying on push builds.
+
+The ingress has no login, dashboard, project, operator, proxy, or arbitrary
+forwarding route. It does not make the GitHub integration part of the core
+installer, provision build executors, create a GitHub App, configure Cloudflare
+Access, or manage either Worker's secrets. Its body limit is 25 MiB, based on
+GitHub's [documented 25 MB webhook payload cap](https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap);
+malformed or larger deliveries are rejected before event processing.
+
 ## Deploying Source Builds from CI {#source-build-ci}
 
 Build `@void/platform` from your checkout and pass its runtime directory to `install`, `upgrade`, `repair`, `enable`, or `rollback` with `--runtime`. Custom runtimes get the same integrity, migration, health, and rollback checks as packaged releases.
@@ -169,7 +231,7 @@ node packages/void/dist/cli/cli.mjs platform upgrade "$VOID_PLATFORM_INSTALLATIO
 
 Omit the installation selector only if the account has one discoverable installation. Run one deployment per installation at a time, and let it finish before starting the next. Cancelling during migrations or Worker rollout can leave an installation waiting for recovery.
 
-Keep the management token, database URL, JWT signing secret, and complete project-encryption keyring in a protected CI environment. Upgrades inherit deployed Worker secrets. The original values are needed when recreating a missing Worker; configuration credentials are also needed when explicitly rotating them.
+Keep the management token, database URL, JWT signing secret, email signing secret for email-enabled installations, and complete project-encryption keyring in a protected CI environment. Upgrades inherit deployed Worker secrets. The original values are needed when recreating a missing Worker; configuration credentials are also needed when explicitly rotating them.
 
 :::
 

@@ -45,4 +45,4 @@ When you are initializing a project, you should care about these aspect:
 10. GitHub repo description, PR merge setting
 11. AGENTS.md document
 
-You should prepare them in detail but should not make them too complex, for example, linting CI shouldn't be run on all macOS, Linux and Windows, a small library also doesn't need a VitePress website for docs.
+You should prepare them in detail but should not make them too complex, for example, linting CI shouldn't be run on all macOS, Linux and Windows, a small library also doesn't need a VitePress website for docs, `.editorconfig` shouldn't be provided most of the time.

@@ -91,4 +91,4 @@ void project team remove <user-id>
 void project team revoke <invitation-id>
 ```
 
-A non-owner member can leave with `void project team leave`. The owner cannot leave; an installation administrator must [transfer ownership](./platform-administration.md#transferring-project-ownership) first.
+A non-owner member can leave with `void project team leave`. The owner cannot leave; an installation administrator must [transfer ownership](./platform/administration/projects.md#transferring-project-ownership) first.

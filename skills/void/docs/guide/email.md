@@ -10,7 +10,7 @@ Send transactional email from your app via [Cloudflare's `send_email` binding](h
 import { sendEmail } from 'void/email';
 
 const result = await sendEmail({
-  from: 'Acme <acme+noreply@mail.void.cloud>',
+  from: 'Acme <acme+noreply@mail.example.com>', // use your project's sender address
   to: 'user@example.com',
   subject: 'Welcome',
   text: 'Thanks for signing up!',
@@ -36,9 +36,13 @@ hits first, because a recipient you have not verified yet fails per-recipient.
 
 ## Setup
 
-Zero config on the Void platform (`void deploy`). Every Void project ships with:
+On a platform with email enabled, your app needs no email configuration before
+`void deploy`. Ask your administrator for the platform's shared mail domain. A
+self-hosted administrator [enables email during installation or upgrade](/guide/platform/installation/credentials#runtime-token-permissions); installations without it do not offer platform email. Void Cloud uses `mail.void.cloud`.
 
-- **Sender** — `<your-slug>+noreply@mail.void.cloud`. Used as the default `from` if you omit it. The platform owns the zone with Email Routing + DKIM + SPF + DMARC set up; you do nothing. Project slugs are capped at 56 characters so this local part fits RFC 5321's 64 octets; a project created before the cap with a longer slug must pass `from` explicitly.
+Each project on an email-enabled platform has:
+
+- **Sender** — `<your-slug>+noreply@<mail-domain>`. Used as the default `from` if you omit it. The platform administrator configures the mail zone and its Email Routing, DKIM, SPF, and DMARC records. Project slugs are capped at 56 characters so this local part fits RFC 5321's 64 octets; a project created before the cap with a longer slug must pass `from` explicitly.
 - **No worker binding to add** — outbound mail is sent by the Void proxy, which holds the
   platform `send_email` binding. Your worker never gets one, so there is nothing to configure.
 - **Your own address as a recipient** — the email on your Void account is registered as a recipient when the project is created. It is verified at once when Cloudflare already holds it verified for the platform (you clicked its link for an earlier project of yours); otherwise Cloudflare mails it a verification link, and until you click that link and run `void email destinations` — the listing is what records the click — a send to yourself comes back `ok: false` with a per-recipient `UNVERIFIED_DESTINATION` in `result.deliveries`.
@@ -61,7 +65,7 @@ Cloudflare emails the recipient with a verification link. Once they click it and
 void email destinations
 ```
 
-The project owner's email (the GitHub address you signed up with) is added automatically when the project is created, so it skips `void email allow` — not the verification. See [Setup](#setup) for when it is verified at once and when there is a link to click.
+The project owner's account email is added automatically when the project is created on an email-enabled platform, so it skips `void email allow` — not the verification. See [Setup](#setup) for when it is verified at once and when there is a link to click.
 
 ::: warning When this is the right fit
 The shared sender is great for: ops alerts to the team, notifications to the project owner, reply-by-email flows on top of inbound, internal/app-internal mail.
@@ -71,7 +75,7 @@ For SaaS sending to arbitrary end-users (every signup gets a welcome email), the
 
 ## Your own domain on the platform
 
-The shared sender lives on the platform's `mail.void.cloud` zone. To send — and receive — at a domain you own, register its Cloudflare zone with the project:
+The shared sender uses the platform's configured mail domain. To send — and receive — at a domain you own, register its Cloudflare zone with the project:
 
 ```sh
 void email domain add acme.com
@@ -120,7 +124,7 @@ At most 50 recipients across `to`, `cc` and `bcc` per call. Each address is chec
 
 `Address` accepts either a string (`"hello@acme.dev"` or `"Name <hello@acme.dev>"`) or an object (`{ email, name? }`). Display names with non-ASCII characters are RFC 2047 encoded automatically.
 
-On the platform the sender is pinned to your project. `from` must be your project's own platform address — `<project-slug>@mail.void.cloud` or `<project-slug>+<tag>@mail.void.cloud`, optionally with a display name (`Acme <acme+noreply@mail.void.cloud>`) — or any address on a domain registered with `void email domain add` (see [Your own domain on the platform](#your-own-domain-on-the-platform)). Anything else is rejected with `INVALID_FROM`. Omit `from` and Void fills in `<project-slug>+noreply@mail.void.cloud` for you.
+On the platform the sender is pinned to your project. `from` must be your project's own platform address — `<project-slug>@<mail-domain>` or `<project-slug>+<tag>@<mail-domain>`, optionally with a display name — or any address on a domain registered with `void email domain add` (see [Your own domain on the platform](#your-own-domain-on-the-platform)). For example, if your platform's mail domain is `mail.example.com`, you can use `Acme <acme+noreply@mail.example.com>`. Anything else is rejected with `INVALID_FROM`. Omit `from` and Void fills in `<project-slug>+noreply@<mail-domain>` for you.
 
 On your own Cloudflare account, `from` defaults to `email.from` from `void.json` and must be on a domain your account can send from; Cloudflare rejects any other sender and `sendEmail` reports it as `INVALID_FROM`.
 
@@ -128,7 +132,6 @@ On your own Cloudflare account, `from` defaults to `email.from` from `void.json`
 
 ```ts
 await sendEmail({
-  from: 'Acme <acme+noreply@mail.void.cloud>',
   to: 'user@example.com',
   subject: 'Your receipt',
   text: 'Receipt attached.',
@@ -146,7 +149,6 @@ For inline images (e.g. logos referenced from HTML), set `disposition: 'inline'`
 
 ```ts
 await sendEmail({
-  from: 'Acme <acme+noreply@mail.void.cloud>',
   to: 'user@example.com',
   subject: 'Hello',
   html: '<img src="cid:logo" alt="Acme">',
@@ -241,7 +243,7 @@ The dev inbox is **not** available under a Class B or C framework — SvelteKit,
 
 ```ts
 const result = await sendEmail({
-  from: 'acme+noreply@mail.void.cloud',
+  from: 'acme+noreply@mail.example.com', // replace with your project sender
   to: 'verified@acme.dev',
   subject: 'Skips the dev inbox',
   text: 'Not captured — and not delivered either.',
@@ -264,7 +266,7 @@ describe('signup flow', () => {
     const inbox = createEmailTestHarness();
 
     await sendEmail({
-      from: 'acme+noreply@mail.void.cloud',
+      from: 'acme+noreply@mail.example.com', // use your project sender
       to: 'user@example.com',
       subject: 'Welcome',
       text: 'Hi!',

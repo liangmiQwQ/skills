@@ -4,23 +4,6 @@ outline: deep
 
 # Sandboxes
 
-> **Managed platform beta paused:** New managed Sandbox deployments and retained
-> Sandbox rollbacks are currently disabled. Native Cloudflare deployments keep
-> using Cloudflare Sandboxes directly. Platform operators upgrading an existing
-> installation must preview and complete
-> `void platform system sandbox-drain` before reopening platform traffic. The
-> preview is bounded; pass its `nextCursor` back with `--cursor` to inspect later
-> pages. Apply is resumable through a leased database checkpoint: rerun it after
-> active deployments settle, after it advances a page, or after resolving any
-> ownership verification blocker.
-
-For an `unverified_container` blocker, use the reported resource, project,
-binding, application ID, and application name to compare the application's
-Durable Object namespace with the project's managed dispatch script. Never
-delete an account application by name alone. Remove the application and stale
-resource row only after proving that both belong to this platform installation,
-then rerun the drain.
-
 Use a Cloudflare Sandbox to run commands, work with files, and expose ports from server code. Each session gets an isolated container.
 
 ```ts
@@ -36,7 +19,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Importing from `void/sandbox` enables the `SANDBOX` Durable Object binding, exports the SDK's `Sandbox` class from the generated Worker entry, and adds the matching `containers` and migration metadata to the Cloudflare worker config.
+Importing from `void/sandbox` enables the required Sandbox resources. Native Cloudflare deployments add the `SANDBOX` Durable Object and Container metadata to the Worker. Void Platform deployments provide the same runtime API through a managed Sandbox controller.
 
 ## Configuration
 
@@ -59,8 +42,8 @@ Available fields:
 
 | Field               | Default                    | Description                                                           |
 | ------------------- | -------------------------- | --------------------------------------------------------------------- |
-| `binding`           | `SANDBOX`                  | Worker binding name                                                   |
-| `className`         | `Sandbox`                  | Durable Object class exported by the Worker                           |
+| `binding`           | `SANDBOX`                  | Binding name for local and native Cloudflare use                      |
+| `className`         | `Sandbox`                  | Durable Object class for local and native Cloudflare use              |
 | `containerName`     | `void-sandbox`             | Cloudflare container app name                                         |
 | `image`             | Matching sandbox SDK image | Dockerfile path or registry image for local and native Cloudflare use |
 | `imageBuildContext` | Directory of `image`       | Docker build context for local and native Cloudflare use              |
@@ -81,13 +64,13 @@ await sandbox.writeFile('/tmp/input.txt', 'hello');
 const result = await sandbox.exec('cat /tmp/input.txt');
 ```
 
-You can also use the namespace directly from `c.env.SANDBOX` when you need lower-level Durable Object control.
+For code that must run on both deployment targets, use `getSandbox()`. Direct access through `c.env.SANDBOX` is available only on local and native Cloudflare deployments; managed platforms intentionally expose the application Sandbox API without the underlying lifecycle namespace.
 
 ## State persistence
 
-A sandbox has a persistent Durable Object identity and a container that can restart:
+A sandbox has a Durable Object identity and a container that can restart:
 
-`getSandbox(id)` selects the same Durable Object for that ID across deploys and rollbacks. Data saved in its persistent storage, including its SQLite database, survives container restarts. Use that storage for session metadata and other state you need to keep.
+`getSandbox(id)` selects the same Durable Object for that ID within a deployment. Native Cloudflare deployments preserve that namespace across Worker versions. Each managed platform deployment has its own namespace; rolling back to a retained deployment reconnects to that deployment's namespace.
 
 Files, running processes, exposed ports, and in-memory shell sessions last only as long as the container. It can stop after inactivity (the SDK defaults to `sleepAfter: "10m"`), crash, or restart during platform scheduling. `keepAlive: true` disables the idle timer but doesn't prevent other restarts.
 
@@ -95,6 +78,8 @@ Save anything you need to keep in Durable Object storage, your database, KV, or 
 
 ## Deployment
 
-`void deploy` provisions the `SANDBOX` Durable Object namespace, attaches the Cloudflare Container metadata to the Worker upload, and creates or updates the matching container application in the Void platform account.
+`void deploy` creates a deployment-scoped Sandbox controller and container application in the Void platform account. The controller owns container lifetime, concurrency admission, and runtime accounting; the application receives only the Sandbox operations exposed by `getSandbox()`.
 
 Platform deploys require a registry image reference. The default sandbox works without extra config. If `sandbox.image` points at a custom local Dockerfile, also set `sandbox.platformImage` to an image you have already pushed to a registry.
+
+Managed Sandboxes require Workers Paid on the platform's Cloudflare account. The platform runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit. These are checked only when an application that uses Sandbox is deployed; installing or upgrading a platform and deploying other applications does not probe Containers access.

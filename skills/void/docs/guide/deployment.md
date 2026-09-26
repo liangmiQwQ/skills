@@ -14,23 +14,23 @@ Direct Cloudflare deployment runs an application in your account. A self-hosted
 Void platform provides that deployment service to a team using the operator's
 account. Both use the same application APIs, with the following differences:
 
-| Feature                                          | Direct Cloudflare                | Core self-hosted platform                 |
-| ------------------------------------------------ | -------------------------------- | ----------------------------------------- |
-| Static sites, SPAs, and native Pages SSR         | Supported                        | Supported                                 |
-| Routing rules, WebSockets, queues, cron, and ISR | Supported                        | Supported                                 |
-| D1, KV, R2, and external SQL through Hyperdrive  | Supported                        | Supported                                 |
-| Workers AI and provider requests                 | Your account and gateway         | Installation gateway and proxy            |
-| Runtime logs                                     | Live Cloudflare tail             | Retained platform logs                    |
-| Application rollback                             | Worker versions                  | Retained platform deployments             |
-| Typed Durable State                              | Supported                        | Unavailable                               |
-| Sandboxes                                        | Requires Workers Paid and Docker | Unavailable in beta                       |
-| Custom application domains                       | Supported                        | Unavailable in the core installation      |
-| Generated GitHub deployment workflow             | Supported                        | Use your CI with a scoped developer token |
-| User dashboard and managed GitHub builds         | Not required                     | Not included in a standard installation   |
+| Feature                                          | Direct Cloudflare                | Core self-hosted platform                     |
+| ------------------------------------------------ | -------------------------------- | --------------------------------------------- |
+| Static sites, SPAs, and native Pages SSR         | Supported                        | Supported                                     |
+| Routing rules, WebSockets, queues, cron, and ISR | Supported                        | Supported                                     |
+| D1, KV, R2, and external SQL through Hyperdrive  | Supported                        | Supported                                     |
+| Workers AI and provider requests                 | Your account and gateway         | Installation gateway and proxy                |
+| Runtime logs                                     | Live Cloudflare tail             | Retained platform logs                        |
+| Application rollback                             | Worker versions                  | Retained platform deployments                 |
+| Typed Durable State                              | Supported                        | Unavailable                                   |
+| Sandboxes                                        | Requires Workers Paid and Docker | Requires Workers Paid on the platform account |
+| Custom application domains                       | Supported                        | Unavailable in the core installation          |
+| Generated GitHub deployment workflow             | Supported                        | Use your CI with a scoped developer token     |
+| User dashboard and managed GitHub builds         | Not required                     | Not included in a standard installation       |
 
 Ordinary native applications remain compatible with Workers Free within its
 quotas. Installing a team platform requires Workers for Platforms and the
-[documented infrastructure](./self-hosted-platform.md#cloudflare-footprint).
+[documented infrastructure](./platform/installation/domains.md#cloudflare-footprint).
 Application rollback never reverses database migrations.
 
 Routing-rule parity applies to native Void applications and static deployments.

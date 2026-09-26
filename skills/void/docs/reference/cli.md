@@ -506,7 +506,7 @@ Browser login offers the platform's enabled methods; `--provider <connection-id>
 
 `protection enable` creates or connects Cloudflare Access applications independently
 of login methods. Its `--file` accepts the `cloudflareAccess` object described in
-[installation setup](../guide/self-hosted-platform.md#configure-github-oauth).
+[installation setup](../guide/platform/installation/setup.md#choose-login-methods).
 Protection changes require installation ownership, the saved recovery credentials,
 and a human administrator session. They revoke current human sessions. Before
 removing protection, change any signup rule that depends on that gate. Cloudflare
@@ -521,7 +521,7 @@ original recovery keys, and a successful browser provider test. Use
 
 `auth token` prints your current operator token. With `--token-stdin`, it exchanges a full administrator API login session from standard input for a new operator token. `auth login --token-stdin` saves the exchanged token to the keychain instead of printing it.
 
-For automation, supply `VOID_OPERATOR_TOKEN` with an explicit `VOID_API_URL` or `--connection`. Operator tokens are stored separately from application deployment credentials. The API checks your current administrator access on every request. See [Using Scripts](../guide/platform-administration.md#using-scripts) for an example.
+For automation, supply `VOID_OPERATOR_TOKEN` with an explicit `VOID_API_URL` or `--connection`. Operator tokens are stored separately from application deployment credentials. The API checks your current administrator access on every request. See [Using Scripts](../guide/platform/administration/operations.md#using-scripts) for an example.
 
 #### Users {#operator-users}
 
@@ -711,11 +711,28 @@ void platform system sandbox-drain [--cursor <opaque-cursor>]
 
 `events` shows the administrator, target, and outcome of changes. A pending event means the outcome has not been recorded. Previews and session login/logout do not create these events. `backfill-queue-tokens` repairs older queue entries that are missing authentication tokens and supports `--plan` before applying the repair.
 
-Use `sandbox-drain` when an upgrade asks you to finish Sandbox cleanup. Preview with `--plan`; pass the returned `nextCursor` as `--cursor` to inspect later pages. Apply with `--yes` and rerun until it reports `complete: true`, then rerun the interrupted upgrade. Application traffic stays paused during cleanup, while administrator login remains available.
-
-<span id="operator-workers"></span>
+Use `sandbox-drain` when an upgrade from the legacy tenant-owned Sandbox runtime asks you to finish cleanup. Preview with `--plan`; pass the returned `nextCursor` as `--cursor` to inspect later pages. Apply with `--yes` and rerun until it reports `complete: true`, then rerun the interrupted upgrade. Application traffic stays paused during cleanup, while administrator login remains available. The completed upgrade enables the current managed Sandbox controller automatically.
 
 Use the [platform lifecycle commands](#lifecycle-commands) to maintain your installation's Workers.
+
+#### Hosted Workers {#operator-workers}
+
+The following commands manage the Workers of the hosted Void Cloud platform.
+They are unavailable on a self-hosted installation; use the
+[lifecycle commands](#lifecycle-commands) there instead.
+
+```sh
+void platform worker list [--environment <production|staging>]
+void platform worker show <worker-name> [--environment <production|staging>]
+void platform worker rollback <worker-name> <version-id> [--environment <production|staging>]
+void platform worker rollback-all [--environment <production|staging>]
+void platform worker events [batch-id] [--environment <production|staging>]
+```
+
+Use a name from `worker list`, such as `api` or `proxy`. `show` lists its
+versions and current deployment. Preview either rollback with `--plan`, then
+apply it interactively or with `--yes` in a script. `events` lists worker
+operation events or inspects one batch by ID.
 
 #### Pagination and JSON
 
@@ -745,11 +762,11 @@ void platform install [options] [--yes]
 | `--runtime <path>`                | Deploy a locally built, integrity-checked runtime directory                          |
 | `--yes`                           | Acknowledge Cloudflare changes in non-interactive use                                |
 
-For a first installation, follow [Install a Void Platform](../guide/self-hosted-platform.md). The interactive installer recommends using a domain and offers **Use workers.dev for testing** as a visible alternative. Void creates the platform infrastructure and tables. External PostgreSQL and GitHub OAuth are required in either mode. `--workers-dev` skips zone/DNS/certificate operations and cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
+For a first installation, follow [Install a Void Platform](../guide/self-hosted-platform.md). The interactive installer recommends using a domain and offers **Use workers.dev for testing** as a visible alternative. Void creates the platform infrastructure and tables. External PostgreSQL and a configured login method are required in either mode; GitHub OAuth is the default login choice, not a requirement. `--workers-dev` skips zone/DNS/certificate operations and cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
 
 Read-only plans, workers.dev installations with the default API hostname, and supported lifecycle operations can use Cloudflare browser login and the system keychain. Installation that writes DNS or creates a zone needs an explicit management token through `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN`.
 
-The installed platform needs a separate runtime token to provision resources for apps. The interactive installer prompts for it and the other setup values. For non-interactive installs, inject the variables listed in [Install from CI](../guide/self-hosted-platform.md#install-from-ci).
+The installed platform needs a separate runtime token to provision resources for apps. The interactive installer prompts for it and the other setup values. For non-interactive installs, inject the variables listed in [Install from CI](../guide/platform/installation/ci.md).
 
 To enable email during install or upgrade, set both `VOID_EMAIL_SENDER_DOMAIN` and `VOID_EMAIL_SHARED_ZONE_ID`. Void records the pair for later upgrades; supplying only one is an error.
 
@@ -775,7 +792,7 @@ void platform domain set <domain> [--installation <id>] [--zone <domain>] [--ded
 
 Add an application domain to a workers.dev test platform. Domain-based installations remain the recommended default. The command detects the zone when possible, creates missing DNS and routes after confirmation, and checks HTTPS before making the domain canonical. If DNS or certificates are pending, rerun the same command to resume. `--plan` is read-only; non-interactive mutations require `--yes`.
 
-Existing workers.dev URLs remain available, and the platform API origin, OAuth callback, projects, and deployments stay unchanged. The command verifies the running runtime token's Cache Purge permission for the new zone. A disabled platform stays disabled. Use the database URL from the original installation when administering from another machine. Replacing an already configured application domain is not supported. See [Add a Domain Later](../guide/self-hosted-platform.md#add-a-domain-later).
+Existing workers.dev URLs remain available, and the platform API origin, OAuth callback, projects, and deployments stay unchanged. The command verifies the running runtime token's Cache Purge permission for the new zone. A disabled platform stays disabled. Use the database URL from the original installation when administering from another machine. Replacing an already configured application domain is not supported. See [Adding a Domain](../guide/platform/installation/domains.md#adding-a-domain).
 
 ### Lifecycle commands
 
@@ -811,7 +828,7 @@ Repair and upgrade preserve disabled state. New, resumed, and previously disable
 
 Commands preserve existing routes and domains, verify the configured database, and coordinate concurrent administrators before making changes.
 
-`--runtime` selects a custom platform build. Relative paths resolve from your current directory. Void verifies the build before making changes; see [Platform Development](../guide/platform-development.md#deploying-your-runtime) for creating one.
+`--runtime` selects a custom platform build. Relative paths resolve from your current directory. Void verifies the build before making changes; see [Platform Development](../guide/platform/development/runtime.md#deploying-your-runtime) for creating one.
 
 Without `--runtime`, the CLI uses its packaged platform version.
 
@@ -825,7 +842,7 @@ Uninstall verifies remote ownership before removing anything. Data resources are
 
 Resources that may have been shared or repurposed are retained for manual review. Platform traffic stays blocked. External PostgreSQL and its data are never deleted.
 
-See [Disable and safely uninstall](../guide/self-hosted-platform.md#disable-and-safely-uninstall) for the full removal policy.
+See [Disable and Uninstall](../guide/platform/installation/uninstall.md) for the full removal policy.
 
 ## Deploy
 
@@ -999,7 +1016,7 @@ Run ad-hoc SQL against the database. Provide SQL inline or from a file. SELECT q
 
 By default, targets the local database. Pass `--remote` to run against the deployed database selected in `.void/project.json`:
 
-- **Hosted D1 projects**: routes the query through the Void proxy (`proxy.void.cloud/d1/query`) using your auth token.
+- **Void platform D1 projects**: routes the query through the selected platform's registered proxy using your auth token. Void Cloud's proxy is `proxy.void.cloud`; a self-hosted platform uses its own proxy URL.
 - **Direct Cloudflare D1 projects**: invokes Cloudflare against the pinned D1 binding from root `wrangler.jsonc`.
 - **Hosted PostgreSQL and MySQL projects**: fetches the stored connection string from the platform and connects directly.
 - **Direct Cloudflare PostgreSQL and MySQL projects**: uses `DATABASE_URL` from the current shell; Cloudflare cannot return the password from Hyperdrive.

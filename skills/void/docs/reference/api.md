@@ -10,7 +10,7 @@ This page is the source of truth for user-facing `void` exports. Use it when you
 
 ### `voidPlugin(options?)`
 
-Named export from `"void"`. Returns an array of Vite plugins that set up file-based routing, migration support, and the Cloudflare Workers runtime. Application-level configuration is read from [`void.json`](./config.md); the optional `options` object controls Vite/Cloudflare plugin behavior.
+Named export from `"void"`. Returns an array of Vite plugins that set up file-based routing, migration support, and the Cloudflare Workers runtime. Application-level configuration is read from [`void.config.ts`](./config.md); the optional `options` object controls Vite/Cloudflare plugin behavior.
 
 ```ts
 import { voidPlugin } from 'void';
@@ -24,6 +24,23 @@ export default defineConfig({
 | ------------------ | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `persistTo`        | `string`                  | Directory path for persisting local dev state (D1, KV, R2). Defaults to `.void/` in the project root.                                                                                                                             |
 | `auxiliaryWorkers` | `AuxiliaryWorkerConfig[]` | Additional workers to run inside the same Miniflare instance during dev. Passed through to `@cloudflare/vite-plugin`. Useful for running multiple workers that share bindings (e.g. a separate API worker alongside a dashboard). |
+
+## Project configuration
+
+### `defineConfig(config)`
+
+Import from `void/config` in the root `void.config.ts`. It returns the config with editor completion and TypeScript checking. Void validates the result when loading it, including values computed at runtime.
+
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  cloudflare: { name: 'my-app' },
+  routing: { revalidate: 60 },
+});
+```
+
+See the [config reference](./config.md) for all fields.
 
 ## Handlers
 
@@ -278,7 +295,7 @@ function defineHead<P = Record<string, unknown>>(
 
 ## Rewrites
 
-URL rewrites re-dispatch a request at a different internal path without changing the browser's URL. `c.rewrite()`, `c.originalUrl()`, and `c.isRewritten()` are available on every Hono `Context` the Void runtime hands you. See the [Rewrites guide](../guide/edge/rewrites.md) for the full overview, including static `routing.rewrites` / `routing.fallbacks` in [`void.json`](./config.md#routing).
+URL rewrites re-dispatch a request at a different internal path without changing the browser's URL. `c.rewrite()`, `c.originalUrl()`, and `c.isRewritten()` are available on every Hono `Context` the Void runtime hands you. See the [Rewrites guide](../guide/edge/rewrites.md) for the full overview, including static `routing.rewrites` / `routing.fallbacks` in [`void.config.ts`](./config.md#routing).
 
 ### `c.rewrite(destination)`
 
@@ -345,7 +362,7 @@ import type { RewriteDestination } from 'void/routes';
 Union of the exact route patterns from your generated `RouteMap` plus a `string` fallback (`RouteName | (string & {})`). Known route patterns (e.g. `/posts/[id]`) are offered as autocomplete entries in your editor, while the `string` branch keeps the type assignable from concrete runtime paths like `` `/posts/${id}` `` — there is no `:id` template-literal resolution at the type level. Used as:
 
 - The parameter type of [`c.rewrite()`](#c-rewrite-destination).
-- The type of `destination` entries in `routing.rewrites` and `routing.fallbacks` in [`void.json`](./config.md#routing).
+- The type of `destination` entries in `routing.rewrites` and `routing.fallbacks` in [`void.config.ts`](./config.md#routing).
 
 Like [`RouteMap`](#routemap), `RewriteDestination` lives in the virtual `void/routes` module and is refreshed whenever routes change.
 
@@ -752,7 +769,7 @@ Typed AI client for Cloudflare AI models and provider-native AI Gateway requests
 ```ts
 import { ai } from 'void/ai';
 
-const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+const result = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
   messages: [{ role: 'user', content: 'Summarize this release note.' }],
 });
 

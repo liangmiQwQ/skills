@@ -16,7 +16,7 @@ Void can provision the Hyperdrive configuration from your connection string. Dir
 
 ### 1. Set the database
 
-Add to your `void.json`:
+Add to your `void.config.ts`:
 
 ```json
 {
@@ -43,7 +43,7 @@ Your project uses PostgreSQL. Enter your connection string:
 > postgresql://user:password@host:5432/mydb?sslmode=require
 ```
 
-Void provisions Hyperdrive and records its config ID. The connection string isn't written to `wrangler.jsonc` or generated Worker config.
+Void provisions Hyperdrive and records its config ID. The connection string isn't written to `void.config.ts`, `void.lock.json`, or generated Worker config.
 Both `postgres://` and `postgresql://` URLs are supported, including provider-supplied query strings such as `?sslmode=require`.
 
 For a linked Void project, you can also configure the connection with `void db set-url`. For a direct Cloudflare deploy, export the production `DATABASE_URL` in your shell.
@@ -99,7 +99,7 @@ When deploying a PostgreSQL project to a Void platform:
 When deploying to your own account with `void deploy --platform cloudflare`, export the production
 connection string as `DATABASE_URL`. Void uses it to provision Hyperdrive and apply the checked-in
 migrations transactionally before it uploads the Worker. The connection string is not written to
-`wrangler.jsonc` or the generated Worker config.
+`void.config.ts`, `void.lock.json`, or the generated Worker config.
 
 ## Updating the Connection String
 

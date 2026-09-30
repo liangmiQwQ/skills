@@ -29,7 +29,7 @@ void platform install
 
 :::
 
-Use the same name, account, and domain as the preview, then confirm the installation plan. Void saves a local setup draft and opens the runtime-token page when that token is missing. Paste the token into the masked prompt. As you continue, it opens GitHub and R2 at their respective steps. Each page has a short checklist and a clickable fallback link in the terminal. Values already supplied through the environment or saved setup are reused without opening their pages again.
+After `--plan`, run the install command printed at the end of the preview. Void recalculates the plan and asks you to confirm it; choose the same login methods again if you selected them interactively. Void then saves a local setup draft and opens the runtime-token page when that token is missing. Paste the token into the masked prompt. As you continue, it opens GitHub and R2 at their respective steps. Each page has a short checklist and a clickable fallback link in the terminal. Values already supplied through the environment or saved setup are reused without opening their pages again.
 
 ## Choose login methods
 

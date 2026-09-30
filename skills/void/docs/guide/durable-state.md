@@ -8,7 +8,7 @@ Use a Durable Object when requests need to share state under one name, such as a
 
 Void turns each module in `durable-objects/` into a SQLite-backed Cloudflare Durable Object. The filename determines the binding, Worker class, and initial Cloudflare migration, so no manual Cloudflare configuration is needed.
 
-Void writes the inferred binding and migration entry to `wrangler.jsonc`. Commit that file: Cloudflare Durable Object migrations are append-only, and the persisted order ensures a newly added module is migrated after every class already deployed.
+Void records the inferred binding and migration entry in `void.lock.json`. Commit that file: Cloudflare Durable Object migrations are append-only, and the persisted order ensures a newly added module is migrated after every class already deployed.
 
 ## Define state and methods
 
@@ -129,7 +129,7 @@ export default Counter;
 
 These state migrations are separate from Cloudflare's Durable Object class migration. Void generates the latter with `new_sqlite_classes` when it discovers the file.
 
-Do not delete or reorder generated Durable Object migrations in `wrangler.jsonc` after deployment. Native Cloudflare beta deploys can create these classes with the Worker's first deployment, but do not yet apply a later class migration to an existing Worker. Additions, renames, and removals require an explicit supported Cloudflare deployment workflow; after its migration tag is active, `void deploy --platform cloudflare` can resume ordinary version uploads.
+Do not delete or reorder generated Durable Object migrations in `void.lock.json` after deployment. Native Cloudflare beta deploys can create these classes with the Worker's first deployment, but do not yet apply a later class migration to an existing Worker. Additions, renames, and removals require an explicit supported Cloudflare deployment workflow; after its migration tag is active, `void deploy --platform cloudflare` can resume ordinary version uploads.
 
 ## Deployment support
 

@@ -14,7 +14,7 @@ const items = [
   { name: "public/", description: "Static assets (served as-is)", link: "#public" },
   { name: ".void/", description: "Auto-generated (gitignored)", link: "#void" },
   { name: "vite.config.ts", description: "Vite config with voidPlugin()", link: "#config-files" },
-  { name: "void.json", description: "Void project config (optional)", link: "#config-files" },
+  { name: "void.config.ts", description: "Void project config (optional)", link: "#config-files" },
   { name: ".env", description: "Environment variables", link: "#config-files" },
   { name: "package.json" },
   { name: "tsconfig.json" },
@@ -167,7 +167,7 @@ Generate or refresh it with `void prepare`, or let `vite dev` / `vite build` pop
 | File             | Purpose                                                                                                                                                  |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vite.config.ts` | Vite configuration. Must include `voidPlugin()`.                                                                                                         |
-| `void.json`      | Optional Void config for [routing](/reference/config#routing), [inference](/reference/config#inference), and [worker settings](/reference/config#worker) |
+| `void.config.ts` | Optional Void config for [routing](/reference/config#routing), [inference](/reference/config#inference), and [worker settings](/reference/config#worker) |
 | `tsconfig.json`  | TypeScript config. Extend `.void/tsconfig.json` for auto-generated types; run `void init --tsconfig` when an existing config already uses `extends`.     |
 | `.env`           | Local development values only (gitignored; never deployed)                                                                                               |
 | `env.ts`         | Checked-in env names, types, defaults, and requiredness                                                                                                  |

@@ -25,7 +25,7 @@ Importing from `void/sandbox` enables the required Sandbox resources. Native Clo
 
 Most apps do not need config. The default binding is `SANDBOX`, the Durable Object class is `Sandbox`, and local development, native Cloudflare deploys, and Void Platform all use the published image matching the installed `@cloudflare/sandbox` version.
 
-Use `void.json` when you need a custom image or container size:
+Use `void.config.ts` when you need a custom image or container size:
 
 ```json
 {

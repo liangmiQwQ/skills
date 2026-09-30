@@ -10,7 +10,7 @@ Void supports three types of apps:
 2. **Meta frameworks:** [TanStack Start](https://tanstack.com/start/latest), [React Router](https://reactrouter.com/), [SvelteKit](https://svelte.dev/docs/kit), [Nuxt](https://nuxt.com/), and [Astro](https://astro.build/)
 3. **Static sites:** SPAs, sites built with tools like [VitePress](https://vitepress.dev/), or any directory of static files
 
-The type is auto-detected from your project structure, or you can set it explicitly in [`void.json`](../reference/config.md).
+The type is auto-detected from your project structure, or you can set it explicitly in [`void.config.ts`](../reference/config.md).
 
 ## Void Apps
 
@@ -79,14 +79,15 @@ If you add API routes to a static site generator, tell Void whether to deploy th
 
 To deploy both, set `appType` to `"void"` and build the static site before the Void app:
 
-```json
-// void.json
-{
-  "inference": {
-    "appType": "void",
-    "build": "vitepress build && vite build"
-  }
-}
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  inference: {
+    appType: 'void',
+    build: 'vitepress build && vite build',
+  },
+});
 ```
 
 ```ts
@@ -117,7 +118,7 @@ To deploy only the static output, set:
 
 ## Auto-Detection
 
-When running `void deploy` and no `inference.appType` is set in `void.json`, the detection logic runs in this order:
+When running `void deploy` and no `inference.appType` is set in `void.config.ts`, the detection logic runs in this order:
 
 | Priority | Condition                                                                                                       | Type                                        |
 | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
@@ -131,7 +132,7 @@ When running `void deploy` and no `inference.appType` is set in `void.json`, the
 
 ## Explicit Configuration
 
-To lock the app type and skip auto-detection, set `inference.appType` in [`void.json`](../reference/config.md):
+To lock the app type and skip auto-detection, set `inference.appType` in [`void.config.ts`](../reference/config.md):
 
 ```json
 {

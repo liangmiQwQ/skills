@@ -6,13 +6,13 @@ outline: deep
 
 Revalidation caches rendered pages and refreshes them in the background. When a cached page becomes stale, visitors can keep reading it while the Worker renders an updated version. This is often called [Incremental Static Regeneration (ISR)](https://vercel.com/docs/incremental-static-regeneration).
 
-This requires [SSR](../ssr.md) or [Pages mode](../pages-routing/overview) to be configured.
+Use revalidation with [Void SSR](../ssr.md), [Pages mode](../pages-routing/overview), or a [supported SSR framework](../../integrations/frameworks/overview.md). For framework apps, Void caches public HTML document responses, not framework data requests.
 
-To disable Void's ISR caching across the app while keeping your per-page settings, set `"routing": { "isr": false }` in `void.json`. This overrides per-page revalidate and prerender policies. Set `isr` back to `true` to enable those policies again. Build-time HTML generation with `output: "static"` is unaffected.
+To disable Void's ISR caching across the app while keeping your per-page settings, set `"routing": { "isr": false }` in `void.config.ts`. This overrides per-page revalidate and prerender policies. Set `isr` back to `true` to enable those policies again. Build-time HTML generation with `output: "static"` is unaffected.
 
 ## Enabling revalidation
 
-Add a `routing.revalidate` field to `void.json` with a TTL in seconds:
+Add a `routing.revalidate` field to `void.config.ts` with a TTL in seconds:
 
 ```json
 {
@@ -61,7 +61,7 @@ export const loader = defineHandler(async (c) => {
 });
 ```
 
-Per-page values take precedence over `void.json` patterns.
+Per-page values take precedence over `void.config.ts` patterns.
 
 ## Precedence
 
@@ -69,8 +69,8 @@ When multiple sources set a revalidate TTL, the most specific wins:
 
 1. `x-revalidate` response header (per-response)
 2. `.server.ts` export (per-page, Pages mode only)
-3. `void.json` `routing.revalidate` path pattern match
-4. `void.json` `routing.revalidate` global number or `"*"` fallback
+3. `void.config.ts` `routing.revalidate` path pattern match
+4. `void.config.ts` `routing.revalidate` global number or `"*"` fallback
 
 ## How revalidation works
 

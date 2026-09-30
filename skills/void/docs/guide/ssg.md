@@ -4,7 +4,7 @@ outline: deep
 
 # Static Site Generation (SSG)
 
-Set `output: "static"` in `void.json` to prerender all pages at build time:
+Set `output: "static"` in `void.config.ts` to prerender all pages at build time:
 
 ```json
 {

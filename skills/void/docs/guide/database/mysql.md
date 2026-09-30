@@ -8,7 +8,7 @@ Void supports MySQL through [Cloudflare Hyperdrive](https://developers.cloudflar
 
 ## Configure
 
-Set the dialect in `void.json`:
+Set the dialect in `void.config.ts`:
 
 ```json
 {

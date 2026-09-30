@@ -40,6 +40,7 @@ export default defineConfig({
       ssr: true,
       nitro: {
         preset: 'cloudflare-module',
+        cloudflareDev: { configPath: './.void-wrangler.jsonc' },
         modules: ['nitro-cloudflare-dev'],
         alias: {
           // Nitro has its own bundler that doesn't use Vite aliases.
@@ -53,16 +54,20 @@ export default defineConfig({
 });
 ```
 
-### 4. Create `wrangler.jsonc`
+### 4. Create `void.config.ts`
 
-`voidPlugin()` auto-syncs inferred bindings into this file on dev startup:
+Void generates the Cloudflare config used by Analog's development runtime:
 
-```jsonc
-{
-  "name": "my-app",
-  "compatibility_date": "2026-02-24",
-  "compatibility_flags": ["nodejs_compat", "nodejs_als"],
-}
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  cloudflare: {
+    name: 'my-app',
+    compatibility_date: '2026-02-24',
+    compatibility_flags: ['nodejs_compat', 'nodejs_als'],
+  },
+});
 ```
 
 `nodejs_compat` is required for Nitro's Cloudflare runtime. `nodejs_als` is required for `void/*` runtime helpers (e.g. `void/db`, `void/kv`).
@@ -127,7 +132,7 @@ import { eventHandler } from 'h3';
 import { ai } from 'void/ai';
 
 export default eventHandler(async () => {
-  return ai.run('@cf/meta/llama-3.1-8b-instruct', {
+  return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
     prompt: 'Summarize the latest news',
   });
 });

@@ -4,15 +4,13 @@ outline: deep
 
 # Deployment
 
-Use `void deploy` to deploy your app to your own Cloudflare account or a Void platform run by your team. The CLI builds your app, creates the resources it needs, and applies your database migrations.
+`void deploy` builds your app, provisions its resources, applies migrations, and deploys it to your own Cloudflare account or a Void platform run by your team.
 
-Choose Cloudflare if you're deploying an app yourself. Choose Void if your team has a shared platform you can connect to. You can also [install a Void platform](./self-hosted-platform.md) in your company's Cloudflare account.
+Choose Cloudflare for your own account or Void for a shared team platform. You can [install a Void platform](./self-hosted-platform.md) in your team's Cloudflare account.
 
-## Beta Support
+## Deployment Targets
 
-Direct Cloudflare deployment runs an application in your account. A self-hosted
-Void platform provides that deployment service to a team using the operator's
-account. Both use the same application APIs, with the following differences:
+Both targets use the same application APIs. Their deployment features differ:
 
 | Feature                                          | Direct Cloudflare                | Core self-hosted platform                     |
 | ------------------------------------------------ | -------------------------------- | --------------------------------------------- |
@@ -28,14 +26,9 @@ account. Both use the same application APIs, with the following differences:
 | Generated GitHub deployment workflow             | Supported                        | Use your CI with a scoped developer token     |
 | User dashboard and managed GitHub builds         | Not required                     | Not included in a standard installation       |
 
-Ordinary native applications remain compatible with Workers Free within its
-quotas. Installing a team platform requires Workers for Platforms and the
-[documented infrastructure](./platform/installation/domains.md#cloudflare-footprint).
-Application rollback never reverses database migrations.
+Native apps can run on Workers Free within its quotas. A team platform requires Workers for Platforms and the [documented infrastructure](./platform/installation/domains.md#cloudflare-footprint). Rollback does not reverse database migrations.
 
-Routing-rule parity applies to native Void applications and static deployments.
-Framework-owned Worker output uses its framework's routing and asset policy;
-unsupported Void routing rules are rejected before direct deployment.
+Native Void apps and static sites use Void routing rules. Framework deployments use their framework's routing and asset policies; direct deploy rejects unsupported Void rules.
 
 Use matching CLI and framework adapter versions. For a team platform, the available features depend on its installed version and configuration. Ask your administrator if a feature is unavailable or an upgrade is required.
 
@@ -50,7 +43,7 @@ void deploy # builds and deploys to the saved platform
 
 During setup, Void asks where you want to deploy:
 
-- **Cloudflare:** sign in through your browser and choose an account. Void saves the account in `wrangler.jsonc`.
+- **Cloudflare:** sign in through your browser and choose an account. Void saves the account in `void.config.ts` or `void.lock.json`.
 - **Void:** connect to a platform, sign in, and link or create a project.
 - **Skip:** set up deployment later with `void connect`.
 
@@ -247,7 +240,7 @@ See the [Cloudflare guide](../integrations/cloudflare.md#deploy-to-your-own-clou
 
 ### Node.js, Bun, and Deno
 
-Set [`target`](../reference/config.md#target) in `void.json` to build a standalone server for Node.js, Bun, or Deno. You can run the result on your own server or in a container.
+Set [`target`](../reference/config.md#target) in `void.config.ts` to build a standalone server for Node.js, Bun, or Deno. You can run the result on your own server or in a container.
 
 Deploy `dist/ssr` and `dist/client` together. The server loads the Pages client manifest and assets relative to its emitted module; start it from the app root with `node dist/ssr/index.js`, `bun dist/ssr/index.js`, or `deno run -A dist/ssr/index.js`.
 

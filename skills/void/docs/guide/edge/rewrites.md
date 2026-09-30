@@ -6,7 +6,7 @@ outline: deep
 
 A rewrite serves one route's content at another URL while keeping the browser's address unchanged. For example, `/docs` can serve the content from `/en/docs`.
 
-Define source patterns and destination paths in `routing.rewrites` in [`void.json`](../../reference/config):
+Define source patterns and destination paths in `routing.rewrites` in [`void.config.ts`](../../reference/config):
 
 ```json
 {
@@ -240,7 +240,7 @@ So a SPA app can carve out specific paths without losing the SPA shell behavior 
 
 With this config, an asset miss under `/docs/getting-started` resolves to `/docs.html`, while an asset miss under `/app/settings` still resolves to `/index.html` (the SPA default).
 
-You don't need to write `"/*": "/index.html"` yourself — the CLI **appends** a synthetic `{ source: '/*', destination: '/index.html' }` rule to the fallback list when packaging a SPA deploy that has user fallbacks. Because evaluation is first-match-wins, user rules come before the synthetic entry and take precedence; the synthetic rule only fires when no user rule matched. This is why the shipped manifest may contain more fallback rules than you wrote in `void.json`. If you do write `"/*": "/index.html"` yourself, the CLI emits a warning on `void deploy` noting that the rule duplicates the default and can be omitted.
+You don't need to write `"/*": "/index.html"` yourself — the CLI **appends** a synthetic `{ source: '/*', destination: '/index.html' }` rule to the fallback list when packaging a SPA deploy that has user fallbacks. Because evaluation is first-match-wins, user rules come before the synthetic entry and take precedence; the synthetic rule only fires when no user rule matched. This is why the shipped manifest may contain more fallback rules than you wrote in `void.config.ts`. If you do write `"/*": "/index.html"` yourself, the CLI emits a warning on `void deploy` noting that the rule duplicates the default and can be omitted.
 
 ## `_redirects` file
 
@@ -254,25 +254,25 @@ Rewrites can also be defined in a `_redirects` file placed in Vite's `publicDir`
 /docs/*    /en/docs/:splat 200!
 ```
 
-| File-based form | `void.json` equivalent | Behavior                                                                 |
-| --------------- | ---------------------- | ------------------------------------------------------------------------ |
-| `... 200`       | `routing.fallbacks`    | Fires only when no static asset and no route matched (would have 404'd). |
-| `... 200!`      | `routing.rewrites`     | Always fires, overriding any static asset that would have served.        |
+| File-based form | `void.config.ts` equivalent | Behavior                                                                 |
+| --------------- | --------------------------- | ------------------------------------------------------------------------ |
+| `... 200`       | `routing.fallbacks`         | Fires only when no static asset and no route matched (would have 404'd). |
+| `... 200!`      | `routing.rewrites`          | Always fires, overriding any static asset that would have served.        |
 
-- `void.json` rules are applied **before** file-based rules. Since the first match wins, `routing.rewrites` / `routing.fallbacks` in `void.json` take precedence.
+- `void.config.ts` rules are applied **before** file-based rules. Since the first match wins, `routing.rewrites` / `routing.fallbacks` in `void.config.ts` take precedence.
 - The `_redirects` file can mix 3xx redirects, `200` fallbacks, and `200!` force rewrites. Ordering is preserved within each bucket.
 - The `!` force suffix is only meaningful on `200`. On a 3xx entry like `301!`, the `!` is silently stripped — 3xx redirects always "force" by their nature (they change the URL), so the suffix is meaningless. `void deploy` prints a single aggregated warning tallying all `301!` / `302!` / `307!` / `308!` entries so you can clean them up.
 
-## Precedence: `_redirects` vs `void.json`
+## Precedence: `_redirects` vs `void.config.ts`
 
-When the same source pattern appears in both a `_redirects` file and `void.json` (`routing.redirects` / `routing.rewrites` / `routing.fallbacks`), the rules don't replace each other — they **merge into a single ordered list per phase**, and the first match wins.
+When the same source pattern appears in both a `_redirects` file and `void.config.ts` (`routing.redirects` / `routing.rewrites` / `routing.fallbacks`), the rules don't replace each other — they **merge into a single ordered list per phase**, and the first match wins.
 
 Rules are bucketed by phase before merging:
 
 - **Pre-asset phase** (always fires, runs before static asset lookup): `routing.redirects` + `routing.rewrites` + `_redirects` 3xx entries + `_redirects` `200!` entries.
 - **Post-asset phase** (only fires on an asset miss): `routing.fallbacks` + `_redirects` plain `200` entries. For SPA app types, the synthetic `/* → /index.html` rule is **appended last** in this phase, so user fallbacks evaluated earlier take precedence under first-match-wins.
 
-Within each phase, `void.json` rules run first, followed by `_redirects` rules. The first matching rule wins, so a `void.json` rule takes precedence over the same source pattern in `_redirects`.
+Within each phase, `void.config.ts` rules run first, followed by `_redirects` rules. The first matching rule wins, so a `void.config.ts` rule takes precedence over the same source pattern in `_redirects`.
 
 ### Concrete example
 
@@ -281,26 +281,27 @@ Within each phase, `void.json` rules run first, followed by `_redirects` rules. 
 /docs/*    /en/docs/:splat    200!
 ```
 
-```json
-// void.json
-{
-  "routing": {
-    "rewrites": {
-      "/docs/*": "/handbook/:splat"
-    }
-  }
-}
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  routing: {
+    rewrites: {
+      '/docs/*': '/handbook/:splat',
+    },
+  },
+});
 ```
 
-A request to `/docs/intro` matches both rules. Merged order is `[void.json: /docs/* → /handbook/:splat, _redirects: /docs/* → /en/docs/:splat]`, so `void.json` wins and the request resolves to `/handbook/intro`.
+A request to `/docs/intro` matches both rules. Merged order is `[void.config.ts: /docs/* → /handbook/:splat, _redirects: /docs/* → /en/docs/:splat]`, so `void.config.ts` wins and the request resolves to `/handbook/intro`.
 
-To confirm precedence in practice, check the [`X-Void-Routing` dev header](#debugging-with-x-void-routing) on any response during `vite dev` — it names the winning rule and its origin (`_redirects:<line>` vs `void.json#routing.rewrites`).
+To confirm precedence in practice, check the [`X-Void-Routing` dev header](#debugging-with-x-void-routing) on any response during `vite dev` — it names the winning rule and its origin (`_redirects:<line>` vs `void.config.ts#routing.rewrites`).
 
 ## How rewrites work
 
-**Static rewrites** (`void.json` and `_redirects` file) on managed Void deployments:
+**Static rewrites** (`void.config.ts` and `_redirects` file) on managed Void deployments:
 
-1. `void deploy` reads rewrite rules from the `_redirects` file (status `200` entries) and `routing.rewrites` in `void.json`, then includes them in the deploy manifest alongside redirect rules.
+1. `void deploy` reads rewrite rules from the `_redirects` file (status `200` entries) and `routing.rewrites` in `void.config.ts`, then includes them in the deploy manifest alongside redirect rules.
 2. The platform stores the rules in the KV routing entry for your project.
 3. The dispatch worker evaluates all routing rules (redirects and rewrites) before any worker invocation. If a rewrite matches, the request pathname is updated internally and the request continues through the normal pipeline (static assets, ISR, worker). The original URL is passed as `X-Void-Original-URL`.
 
@@ -337,16 +338,16 @@ During `vite dev`, every response carries an `X-Void-Routing` header that traces
 
 ```
 X-Void-Routing: redirect[/old] -> /new 301 (_redirects:12)
-X-Void-Routing: rewrite[/api/*] -> /backend/:splat (void.json#routing.rewrites)
-X-Void-Routing: fallback[/docs/*] -> /docs.html (void.json#routing.fallbacks)
+X-Void-Routing: rewrite[/api/*] -> /backend/:splat (void.config.ts#routing.rewrites)
+X-Void-Routing: fallback[/docs/*] -> /docs.html (void.config.ts#routing.fallbacks)
 X-Void-Routing: c.rewrite -> /new-path (middleware)
 X-Void-Routing: pass-through
 ```
 
-Phases are separated by `->` so the diagnostic value stays valid as an HTTP header. The parenthesised source hint points at the exact declaration — a line number for `_redirects`, a config path for `void.json`, or `spa-default` for the synthetic SPA catch-all. The header is **only emitted in dev** — production builds strip both the trace code and the per-rule `origin` metadata from the bundle and manifest.
+Phases are separated by `->` so the diagnostic value stays valid as an HTTP header. The parenthesised source hint points at the exact declaration — a line number for `_redirects`, a config path for `void.config.ts`, or `spa-default` for the synthetic SPA catch-all. The header is **only emitted in dev** — production builds strip both the trace code and the per-rule `origin` metadata from the bundle and manifest.
 
 ::: info What fires in `vite dev`
-`vite dev` applies the full static routing pipeline on every target — `node`, `bun`, `deno`, and the default target alike. `void.json` rules (`routing.redirects` / `routing.rewrites` / `routing.fallbacks` / `routing.headers`) and file-based rules (`public/_redirects`, `public/_headers`) are merged at plugin load and compiled into the Hono middleware your worker runs behind. Editing `_redirects` or `_headers` during a dev session re-runs the merge and reloads the page — no restart needed. `c.rewrite()` calls in middleware work everywhere because they live inside the worker itself, and the `X-Void-Routing` dev header reports every decision on every target.
+`vite dev` applies the full static routing pipeline on every target — `node`, `bun`, `deno`, and the default target alike. `void.config.ts` rules (`routing.redirects` / `routing.rewrites` / `routing.fallbacks` / `routing.headers`) and file-based rules (`public/_redirects`, `public/_headers`) are merged at plugin load and compiled into the Hono middleware your worker runs behind. Editing `_redirects` or `_headers` during a dev session re-runs the merge and reloads the page — no restart needed. `c.rewrite()` calls in middleware work everywhere because they live inside the worker itself, and the `X-Void-Routing` dev header reports every decision on every target.
 
 A few things still only run in the deployed runtime, not `vite dev`:
 

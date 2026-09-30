@@ -83,7 +83,7 @@ export default defineConfig({
 7. Deploy workflow migration
 
 - Replace old deploy instructions with:
-  - `void auth login`
+  - `void account login`
   - `void deploy`
 - If CI must target a specific project, use:
   - `void deploy --project <slug>`

@@ -6,38 +6,44 @@ outline: deep
 
 ## Config File Format
 
-Use this page as the exact reference for `void.json`. If you are still learning how the pieces fit together, start in the guide first and come back here when you need field-by-field details.
+Use `void.config.ts` to configure your app. For a guided introduction, start with [What is Void?](../guide/).
 
-Project-level configuration lives in a `void.json` file at the project root. Most fields are optional. Cloudflare-targeted apps must pin a Workers `compatibility_date` in `worker.compatibility_date` or in a supported Cloudflare fallback file (`wrangler.jsonc` or `wrangler.json`). If no date is configured, Void writes the latest known-good date to `void.json` so future runs stay explicit and stable.
+Put `void.config.ts` at the project root and import `defineConfig` from `void/config`. All fields are optional. `void init`, `void deploy`, and `void migrate` can convert older Void and Cloudflare JSON config files, saving backups under `.void/config-migration/`. Commit `void.config.ts` and `void.lock.json` when Void creates the lock; it records resource IDs and migration history.
 
-```json
-{
-  "$schema": "./node_modules/void/schema.json",
-  "sourceDir": "src",
-  "target": "cloudflare",
-  "auth": {
-    "providers": ["email", "github", "google"]
+```ts
+// void.config.ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  sourceDir: 'src',
+  target: 'cloudflare',
+  auth: { providers: ['email', 'github', 'google'] },
+  routing: {
+    revalidate: { '/': 60, '*': 30 },
+    headers: {
+      '/assets/*': ['Cache-Control: public, max-age=31536000, immutable'],
+      '/*': ['X-Frame-Options: DENY', 'X-Content-Type-Options: nosniff'],
+    },
   },
-  "routing": {
-    "revalidate": { "/": 60, "*": 30 },
-    "headers": {
-      "/assets/*": ["Cache-Control: public, max-age=31536000, immutable"],
-      "/*": ["X-Frame-Options: DENY", "X-Content-Type-Options: nosniff"]
-    }
+  inference: {
+    bindings: { db: true, kv: false },
+    appType: 'spa',
+    outputDir: 'dist',
   },
-  "inference": {
-    "bindings": { "db": true, "kv": false },
-    "appType": "spa",
-    "outputDir": "dist"
+  worker: {
+    compatibility_date: '2025-12-01',
+    compatibility_flags: ['nodejs_compat'],
   },
-  "worker": {
-    "compatibility_date": "2025-12-01",
-    "compatibility_flags": ["nodejs_compat"]
-  }
-}
+  cloudflare: {
+    name: 'my-app',
+    account_id: 'your-account-id',
+  },
+});
 ```
 
-Add the `$schema` field for autocomplete and validation in your editor. The schema ships with the `void` package at `node_modules/void/schema.json` and is also exposed as the `void/schema.json` package subpath.
+TypeScript provides editor completion and checks. Void validates the config again when it runs, including values computed at runtime.
+
+The shorter JSON fragments below show individual fields to place inside `defineConfig({ ... })`.
 
 ## Fields
 
@@ -53,7 +59,7 @@ When set, those conventions move under the configured directory:
 { "sourceDir": "src" }
 ```
 
-With that config, Void reads `src/pages`, `src/routes`, `src/db/schema.ts`, `src/db/migrations`, `src/auth.ts`, and `src/env.ts`. Project files such as `void.json`, `vite.config.ts`, `package.json`, `tsconfig.json`, `wrangler.json`, `public/`, and the local-only `.env` stay at the project root. Void does not scan both locations; if source conventions exist in both places during dev/build, remove one copy so the active source tree is unambiguous.
+With that config, Void reads `src/pages`, `src/routes`, `src/db/schema.ts`, `src/db/migrations`, `src/auth.ts`, and `src/env.ts`. Project files such as `void.config.ts`, `vite.config.ts`, `package.json`, `tsconfig.json`, `public/`, and the local-only `.env` stay at the project root. Void does not scan both locations; if source conventions exist in both places during dev/build, remove one copy so the active source tree is unambiguous.
 
 ### `auth`
 
@@ -152,7 +158,7 @@ What `from` does depends on where the app runs:
 
 - **`void dev`** — becomes the default `from` of every `sendEmail()` call, captured in the dev inbox; no mail leaves the machine.
 - **`void deploy`** (managed platform) — not used: the sender is pinned to your project's own platform address, which Void fills in for you.
-- **`void deploy --platform cloudflare`** (your own Cloudflare account) — the address host (`mail.acme.com`) is the domain Void sets Email Routing and Email Sending up on, and the address becomes the default `from` (written into the worker as the `__VOID_EMAIL_FROM` var). The host must be a zone in the pinned Cloudflare account, or a subdomain of one; a subdomain is the usual choice, and the apex is refused when it already receives mail elsewhere. An app that uses email without `email.from` deploys without it and prints the line to add. Void never picks a zone or writes `void.json` for you. See [Your own Cloudflare account](../guide/email.md#your-own-cloudflare-account).
+- **`void deploy --platform cloudflare`** (your own Cloudflare account) — the address host (`mail.acme.com`) is the domain Void sets Email Routing and Email Sending up on, and the address becomes the default `from` (written into the worker as the `__VOID_EMAIL_FROM` var). The host must be a zone in the pinned Cloudflare account, or a subdomain of one; a subdomain is the usual choice, and the apex is refused when it already receives mail elsewhere. An app that uses email without `email.from` deploys without it and prints the line to add. Void never picks a zone or writes `void.config.ts` for you. See [Your own Cloudflare account](../guide/email.md#your-own-cloudflare-account).
 
 ### `head`
 
@@ -211,11 +217,11 @@ Use remote D1/KV/R2 bindings during local development instead of local miniflare
 
 **Requirements:**
 
-- Must be logged in (`void auth login`)
+- Must be logged in (`void account login`)
 - Must have a linked project (`void project link`)
 - Only affects D1 (`DB`), KV (`KV`), and R2 (`STORAGE`) bindings
 
-You can also enable remote mode via the `VOID_REMOTE=1` environment variable without modifying `void.json`:
+You can also enable remote mode via the `VOID_REMOTE=1` environment variable without modifying `void.config.ts`:
 
 ```bash
 VOID_REMOTE=1 pnpm dev
@@ -247,7 +253,7 @@ Enable and configure Cloudflare Sandboxes for Void apps. Importing from `void/sa
 | `instanceType`      | `string` | `lite` on Void deploy                |
 | `maxInstances`      | `number` | `20` on Void deploy                  |
 
-Sandbox support currently applies to Void apps on the Cloudflare target. Native deployment requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) because Cloudflare Containers are unavailable on Workers Free. `void deploy --platform cloudflare` verifies Containers access before provisioning resources or building the app and explains how to fix a missing plan or API-token permission. Managed deployment checks the platform account and runtime token only when a Sandbox app is deployed; the token needs Account / Containers: Edit and Account / Cloudchamber: Edit. Apps that do not import `void/sandbox` or configure `sandbox` emit no Container and perform no entitlement check. The default registry image is pinned to the installed `@cloudflare/sandbox` version, so local and native Cloudflare deploys run the same container as Void Platform. If `sandbox.image` is a custom local Dockerfile path, set `sandbox.platformImage` to the pushed image that the platform should run.
+Sandbox is available to Void apps on the Cloudflare target and requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Void checks access before provisioning or building. For a managed platform, its runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit. Apps without Sandbox use neither Containers nor an entitlement check. The default image matches the installed `@cloudflare/sandbox` version. If `sandbox.image` points to a local Dockerfile, set `sandbox.platformImage` to the pushed image for the platform.
 
 ### `target`
 
@@ -270,7 +276,7 @@ Void-managed WebSocket route files (`*.ws.ts`) are Cloudflare-only because they 
 
 ### `worker`
 
-Curated Cloudflare Workers configuration. Cloudflare-targeted apps require an explicit `compatibility_date` here unless it is provided by a supported Cloudflare fallback file. If no date is configured, Void writes the latest known-good date here. Binding arrays such as `d1_databases`, `kv_namespaces`, and `r2_buckets` are not allowed here because Void manages bindings through inference and `inference.bindings`. If you need custom bindings with real IDs, add them to `wrangler.jsonc`; Void preserves them during deployment.
+Curated Cloudflare Workers configuration. `void init` pins `compatibility_date` here. Binding arrays such as `d1_databases`, `kv_namespaces`, and `r2_buckets` go in [`cloudflare`](#cloudflare), where Void preserves custom settings and resolved IDs during deployment.
 
 | Field                 | Type       | Description                            |
 | --------------------- | ---------- | -------------------------------------- |
@@ -293,7 +299,24 @@ Curated Cloudflare Workers configuration. Cloudflare-targeted apps require an ex
 
 `worker.vars` values must be strings. Root `.env` values override them during local development only. Production builds do not load `.env`, and reject any `worker.vars` name declared as a server key in `env.ts`. Use `void secret put` for production server values.
 
-`worker.limits.cpu_ms` caps Workers CPU time per request, in milliseconds. It must be an integer between 1 and 300000 (Cloudflare's hard maximum, 5 minutes). A deploy that requests more than your account plan's ceiling fails with an error naming both the requested value and the plan maximum. Only a rollback clamps: rolling back to a deployment whose configured limit now exceeds your plan applies the plan ceiling instead of failing. If your plan changes so that a previously valid value now exceeds the ceiling, deploys keep failing until you lower `cpu_ms` in `void.json`. On the direct Cloudflare path, the value is written into the generated `dist/ssr/wrangler.json` as `limits.cpu_ms` and enforced by Cloudflare directly. The Void plan ceiling does not apply there, but your Cloudflare account's own CPU-time allowance still does: the Workers Free plan caps CPU at 10 ms per request, and the Workers Paid plan allows up to 300000 ms. A value above what your Cloudflare account permits is constrained or rejected by Cloudflare, not by Void.
+### `cloudflare`
+
+The complete Cloudflare Worker configuration for direct Cloudflare builds and deployment. Put custom bindings, `name`, `account_id`, routes, services, vars, migrations, and any other Cloudflare fields here. Void passes these fields through to the generated Cloudflare build configuration. Settings you edit here take precedence over values Void previously recorded in `void.lock.json`.
+
+```ts
+// Inside defineConfig({ ... })
+cloudflare: {
+  name: 'my-app',
+  d1_databases: [{ binding: 'ANALYTICS', database_name: 'analytics', database_id: '...' }],
+  vars: { PUBLIC_API_BASE: 'https://api.example.com' },
+},
+```
+
+Void writes a generated Cloudflare config for its tooling and records provisioned resource IDs and append-only migration history in `void.lock.json`. Commit the lock when it changes. Root `wrangler.jsonc` and `wrangler.json` are migrated on `void init` or `void deploy`; Void keeps backup copies under `.void/config-migration/`.
+
+If you need to remove a value that Void previously generated, remove it from the `resolved` object in `void.lock.json`. Void refreshes the generated Cloudflare file on the next command. Put ongoing custom settings in `cloudflare` in `void.config.ts`.
+
+`worker.limits.cpu_ms` sets the CPU time limit per request, from 1 to 300000 ms. On a Void platform, deploy fails if the limit exceeds the account plan; lower it in `void.config.ts` before retrying. Rollback instead caps the old limit at the current plan ceiling. On direct deploys, [Cloudflare enforces the value](https://developers.cloudflare.com/workers/platform/limits/#cpu-time): Workers Free allows up to 10 ms and Workers Paid up to 300000 ms per request.
 
 ```json
 {
@@ -470,9 +493,9 @@ Each binding accepts `true` (use default name), `false` (disable), or a string (
 | `ai`      | `AI`            | `Ai`          | `"ai": "MY_AI"`          |
 | `email`   | —               | —             | Boolean only             |
 
-Custom resource binding names flow through deploy manifests, Cloudflare config generation, remote binding proxying, internal migrations, and generated runtime helpers such as `void/db`, `void/kv`, and `void/storage`. Custom AI names apply to generated Cloudflare configuration and `void/ai` runtime resolution for direct Cloudflare builds; managed Workers AI continues to use Void's service proxy.
+Custom binding names work with `void/db`, `void/kv`, and `void/storage` during development and deployment. Custom AI names also work with `void/ai` on direct Cloudflare deploys; managed Workers AI uses the platform's proxy.
 
-`email` is a feature switch rather than a Cloudflare binding, so it has no binding name or type. On the platform, outbound mail is sent through the Void proxy, which owns the `send_email` binding — none is written into your worker; on your own Cloudflare account, `void deploy --platform cloudflare` writes a `send_email` binding named `SEND_EMAIL` into `wrangler.jsonc` itself once email is set up (see [`email.from`](#email)). Set it to `true` to turn the [email integration](../guide/email.md) on — which registers the `void dev` inbox — even when no scanned file imports `void/email`, or `false` to turn it off.
+`email` is a boolean feature switch. Set it to `true` to enable [email](../guide/email.md) and the `void dev` inbox without an import from `void/email`, or `false` to disable them. On a Void platform, sending uses the platform proxy. Direct Cloudflare setup records a `SEND_EMAIL` binding in `void.lock.json`; see [`email.from`](#email).
 
 #### `inference.build`
 

@@ -14,7 +14,7 @@ Void configures [Better Auth](https://www.better-auth.com/) for your app, includ
 
 ### 1. Enable auth
 
-Add a provider to `void.json`. Email/password is the default, so the simplest config is:
+Add a provider to `void.config.ts`. Email/password is the default, so the simplest config is:
 
 ```json
 {
@@ -91,7 +91,7 @@ Auth turns on automatically when you:
 
 - import anything from `void/auth`
 - import `auth` from `void/client`
-- add `auth` to `void.json`
+- add `auth` to `void.config.ts`
 - add a root-level `auth.ts` file
 
 The simplest setup is no config at all. Email/password auth is enabled by default.

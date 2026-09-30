@@ -135,7 +135,7 @@ For direct Cloudflare deployment, these frameworks need a complete `assets` poli
 
 ### Generated config
 
-Void owns the generated asset routing policy during dev and build for Void apps. If a root `wrangler.jsonc` contains stale `not_found_handling` or `run_worker_first` values, Void replaces those fields so generated config cannot accidentally change which layer sees a request first.
+Void owns the generated asset routing policy during dev and build for Void apps. If `cloudflare.assets` in `void.config.ts` contains stale `not_found_handling` or `run_worker_first` values, Void replaces those fields so generated config cannot accidentally change which layer sees a request first.
 
 TanStack Start and React Router are the exception: Void generates no asset policy for them and leaves both fields to your own Cloudflare config. Writing `not_found_handling` alone would make the asset layer answer unmatched requests and the framework Worker would never run, and completing the policy needs `assets.binding` and `assets.directory` that the framework owns, not Void.
 

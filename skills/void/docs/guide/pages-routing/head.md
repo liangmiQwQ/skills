@@ -39,7 +39,7 @@ export const head = defineHead<Props>((c, props) => {
 
 ## Config Defaults
 
-Set site-wide head defaults in `void.json`:
+Set site-wide head defaults in `void.config.ts`:
 
 ```json
 {

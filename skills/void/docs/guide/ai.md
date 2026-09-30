@@ -21,7 +21,7 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+  const result = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -29,7 +29,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-You can use any model available through Cloudflare's AI binding, including Workers AI models such as `@cf/meta/llama-3.1-8b-instruct` and Cloudflare Gateway models such as `google/gemini-2.5-flash` or `openai/gpt-4.1-mini`. The input object must match the selected Cloudflare model's schema. Models that return binary data, such as generated images, are returned as a `Blob` from `ai.run()`.
+You can use any model available through Cloudflare's AI binding, including Workers AI models such as `@cf/meta/llama-3.3-70b-instruct-fp8-fast` and Cloudflare Gateway models such as `google/gemini-2.5-flash` or `openai/gpt-4.1-mini`. The input object must match the selected Cloudflare model's schema. Models that return binary data, such as generated images, are returned as a `Blob` from `ai.run()`.
 
 ## Streaming
 
@@ -42,7 +42,7 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  return ai.stream('@cf/meta/llama-3.1-8b-instruct', {
+  return ai.stream('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
     messages: [{ role: 'user', content: prompt }],
   });
 });

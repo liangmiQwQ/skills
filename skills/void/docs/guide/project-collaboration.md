@@ -77,7 +77,7 @@ and run `void project link`.
 
 If the invitation is missing, check the platform and signed-in account. To
 switch accounts, set `VOID_API_URL` to the invitation's platform URL, unset
-`VOID_TOKEN` if present, then run `void auth logout` and `void auth login` using
+`VOID_TOKEN` if present, then run `void account logout` and `void account login` using
 the invited email address. For an expired or revoked invitation, ask a project
 administrator to invite you again.
 

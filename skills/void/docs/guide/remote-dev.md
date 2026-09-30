@@ -17,7 +17,7 @@ Before enabling remote mode, you need:
 
 ## Enabling Remote Mode
 
-### In `void.json` (persistent)
+### In `void.config.ts` (persistent)
 
 ```json
 {
@@ -31,7 +31,7 @@ Before enabling remote mode, you need:
 VOID_REMOTE=1 vite dev
 ```
 
-`VOID_REMOTE=0` disables remote mode even if `void.json` has `"remote": true`.
+`VOID_REMOTE=0` disables remote mode even if `void.config.ts` has `"remote": true`.
 
 ## Supported Bindings
 

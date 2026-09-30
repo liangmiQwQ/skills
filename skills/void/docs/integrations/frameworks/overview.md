@@ -45,29 +45,32 @@ With `voidPlugin()` added to the framework's Vite config, frameworks get most of
 - **Auth:** Void-managed auth is not supported in framework mode yet. For now, use Better Auth's official integration for your framework.
 - **Cron jobs:** scheduled handlers via the `crons/` directory.
 - **Queue consumers:** typed producers and consumers via the `queues/` directory.
-- **Revalidation and prerendering:** configure them with [`routing.revalidate`](../../guide/edge/revalidation.md) and [`routing.prerender`](../../guide/edge/prerendering.md) in `void.json`. Void apps can also set these per page in component files.
+- **Revalidation and prerendering:** configure them with [`routing.revalidate`](../../guide/edge/revalidation.md) and [`routing.prerender`](../../guide/edge/prerendering.md) in `void.config.ts`. Void apps can also set these per page in component files.
+
+For framework apps, Void revalidation caches public HTML document responses with both `void deploy` and `void deploy --platform cloudflare`. Client data requests continue to use the framework's own behavior. A response with `Set-Cookie` or `Cache-Control: private`, `no-store`, or `no-cache` is never shared.
 
 Frameworks can also access bindings directly via the framework's own mechanisms (e.g. `platform.env` in SvelteKit, `event.context.cloudflare.env` in Nuxt, `env` from `cloudflare:workers` in Analog, `Astro.locals.runtime.env` in Astro).
 
 ## Configuration
 
-### `void.json`
+### `void.config.ts`
 
-Most configuration is inferred automatically. Use `void.json` to override defaults or fine-tune behavior:
+Most configuration is inferred automatically. Use `void.config.ts` to override defaults or fine-tune behavior:
 
-```json
-{
-  "$schema": "./node_modules/void/schema.json",
-  "inference": {
-    "build": "nuxt build",
-    "scanDirs": ["src", "server", "lib"],
-    "bindings": { "db": "MY_DB" }
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  inference: {
+    build: 'nuxt build',
+    scanDirs: ['src', 'server', 'lib'],
+    bindings: { db: 'MY_DB' },
   },
-  "routing": {
-    "prerender": ["/", "/about", "/pricing"],
-    "revalidate": 60
-  }
-}
+  routing: {
+    prerender: ['/', '/about', '/pricing'],
+    revalidate: 60,
+  },
+});
 ```
 
 | Field                | Purpose                                                                                                                                                       |
@@ -81,22 +84,25 @@ Most configuration is inferred automatically. Use `void.json` to override defaul
 
 See [Configuration](../../reference/config.md) for the full reference.
 
-### `wrangler.jsonc`
+### Cloudflare settings
 
-Frameworks that use Cloudflare's dev runtime for local dev (SvelteKit, Nuxt with `nitro-cloudflare-dev`, Astro) need a `wrangler.jsonc` for binding configuration. `voidPlugin()` auto-syncs inferred bindings into this file on dev startup:
+Frameworks that use Cloudflare's dev runtime need their adapters pointed at Void's generated `.void-wrangler.jsonc`. Their setup guides show the adapter options. Define your Cloudflare settings in `void.config.ts`:
 
-```jsonc
-{
-  "name": "my-app",
-  "compatibility_date": "2026-02-24",
-  "compatibility_flags": ["nodejs_compat"],
-  // Bindings below are auto-managed by voidPlugin()
-}
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  cloudflare: {
+    name: 'my-app',
+    compatibility_date: '2026-02-24',
+    compatibility_flags: ['nodejs_compat'],
+  },
+});
 ```
 
-Existing bindings are preserved. Only missing ones are added with local placeholder IDs.
+Existing bindings are preserved. D1, KV, and R2 use local placeholder IDs until deployment. For a project connected directly to Cloudflare, importing `void/ai` adds a remote Workers AI binding during development; [Cloudflare login](../../guide/ai.md#local-development) is required to use it. Direct deployments also include the inferred AI binding.
 
-For `void deploy`, compatibility settings are read from `wrangler.jsonc` automatically (no need to duplicate them in `void.json`).
+Void combines these settings with inferred bindings and records provisioned resource IDs in `void.lock.json`. Commit both files.
 
 ## Deploy Pipeline
 
@@ -109,7 +115,7 @@ void deploy
   │    Reads package.json → determines framework + output conventions
   │
   ├─ 2. Build
-  │    Runs framework's build command (or void.json `build` override)
+  │    Runs framework's build command (or void.config.ts `build` override)
   │    SvelteKit: vite build → .svelte-kit/cloudflare/
   │    Nuxt:      nuxt build → .output/
   │    Analog:    vite build → dist/analog/
@@ -117,10 +123,10 @@ void deploy
   │
   ├─ 3. Analyze
   │    ├─ Locate worker entry + static assets from known output paths
-  │    ├─ Infer bindings from source or read from void.json
+  │    ├─ Infer bindings from source or read from void.config.ts
   │    ├─ Collect migrations from db/migrations/*.sql
   │    ├─ Detect cron and queue handlers
-  │    └─ Read wrangler.jsonc compat settings
+  │    └─ Read void.config.ts Cloudflare settings
   │
   ├─ 4. Wrap (if needed)
   │    If crons or queues are configured:

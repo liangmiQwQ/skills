@@ -107,15 +107,17 @@ Cloudflare applications for deliberate cleanup. Disabling an Access login method
 does not remove the gate.
 
 Users can add another enabled login to their existing account with
-`void auth link <connection-id>` or **Account** in the optional
+`void account link <connection-id>` or **Account** in the optional
 dashboard. Sign in again first if prompted, then authenticate with the additional
 provider and confirm the identity shown. Matching email addresses alone do not
 link accounts.
 
-For company installations, choose **Company-approved users** under **Who can
-join?** to create accounts automatically for users accepted by your configured
-company rules. Individual invitations are not required. Invited/allowlisted
-signup remains available when you need to approve people individually.
+In the admin dashboard, open **People → Access** to choose who can join, invite
+people, and manage individual signup grants. Choose **Company-approved or
+individually approved users** to create accounts automatically for people who
+meet your configured company rules while still allowing explicit invitations
+and allowlist grants. Company protection at the platform edge still applies
+before anyone reaches a login page.
 
 With invited/allowlisted signup selected, let a teammate join with GitHub by adding their login to the allowlist:
 
@@ -148,7 +150,13 @@ To invite someone else by email, use:
 void platform invitation send alex@example.org
 ```
 
-An invitation grants signup access and sends an email when the platform has email delivery configured. If delivery is unavailable or fails, the result tells you; the person can still join using the platform's URL.
+An invitation grants signup access for that exact email address. The person must
+sign in with a login method that supplies the same verified email address.
+When platform email delivery is configured, Void also sends connection
+instructions. If delivery is unavailable or fails, the grant still works:
+share the platform's `/invite` page or `void connect '<platform URL>'` command
+with the person yourself. The admin dashboard shows the delivery outcome
+separately from the invitation's pending, accepted, or revoked status.
 
 Inspect the current access settings and invitations with:
 

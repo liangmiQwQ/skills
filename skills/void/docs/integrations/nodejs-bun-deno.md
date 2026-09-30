@@ -4,7 +4,7 @@ outline: deep
 
 # Node.js, Bun, and Deno
 
-Set `target` in `void.json` to build for Node.js, Bun, or Deno. You can run the resulting server on your own machine, in a container, or with a hosting provider.
+Set `target` in `void.config.ts` to build for Node.js, Bun, or Deno. You can run the resulting server on your own machine, in a container, or with a hosting provider.
 
 ```json
 { "target": "node" }
@@ -25,7 +25,7 @@ All three produce the same project structure and use the same Hono-based routing
 ### 1. Configure the target
 
 ```json
-// void.json
+// void.config.ts
 { "target": "node" }
 ```
 
@@ -140,7 +140,7 @@ Inbound [email handlers](../guide/email.md#inbound) in `email/` need Cloudflare 
 
 ### Ignored config fields
 
-Void warns and ignores these Cloudflare-specific `void.json` fields on other targets:
+Void warns and ignores these Cloudflare-specific `void.config.ts` fields on other targets:
 
 - `inference.bindings`: Cloudflare binding configuration
 - `remote`: remote binding proxy
@@ -166,11 +166,11 @@ my-app/
       hello.ts
   package.json
   vite.config.ts
-  void.json
+  void.config.ts
 ```
 
 ```json
-// void.json
+// void.config.ts
 { "target": "node" }
 ```
 

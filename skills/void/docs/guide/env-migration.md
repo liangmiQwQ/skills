@@ -80,7 +80,7 @@ void secret list
 
 Remote stores return names only; plaintext values are validated during upload and again at worker startup. If an upload fails or a name is missing, retain the source values and retry before continuing.
 
-For direct Cloudflare deployments, remove the migrated server keys from `vars` in `wrangler.jsonc` after confirming the upload. Void now treats any schema-declared server key in Worker `vars` as an error.
+For direct Cloudflare deployments, remove the migrated server keys from `cloudflare.vars` in `void.config.ts` after confirming the upload. Void now treats any schema-declared server key in Worker `vars` as an error.
 
 ## 4. Supply client values at build time
 

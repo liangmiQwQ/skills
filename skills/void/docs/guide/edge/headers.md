@@ -4,7 +4,7 @@ outline: deep
 
 # Custom Headers
 
-Define custom response headers in [`void.json`](../../reference/config) using the `routing.headers` field. Keys are URL patterns, values are arrays of `"Name: value"` strings.
+Define custom response headers in [`void.config.ts`](../../reference/config) using the `routing.headers` field. Keys are URL patterns, values are arrays of `"Name: value"` strings.
 
 ```json
 {
@@ -72,14 +72,14 @@ Header rules do not apply to:
 
 Meta-frameworks like SvelteKit, Nuxt, and Astro generate a `_headers` file with cache rules for their hashed asset directories. Void automatically parses this file during deploy and merges the rules into the deploy manifest.
 
-- Framework-generated rules are applied **before** `void.json` rules. Since the last match wins, `routing.headers` in `void.json` takes precedence and can override framework defaults.
+- Framework-generated rules are applied **before** `void.config.ts` rules. Since the last match wins, `routing.headers` in `void.config.ts` takes precedence and can override framework defaults.
 - The `_headers` file is not uploaded as a static asset. Its contents are parsed and included in the manifest only.
 
 No configuration is needed. If the framework generates a `_headers` file, it is picked up automatically.
 
 ## How headers work
 
-1. `void deploy` reads header rules from the framework `_headers` file (if present) and `routing.headers` in `void.json`, then includes them in the deploy manifest.
+1. `void deploy` reads header rules from the framework `_headers` file (if present) and `routing.headers` in `void.config.ts`, then includes them in the deploy manifest.
 2. The platform stores the rules in the KV routing entry for your project.
 3. The dispatch Worker adds matching headers before returning a response. Most cached responses include those headers. Hashed assets get header rules on each response, including cache hits, so a rule change takes effect without changing the file.
 

@@ -32,6 +32,7 @@ import { voidPlugin } from 'void';
 export default defineNuxtConfig({
   nitro: {
     preset: 'cloudflare-module',
+    cloudflareDev: { configPath: './.void-wrangler.jsonc' },
     alias: {
       // Nitro has its own bundler that doesn't use Vite aliases.
       // Duplicate @schema here so Nitro can resolve it.
@@ -44,16 +45,20 @@ export default defineNuxtConfig({
 
 By default, Nuxt's Cloudflare development runtime and `voidPlugin()` migrations share local state at `.wrangler/state/v3`, so no extra persistence configuration is required.
 
-### 4. Create `wrangler.jsonc`
+### 4. Create `void.config.ts`
 
-`voidPlugin()` auto-syncs inferred bindings into this file on dev startup:
+Void generates the Cloudflare config used by Nuxt's development runtime:
 
-```jsonc
-{
-  "name": "my-app",
-  "compatibility_date": "2026-02-24",
-  "compatibility_flags": ["nodejs_compat", "nodejs_als"],
-}
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  cloudflare: {
+    name: 'my-app',
+    compatibility_date: '2026-02-24',
+    compatibility_flags: ['nodejs_compat', 'nodejs_als'],
+  },
+});
 ```
 
 ### 5. Deploy
@@ -111,7 +116,7 @@ export default defineEventHandler(async () => {
 import { ai } from 'void/ai';
 
 export default defineEventHandler(async () => {
-  return ai.run('@cf/meta/llama-3.1-8b-instruct', {
+  return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
     prompt: 'Summarize the latest news',
   });
 });

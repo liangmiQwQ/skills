@@ -41,15 +41,25 @@ Use the following permissions for the core platform. Cloudflare may label write 
 
 The management token also needs **Zone Edit** with authority to create zones if you ask Void to create the zone. If it already exists, use the selected zone with Zone Read and DNS Edit. Nested application domains additionally need **SSL and Certificates: Read** on the management token. A custom runtime that enables custom project domains needs **SSL and Certificates: Edit** on the runtime token; the core runtime does not enable that feature.
 
-Enabling email lets administrators [register email domains for projects](/guide/platform/administration/email#registering-email-domains-for-projects) and lets projects register destination addresses through the runtime token. That needs **Email Routing Addresses: Edit** and **Email Sending: Edit** on the account, plus **Zone: Read**, **Zone Settings: Edit** and **Email Routing Rules: Edit** on the zones that will carry mail; the token link preselects them when email is enabled. Email Sending onboarding itself needs Workers Paid on the account.
-
-To enable email, set `VOID_EMAIL_SENDER_DOMAIN` to the shared sender domain and `VOID_EMAIL_SHARED_ZONE_ID` to its Cloudflare zone ID when installing or upgrading. Void records both values for later upgrades and rejects attempts to replace them during an ordinary upgrade. The mail zone can differ from the application zone, but it must belong to the selected platform Cloudflare account; without an explicit mail-zone identity, shared inbound delivery stays unavailable. The dedicated email gateway is deployed in the platform account. Each customer zone uses its own ingress Worker to forward mail to that gateway.
-
-The installer prepares the shared mail route and verifies inbound readiness before it opens platform traffic. If that setup fails, the installation remains disabled. Correct the reported Cloudflare permission, mail-zone configuration, or routing conflict, then rerun the same install or upgrade command; a fresh install resumes with `void platform install --resume --name <installation-id>`.
-
 Void checks access before provisioning. If it reports a missing permission, update the token's permissions for the selected account or zone and retry.
 
 :::
+
+## Enable Email {#enable-email}
+
+Choose a shared sender domain and its Cloudflare zone ID. The mail zone may differ from the application zone, but it must belong to the platform's Cloudflare account. To enable email on an existing installation, run:
+
+```sh
+VOID_EMAIL_SENDER_DOMAIN=mail.example.com \
+VOID_EMAIL_SHARED_ZONE_ID=your-zone-id \
+void platform upgrade your-installation-id
+```
+
+Set the same two variables before `void platform install` to enable email during a new installation. Void records the pair for later upgrades; an ordinary upgrade cannot replace it.
+
+Enabling email lets administrators [register email domains for projects](/guide/platform/administration/email#registering-email-domains-for-projects) and lets projects register destination addresses through the runtime token. That needs **Email Routing Addresses: Edit** and **Email Sending: Edit** on the account, plus **Zone: Read**, **Zone Settings: Edit** and **Email Routing Rules: Edit** on the zones that will carry mail. The runtime-token link preselects them when email is enabled. Email Sending onboarding for arbitrary recipients needs Workers Paid.
+
+The installer deploys the email gateway, prepares the shared mail route, and verifies inbound readiness before opening platform traffic. If setup fails, correct the reported permission, mail-zone configuration, or routing conflict, then rerun the same install or upgrade command. A fresh install resumes with `void platform install --resume --name <installation-id>`.
 
 ## R2 Upload Credentials
 

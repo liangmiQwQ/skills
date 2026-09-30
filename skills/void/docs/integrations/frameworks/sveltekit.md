@@ -21,53 +21,56 @@ cd my-app
 npm install -D @sveltejs/adapter-cloudflare void
 ```
 
-### 3. Configure `svelte.config.js`
-
-```js
-import adapter from '@sveltejs/adapter-cloudflare';
-import { withVoidTSConfig } from 'void/sveltekit';
-
-export default {
-  kit: {
-    adapter: adapter(),
-    typescript: {
-      config: withVoidTSConfig(),
-    },
-  },
-};
-```
-
-### 4. Add `voidPlugin()` to `vite.config.ts`
+### 3. Configure `vite.config.ts`
 
 ```ts
+import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { voidPlugin } from 'void';
+import { withVoidTSConfig } from 'void/sveltekit';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [voidPlugin(), sveltekit()],
+  plugins: [
+    voidPlugin(),
+    sveltekit({
+      adapter: adapter({
+        config: './.void-wrangler.jsonc',
+        platformProxy: { configPath: './.void-wrangler.jsonc' },
+      }),
+      typescript: {
+        config: withVoidTSConfig(),
+      },
+    }),
+  ],
 });
 ```
 
-### 5. Create `wrangler.jsonc`
+If your project already configures SvelteKit in `svelte.config.js`, keep that file and add `typescript.config: withVoidTSConfig()` under its `kit` options instead. SvelteKit ignores `svelte.config.js` when options are passed directly to `sveltekit()`.
 
-SvelteKit's adapter reads bindings from `wrangler.jsonc` for local dev. `voidPlugin()` auto-syncs inferred bindings into this file on dev startup, so you only need the base config:
+### 4. Create `void.config.ts`
 
-```jsonc
-{
-  "name": "my-app",
-  "compatibility_date": "2026-02-24",
-  "compatibility_flags": ["nodejs_compat"],
-}
+Point SvelteKit's adapter at Void's generated Cloudflare config as shown above. Add your Cloudflare settings to `void.config.ts`:
+
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  cloudflare: {
+    name: 'my-app',
+    compatibility_date: '2026-02-24',
+    compatibility_flags: ['nodejs_compat'],
+  },
+});
 ```
 
 By default, SvelteKit's Cloudflare adapter, `voidPlugin()` migrations, and `void db` commands share local state at `.wrangler/state/v3`, so no extra `platformProxy.persist` configuration is required.
 
-### 6. Configure `tsconfig.json`
+### 5. Configure `tsconfig.json`
 
 SvelteKit generates `.svelte-kit/tsconfig.json` and expects your root config to extend it. Void generates `.void/tsconfig.json` for project-specific aliases such as `void/db` and `@schema`.
 
-Do not add Void's `compilerOptions.paths` to the root `tsconfig.json`; SvelteKit warns because root-level paths override its generated aliases. The `withVoidTSConfig()` hook above merges Void's generated files and aliases into SvelteKit's generated config instead.
+Do not add Void's `compilerOptions.paths` to the root `tsconfig.json`; SvelteKit warns because root-level paths override its generated aliases. The `withVoidTSConfig()` hook merges Void's generated files and aliases into SvelteKit's generated config instead.
 
 ```json
 {
@@ -80,7 +83,7 @@ Do not add Void's `compilerOptions.paths` to the root `tsconfig.json`; SvelteKit
 
 Run `void prepare` after a fresh clone or before typechecking in CI so `.void/tsconfig.json` exists before SvelteKit syncs its config.
 
-### 7. Deploy
+### 6. Deploy
 
 ```bash
 void auth login
@@ -132,7 +135,7 @@ import { ai } from 'void/ai';
 
 export const actions = {
   summarize: async () => {
-    return ai.run('@cf/meta/llama-3.1-8b-instruct', {
+    return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       prompt: 'Summarize the latest news',
     });
   },

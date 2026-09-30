@@ -4,15 +4,11 @@ outline: deep
 
 # Quickstart
 
-Let's create a Void app, run it locally, and deploy it. You can start in an empty directory or [add Void to an existing Vite app](#adding-to-an-existing-vite-app).
-
-Use Node.js 24.21.0 or later. New projects pin the SDK's tested Workers
-compatibility date, so the bundled local runtime can start them. An existing
-compatibility date in your project is preserved.
+Create a Void app, run it locally, and deploy it. You can also [add Void to an existing Vite app](#adding-to-an-existing-vite-app). Use Node.js 24.21.0 or later.
 
 ## Start in an Empty Directory
 
-Install Void in your project directory:
+Install Void in an empty project directory:
 
 ::: code-group
 
@@ -34,17 +30,7 @@ bun add -D void
 
 :::
 
-Then run the setup command:
-
-With pnpm, you can also start with `pnpm create void my-app`; the scaffolder sets
-up the required native build permissions before installing Void. If a manual
-installation reports blocked build scripts, approve `esbuild`, `sharp`, and
-`workerd` with `pnpm approve-builds`. Set `better-sqlite3: false` in
-`pnpm-workspace.yaml`'s `allowBuilds`: Void uses version 13's bundled binaries,
-so it does not need a native rebuild.
-
-The setup install updates the pnpm lockfile to match the generated dependencies,
-including when setup runs in CI. Later builds can use `pnpm install --frozen-lockfile`.
+Run setup:
 
 ::: code-group
 
@@ -66,58 +52,25 @@ bunx void init
 
 :::
 
-Void asks you to choose Vite+ or plain Vite, a UI framework, and a starter. Vite+ is the default. For a database app, D1 needs no local database server; PostgreSQL and MySQL are available if you want to use an external database. Static Pages starts with pages only.
+Void asks you to choose Vite+ or Vite, a UI framework, a starter, and a deployment target. Vite+ is the default. D1 needs no local database server; choose PostgreSQL or MySQL if you use an external database. You can skip deployment setup and decide later.
 
-Setup also asks where you want to deploy. Choose Cloudflare to use your own account, or Void to connect to your team's platform. You can skip this and decide later.
+With pnpm, you can start with `pnpm create void my-app`. It configures native build permissions before installing Void.
 
-<details>
-<summary style="cursor:pointer">
-💡 <b>Notes on <code>void</code> binary usage</b>
-</summary>
+If a manual pnpm install reports blocked build scripts, run `pnpm approve-builds` for `esbuild`, `sharp`, and `workerd`. Set `better-sqlite3: false` in `pnpm-workspace.yaml`'s `allowBuilds`; Void uses its bundled binaries. Setup updates the pnpm lockfile, including in CI. Later installs can use `pnpm install --frozen-lockfile`.
 
-The docs use `void` for brevity. Because it's installed in your project, run it through your package manager outside package scripts: `npx void`, `pnpm void`, `yarn void`, or `bunx void`.
-
-Alternatively, you can add `./node_modules/.bin` to your `PATH` so that you can invoke `void` directly when you are in the root directory of your app.
-
-:::warning ⚠️ Prefer local install
-Install `void` locally so the CLI and your app use the same version.
-:::
-
-</details>
+The examples below use `void` for brevity. Outside package scripts, run the local binary with `npx void`, `pnpm void`, `yarn void`, or `bunx void`. Keep Void installed in the project so the CLI and app use the same version.
 
 ## Using with Coding Agents
 
-`void init` detects your coding agent and sets up the matching instructions and skills.
-
-If auto-detection fails, `void init` asks you to choose from a short list (Claude, Cursor, Codex, Gemini CLI, Generic).
-
-In agents that support it, use the `/void` skill to load the relevant guidance, then describe the app you want to build. See [Coding Agents](../integrations/agents) for setup details.
+`void init` detects your coding agent and installs its instructions and skills. If detection fails, choose an agent when prompted. In agents that support it, load the `/void` skill and describe the app you want to build. See [Coding Agents](../integrations/agents) for setup details.
 
 ## Meta Frameworks
 
-You can build pages directly with Void's [Pages routing](./pages-routing/overview), or keep an existing framework such as TanStack Start, React Router, or SvelteKit. Follow the [framework integration guides](../integrations/frameworks/overview) for framework-specific setup.
+Use Void's [Pages routing](./pages-routing/overview) or keep a framework such as TanStack Start, React Router, or SvelteKit. Follow the [framework guides](../integrations/frameworks/overview) for setup.
 
 ## Adding to an Existing Vite App
 
-::: code-group
-
-```sh [npm]
-npm install -D void
-```
-
-```sh [pnpm]
-pnpm add -D void
-```
-
-```sh [yarn]
-yarn add -D void
-```
-
-```sh [bun]
-bun add -D void
-```
-
-:::
+Install Void using the package manager command [above](#start-in-an-empty-directory).
 
 Enable the plugin in `vite.config.ts`:
 
@@ -130,27 +83,7 @@ export default defineConfig({
 });
 ```
 
-Run setup to configure the remaining project files:
-
-::: code-group
-
-```sh [npm]
-npx void init
-```
-
-```sh [pnpm]
-pnpm void init
-```
-
-```sh [yarn]
-yarn void init
-```
-
-```sh [bun]
-bunx void init
-```
-
-:::
+Then run `void init` with your package manager to configure the remaining project files. Existing compatibility dates are preserved; new projects use Void's tested Workers compatibility date.
 
 ## Once You Have a Working App
 

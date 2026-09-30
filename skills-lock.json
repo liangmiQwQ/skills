@@ -14,10 +14,10 @@
       "computedHash": "4e08171a2e0c98e51e81bdca628067a3f42024b68f7918b87a81631974b14781"
     },
     "antfu-design": {
-      "source": "antfu/skills",
+      "source": "antfu/design",
       "sourceType": "github",
       "skillPath": "skills/antfu-design/SKILL.md",
-      "computedHash": "3fb42ec43179f38f60106e1ba20f46d660d54e916f9362e4c89ba0abaeaa3dfc"
+      "computedHash": "fb7e37d58f8bedd61353d42de6ada5a5adbb8bf86e6fdca8cb297913100740f1"
     },
     "cc-design": {
       "source": "ZeroZ-lab/cc-design",

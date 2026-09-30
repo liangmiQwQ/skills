@@ -17,6 +17,7 @@ ska liangmiQwQ/vp-config
 ska liangmiQwQ/language-learning
 ska yetone/kill-ai-slop
 ska zerob13/skills --skill test-doctor
+ska antfu/design
 sh void.sh
 
 # ====== SKILLS ADDING AREA ENDED =======

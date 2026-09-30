@@ -13,7 +13,7 @@ ska vuejs-ai/skills
 ska slidevjs/slidev
 ska antfu/skills
 # Conflicts with our own creating-pr skill
-npx skills remove antfu-create-pr -y -a claude-code
+rm -rf .claude/skills/antfu-create-pr
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/vp-config
 ska liangmiQwQ/language-learning

@@ -12,14 +12,15 @@ ska anthropics/skills --skill frontend-design
 ska vuejs-ai/skills
 ska slidevjs/slidev
 ska antfu/skills
-# Conflicts with our own creating-pr skill
-rm -rf .claude/skills/antfu-create-pr
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/vp-config
 ska liangmiQwQ/language-learning
 ska yetone/kill-ai-slop
 ska zerob13/skills --skill test-doctor
 sh void.sh
+
+# In `antfu/skills`, `antfu-create-pr` conflicts with our own `creating-pr` skill
+rm -rf .claude/skills/antfu-create-pr
 
 # ====== SKILLS ADDING AREA ENDED =======
 

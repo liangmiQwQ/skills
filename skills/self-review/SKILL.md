@@ -5,9 +5,9 @@ description: Load this skill when you are required to handling Codex's review su
 
 ## Before the review
 
-You shouldn't fetch GitHub review suggestions or start to do code change at first. The first task for you is to understand the PR's movitation and design direction.
+You shouldn't fetch GitHub review suggestions or start to do code change at first. The first task for you is to understand the PR's motivation and design direction.
 
-You can read the PR description, original commit and diff, make sure you completely understand the goal the PR makes. Breaking changes bourdary and features that are explicitly postponed.
+You can read the PR description, original commit and diff, make sure you completely understand the goal the PR makes. Breaking changes boundary and features that are explicitly postponed.
 
 If you are in a loop, or in a `goal` mode, you should storage all these things, make sure you can still remember them during your sessions. Keep them in mind.
 

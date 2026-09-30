@@ -3,9 +3,9 @@ name: code-style
 description: You are required to load this before writing code. Do not use this skill for reading code or analyzing tasks unless users require to care about codestyle.
 ---
 
-Load $precise-minior-adjustment skill as needed, it is used to tell agents how to make code simple and consistent with other parts in codebase.
+Load $precise-minor-adjustment skill as needed, it is used to tell agents how to make code simple and consistent with other parts in codebase.
 
-After your finish your task, also run a round of simplify according to $precise-minior-adjustmen before commit or summarizing.
+After you finish your task, also run a round of simplify according to $precise-minor-adjustment before commit or summarizing.
 
 # Code Style
 
@@ -50,7 +50,7 @@ If a piece of logic can be clearly divided into multiple stages and exceeds 50 l
 
 ---
 
-After your finishing your whole implementation, check the code diff, if the diff is more than 50 lines while there are no comments added, there are problems.
+After finishing your whole implementation, check the code diff, if the diff is more than 50 lines while there are no comments added, there are problems.
 
 ## Visibility
 

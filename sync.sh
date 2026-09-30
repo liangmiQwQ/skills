@@ -1,4 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+# Stop before `rm -rf skills/*` if any skill fails to install
+set -eu
+
+# The lockfile outlives `.claude`, so reset it to drop skills no longer synced
+rm -f skills-lock.json
 
 ska() {
   npx skills add "$@" -y -a claude-code

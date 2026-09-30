@@ -1,6 +1,6 @@
 ---
 name: precise-minor-adjustment
-description: Load this skill when you are modifying existing code, or doing small patch and adjustment. Load this skill when you are reviewing an implementation or a diff, to judege whether this change is clear and consistent with other parts in codebase.
+description: Load this skill when you are modifying existing code, or doing small patch and adjustment. Load this skill when you are reviewing an implementation or a diff, to judge whether this change is clear and consistent with other parts in codebase.
 ---
 
 ## Consistent Change

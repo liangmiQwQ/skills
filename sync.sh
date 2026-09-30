@@ -20,6 +20,9 @@ ska zerob13/skills --skill test-doctor
 ska antfu/design
 sh void.sh
 
+# In `antfu/skills`, `antfu-create-pr` conflicts with our own `creating-pr` skill
+rm -rf .claude/skills/antfu-create-pr
+
 # ====== SKILLS ADDING AREA ENDED =======
 
 rm -rf skills/*

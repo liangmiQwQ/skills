@@ -24,6 +24,20 @@ I recommend you to clear it if you want to fork and custom your own skills.
 
 Please refer to the `SKILLS ADDING AREA` in [sync.sh](./sync.sh) to learn more.
 
+## Usage
+
+Run this command in shell to install all the skills:
+
+```bash
+skills add liangmiQwQ/skills -g -y --agent *
+```
+
+Or save as a short alias (warn: it would delete all your installed skills)
+
+```bash
+alias sk='skills remove --all -g -y && skills add liangmiQwQ/skills -g -y --agent "*"'
+```
+
 ## License
 
 [MIT](./LICENSE) © Liang Mi

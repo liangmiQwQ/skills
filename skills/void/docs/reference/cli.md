@@ -800,7 +800,7 @@ Setup drafts save Worker names, the login callback, and partial credentials encr
 
 Use an empty PostgreSQL database dedicated to the installation. You can correct a failed initial connection, but after the database is claimed or Hyperdrive is provisioned, commands reject a different URL.
 
-During interactive installation, choose whether Void creates Hyperdrive or uses one you manage separately. If the separately managed configuration is missing, Void shows the required name and setup instructions, then stops before provisioning. Once it exists, Void shows its database, host, port, runtime user, and cache setting for confirmation. Supply an owner PostgreSQL URL at the normal prompt for database claims and migrations. Void adopts the Hyperdrive after verifying its origin and disabled SQL result caching; its configuration stays under the external manager's control. Unattended installs can set `VOID_PLATFORM_HYPERDRIVE_ID`, `VOID_PLATFORM_HYPERDRIVE_ORIGIN_HOST`, and `VOID_PLATFORM_HYPERDRIVE_ORIGIN_USER` together.
+During interactive installation, choose whether Void creates Hyperdrive or uses an existing one. The installer lists the account's Hyperdrive configurations, suggests a matching generated name when present, and lets you select any configuration. Review its database, host, port, runtime user, and cache setting before confirming; its name need not match the installation name. If you need to create a separately managed configuration, Void shows setup instructions and stops before provisioning. Supply an owner PostgreSQL URL at the normal prompt for database claims and migrations. Void adopts the selected Hyperdrive after verifying its database origin and disabled SQL result caching; its configuration stays under the external manager's control. Unattended installs can set `VOID_PLATFORM_HYPERDRIVE_ID`, `VOID_PLATFORM_HYPERDRIVE_ORIGIN_HOST`, and `VOID_PLATFORM_HYPERDRIVE_ORIGIN_USER` together.
 
 Recovery secrets are encrypted with AES-256-GCM using a key in your system keychain. The encrypted data is tied to the installation identity. Without a keychain, supply a canonical base64-encoded 32-byte `VOID_PLATFORM_RECOVERY_KEY`; otherwise Void stops before saving secrets. CI can generate a temporary key when its original credentials remain in protected secrets.
 
@@ -879,6 +879,7 @@ See [Disable and Uninstall](../guide/platform/installation/uninstall.md) for the
 ```
 void deploy [--project <name>] [--dir <path>] [--spa] [--skip-build] [--debug]
 void deploy [--platform <cloudflare|void>] [--require-email]
+void deploy --platform cloudflare --atomic
 ```
 
 Auto-detects your project type and chooses the right pipeline. See [Supported App Types](../guide/app-types.md) and [Deployment](../guide/deployment.md) for details.
@@ -899,7 +900,10 @@ For Drizzle projects, deploy performs a read-only schema drift check. If a new m
 | `--spa`                         | Use SPA mode instead of SSG for static deploys                                                     |
 | `--skip-build`                  | Skip the build step; on Cloudflare this is supported for static/SPA/SSG deploys only               |
 | `--require-email`               | Fail when email cannot be set up instead of deploying without it; requires `--platform cloudflare` |
+| `--atomic`                      | Publish an existing Durable Object Worker directly; readiness is checked after traffic changes     |
 | `--debug`                       | Mirror the structured deploy log to stderr (also written to `~/.void/logs/`)                       |
+
+`--atomic` applies to one deployment. For an existing Durable Object Worker that consistently cannot stage, set `deploy: { cloudflare: { mode: 'atomic' } }` in `void.config.ts` so plain `void deploy` uses atomic publication. The default is `staged`.
 
 The older `--backend cloudflare` spelling remains available as a compatibility alias for `--platform cloudflare`.
 
@@ -986,11 +990,12 @@ If Cloudflare Access protects readiness URLs, supply an allowed `CF_ACCESS_CLIEN
 
 Secrets and migrations are validated after the build, so a failed check may leave provisioned resources. It doesn't apply remote D1 migrations or upload the application Worker. PostgreSQL migrations are transactional; MySQL schema changes may partially apply on error.
 
-Void records provisioned resource IDs in `void.lock.json`. Commit it for other machines and CI. Run the first deploy from one machine at a time; provisioning locks are local. The `--provision` flag is accepted but no longer needed.
+Void records provisioned resource IDs in `void.lock.json`. Commit it for other machines and CI. Run the first deploy from one machine at a time; provisioning locks are local.
 
 `.env` stays local. Store server keys declared in `env.ts` with `void secret put <NAME>`; Void rejects them as plaintext Worker vars. If the first deploy reports missing remote secrets, set them and retry. Custom D1 migration layouts must match the exact files, contents, and order Void validated. Direct deploy and Cloudflare commands use the top-level settings, not named environments or alternate config paths.
 
 Existing remote secrets are preserved. Void also preserves or creates `BETTER_AUTH_SECRET` for auth apps.
+If a failed upload leaves a newer inactive version, later deployments inherit secret bindings from the live version without requiring their plaintext values.
 
 **Email.** If the app uses `sendEmail()` or `email/` handlers, set `email.from` in `void.config.ts`. Void shows the Cloudflare account changes and asks before applying them. Later deploys skip the prompt once setup is ready. Without `email.from`, deploy continues without email. For CI, run `void email setup --platform cloudflare` locally and commit `void.lock.json`; pass `--require-email` to fail when email is unavailable. DNS propagation may delay a deploy after setup. See [Email on your own Cloudflare account](../guide/email.md#your-own-cloudflare-account) for setup and recovery.
 
@@ -1110,7 +1115,9 @@ void db export [--output <path>] [--no-data] [--no-schema] [--table <name>]
 
 Dump the local database as SQL. Outputs to stdout by default (pipeable), or to a file with `--output`.
 
-Data exports preserve SQLite AUTOINCREMENT and PostgreSQL SERIAL counters, including IDs consumed by deleted rows. PostgreSQL schema exports create serial sequences before their tables and restore ownership, constraints, and indexes afterward. `--no-schema` restores counter values into an existing schema; `--no-data` starts counters at their schema-defined starting values.
+Data exports preserve SQLite AUTOINCREMENT and PostgreSQL SERIAL and identity counters, including IDs consumed by deleted rows. SQLite schema exports include indexes, views, and triggers. PostgreSQL schema exports preserve column types, generated columns, identity definitions, serial sequences, constraints, and indexes. `--no-schema` restores counter values into an existing schema; `--no-data` starts counters at their schema-defined starting values.
+
+For PostgreSQL schemas with views, triggers, custom types, functions, or standalone sequences, use `pg_dump` for a complete backup. `void db export` reports these objects before writing a schema dump.
 
 | Flag              | Purpose                            |
 | ----------------- | ---------------------------------- |

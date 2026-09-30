@@ -19,28 +19,11 @@
       "skillPath": "skills/antfu-design/SKILL.md",
       "computedHash": "fb7e37d58f8bedd61353d42de6ada5a5adbb8bf86e6fdca8cb297913100740f1"
     },
-    "cc-design": {
-      "source": "ZeroZ-lab/cc-design",
-      "sourceType": "github",
-      "skillPath": "SKILL.md",
-      "computedHash": "db82a41db2c6da5879da7ab6322889527445762e01872982bc1f6cfaab0ef7a4"
-    },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/create-adaptable-composable/SKILL.md",
       "computedHash": "2f215126499d29a733be980ef9ce8f4ffb5f25a8831aec965d86c0cd21b2c5d2"
-    },
-    "deploy-to-vercel": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "03e0eaaa9bf13ba1e7ffa387f5893de6f324c0868c627001f179395a8feaa7c9"
-    },
-    "design": {
-      "source": "tw93/Waza",
-      "sourceType": "github",
-      "skillPath": "skills/design/SKILL.md",
-      "computedHash": "31be06bb5ef5c27ec5511ed5200efb1feb970c42f9820947860a7d3f204035c5"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
@@ -59,12 +42,6 @@
       "sourceType": "github",
       "skillPath": "skills/global-projects/SKILL.md",
       "computedHash": "83720214eac4fa85c9cd5afa6a16e7c807fc5d2ab70d1332dcf559d5c53e1a89"
-    },
-    "hunt": {
-      "source": "tw93/Waza",
-      "sourceType": "github",
-      "skillPath": "skills/hunt/SKILL.md",
-      "computedHash": "42031e6a62e06984d3c8eb2800f99f407d4b870e192296114501f8e680d08eeb"
     },
     "ielts-reading": {
       "source": "liangmiQwQ/language-learning",
@@ -120,24 +97,6 @@
       "skillPath": "skills/test-doctor/SKILL.md",
       "computedHash": "b0206973c6b0b5335431f750cd89fd62f7b542e4ccf65bc511ed34707e7299dc"
     },
-    "think": {
-      "source": "tw93/Waza",
-      "sourceType": "github",
-      "skillPath": "skills/think/SKILL.md",
-      "computedHash": "8a40cb2afa968ffaf93adfeefd548f5a1784d30a7e82261396ca3ac1d6f0573d"
-    },
-    "tsdown": {
-      "source": "antfu/skills",
-      "sourceType": "github",
-      "skillPath": "skills/tsdown/SKILL.md",
-      "computedHash": "2183b9019058744215ab8b1261e34833653b5864da159bc022e3b9ad2f706aa5"
-    },
-    "turborepo": {
-      "source": "antfu/skills",
-      "sourceType": "github",
-      "skillPath": "skills/turborepo/SKILL.md",
-      "computedHash": "fda851d916bbee5b78446b9a22510e7f38aefdfab57f93de6e0bccbb5b0b537a"
-    },
     "unocss": {
       "source": "antfu/skills",
       "sourceType": "github",
@@ -150,42 +109,17 @@
       "skillPath": "skills/use-vp-config/SKILL.md",
       "computedHash": "6bc1e22882b6137854556c962893d4ec5e74e05b0dc3725bb31a38be3b2c0eff"
     },
-    "vercel-cli-with-tokens": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "1e1664e75dcab248050faac99db1aaef1456b7945266215ccbab68ddf85b2b79"
-    },
-    "vercel-composition-patterns": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "575757e3e25761c8c562d6e395d29f0b76c98b1273c0bd72d88e6ab1bc9c7d42"
-    },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/react-best-practices/SKILL.md",
       "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
     },
-    "vercel-react-native-skills": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "41d24eafa7c3d82e270439808f7cfbc4d51aeb2d14f2809a2267c16275784d06"
-    },
-    "vercel-react-view-transitions": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
-      "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
-    },
     "vite": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vite/SKILL.md",
       "computedHash": "88ee465fd10f711efecc76e91e96accae2b229dda371614dcf219099c264a486"
-    },
-    "vite-plus": {
-      "source": "vite-plus",
-      "sourceType": "node_modules",
-      "computedHash": "9170dcbd33ba1377079b55d0d2cd23cc6ef600697d6d0c0f031847ac7f5ef2f4"
     },
     "vitepress": {
       "source": "antfu/skills",
@@ -246,12 +180,6 @@
       "sourceType": "github",
       "skillPath": "skills/vue-testing-best-practices/SKILL.md",
       "computedHash": "58d365899f54be9e5fa2c2e455093f9567620600578ae92aaa2f31d9b19a59ad"
-    },
-    "vueuse-functions": {
-      "source": "antfu/skills",
-      "sourceType": "github",
-      "skillPath": "skills/vueuse-functions/SKILL.md",
-      "computedHash": "5f32cd5f744671178284887c9ffc27a080e0e3316c0f7c3b22f4459c760daf49"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",

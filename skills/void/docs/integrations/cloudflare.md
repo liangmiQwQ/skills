@@ -308,10 +308,13 @@ Custom D1 layouts are supported through `migrations_dir`, `migrations_table`, an
 Root `.env` is local-only and is never emitted into Worker vars. Every non-client key declared in `env.ts` is a server value: store it with `void secret put <NAME>`. Void emits required server names through `secrets.required`, rejects plaintext Worker vars with those names, and preserves existing remote secrets.
 
 For apps using auth, Void creates a random 32-byte `BETTER_AUTH_SECRET` only when the remote secret is missing. It reuses that value on later deploys. Both auth secrets and schema-marked secrets can be set up on a new Worker's draft before its first upload.
+If an earlier deployment leaves a newer inactive upload, Void pins later uploads to the active version's secret bindings. You do not need to recover the plaintext values from Cloudflare.
 
 ### Readiness and rollback
 
 Void usually checks an uploaded version before sending it traffic. When Cloudflare provides a version preview URL, Void probes that URL. Otherwise, it stages the version at 0% traffic and checks it through `workers.dev` using Cloudflare's version-override header.
+
+For an existing Durable Object Worker that Cloudflare cannot stage, review the Worker and database changes, then run `void deploy --platform cloudflare --atomic`. To use that mode on every deploy, set `deploy: { cloudflare: { mode: 'atomic' } }` in `void.config.ts`. Void will then publish directly, without first attempting staging, and check `/__void/ready` afterward. Production traffic can reach the new version before that check finishes, and a Durable Object class migration cannot be rolled back across its migration boundary. The default `staged` mode continues to check readiness before traffic. A failed staged upload is recorded locally in `.void/cloudflare-candidate.json`; keep that file for a safe retry from the same checkout.
 
 If readiness or trigger synchronization fails, Void restores the previous deployment. If you already have a gradual rollout splitting traffic across versions, finish or cancel it in Cloudflare before deploying through Void.
 

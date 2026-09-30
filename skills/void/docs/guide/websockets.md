@@ -10,7 +10,7 @@ Typed WebSocket routes currently work in native Void apps. They aren't available
 
 Create a `.ws.ts` route to add a typed WebSocket endpoint. Void runs each route instance in a Cloudflare Durable Object, which coordinates the clients connected to it. These routes require the Cloudflare target; Node.js, Bun, and Deno builds reject them.
 
-New route classes use SQLite-backed Durable Objects on both deployment platforms. Void preserves legacy key-value-backed migration history for existing hosted projects and never reclassifies an already-created class.
+New WebSocket route classes use SQLite-backed Durable Objects on both deployment platforms.
 
 For example, a chat route at `/rooms/[id]` gives each room its own instance. Use it for chat, presence, collaborative documents, or notifications.
 

@@ -138,7 +138,7 @@ For the default GitHub-only setup:
 3. Set the **Redirect URI** (also called **Authorization callback URL**) to the exact printed URL ending in `/auth/callback`, then register the application. This URL is now pinned in your saved draft and remains the same if credential setup is interrupted.
 4. Save the **Client ID**, generate a **Client Secret**, and save that too. GitHub's [registration guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) describes the form.
 
-This OAuth App handles sign-in. A GitHub App with repository access and build webhooks is not required for the core platform.
+This OAuth App handles sign-in.
 
 For the default GitHub-only setup, the prompts collect the runtime token, administrator GitHub username, PostgreSQL URL, GitHub client ID and secret, R2 credentials, and signing/encryption keys. Other login methods collect their configured provider credentials and use the one-time administrator setup code described above. Secret values are masked and setup progress is encrypted locally using the system keychain. Keep a password-manager copy for recovery on another machine.
 

@@ -129,7 +129,7 @@ export default Counter;
 
 These state migrations are separate from Cloudflare's Durable Object class migration. Void generates the latter with `new_sqlite_classes` when it discovers the file.
 
-Do not delete or reorder generated Durable Object migrations in `void.lock.json` after deployment. Native Cloudflare beta deploys can create these classes with the Worker's first deployment, but do not yet apply a later class migration to an existing Worker. Additions, renames, and removals require an explicit supported Cloudflare deployment workflow; after its migration tag is active, `void deploy --platform cloudflare` can resume ordinary version uploads.
+Do not delete or reorder generated Durable Object migrations in `void.lock.json` after deployment. For a class addition, rename, or removal on an existing Worker, review the migration and run `void deploy --platform cloudflare --atomic`. If this Worker needs atomic publication on every deploy, set `deploy: { cloudflare: { mode: 'atomic' } }` in `void.config.ts`. Cloudflare applies class lifecycle changes in one deployment. The Worker receives traffic before Void checks readiness, and you cannot roll back across that migration boundary. Staged deploys keep pre-traffic readiness verification.
 
 ## Deployment support
 

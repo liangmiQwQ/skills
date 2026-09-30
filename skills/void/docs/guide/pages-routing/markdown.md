@@ -265,7 +265,7 @@ The array is sorted by path and updates on HMR in dev when `.md` files are added
 
 ## Default CSS Theme
 
-The markdown plugin provides a minimal default theme. Unlike Vitepress, this theme is CSS only - it is designed to be built on top of. The theme ships two entry points depending on your needs:
+The markdown plugin provides a minimal CSS theme with two entry points:
 
 ### Full theme (reset + baseline + content)
 

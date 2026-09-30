@@ -1,6 +1,6 @@
 # Environment migration
 
-The environment model now uses `.env` for local development only and remote secrets for every server-side production value. There are no compatibility shims for the previous four-file behavior.
+Use `.env` for local development and remote secrets for server-side production values.
 
 ## 1. Preserve production values and consolidate local development values
 

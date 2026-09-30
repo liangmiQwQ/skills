@@ -29,10 +29,9 @@ routes/
 
 Excluded routes aren't included in the Worker bundle, generated types, or route and WebSocket configuration.
 
-Two things do not follow the suffix:
+`void prepare` is the exception: it boots no Vite, so it has no environment to read. It generates types for routes in both environments.
 
-- `void prepare` boots no Vite, so it has no environment to read. It generates types for every route in both environments.
-- [Binding inference](../reference/resource-inference.md) scans your source for imports and does not read the suffix. A `void/storage` import inside `api/debug.dev.ts` still adds an R2 binding to your production config, and `void deploy` still provisions the bucket. Set the binding explicitly with [`inference.bindings`](../reference/config.md#inference-bindings) if you do not want it.
+[Binding inference](../reference/resource-inference.md) follows the suffix for files in `routes/`. For example, a `void/storage` import used only in `api/debug.dev.ts` adds a development R2 binding, but does not provision a production bucket. Imports in other source directories remain available in both environments.
 
 The suffix applies to files in `routes/` only. It has no effect in `pages/`, `middleware/`, `crons/`, or `queues/`.
 

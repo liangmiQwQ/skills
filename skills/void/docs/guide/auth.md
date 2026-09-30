@@ -218,11 +218,11 @@ When auth is active, Void configures Better Auth with these conventions:
 - D1/SQLite uses the app `DB` binding
 - PostgreSQL apps (`"database": "pg"`) use the app `HYPERDRIVE` binding
 
-Auth sessions live in the same database system as the rest of the app. `AUTH_KV` is no longer used.
+Auth sessions live in the same database system as the rest of the app.
 
 On both deployment targets, Void keeps an existing `BETTER_AUTH_SECRET` or generates one when it's missing. The value is stored as an encrypted Worker secret and reused by later versions.
 
-Localhost development uses a built-in fallback secret automatically. Production deployment through Void manages the secret lifecycle for you.
+The Vite development server uses a built-in fallback secret automatically. A local preview of a production build needs `BETTER_AUTH_SECRET`; production deployment through Void manages the secret lifecycle for you.
 
 ## Customization
 

@@ -15,9 +15,7 @@ For most apps, [Pages Routing](./pages-routing/overview) handles SSR automatical
 Custom SSR is separate from Pages Routing. Use Custom SSR when you want to bring
 your own root component, router, data loading, HTML shell, and hydration logic.
 
-The `App` component in the examples below is not a Void convention and it is not
-the same thing as `pages/layout.tsx`. It is just the root component for your
-custom-rendered application:
+The `App` component below is the root of this custom-rendered application:
 
 ```tsx
 // src/App.tsx
@@ -26,11 +24,8 @@ export default function App({ url }: { url: string }) {
 }
 ```
 
-If you are using `pages/` with `@void/react`, `@void/vue`, `@void/svelte`, or
-`@void/solid`, do not create `src/main.ssr.*`, `src/main.client.*`, or
-`src/App.*` for Pages mode. The adapter generates the SSR and hydration entries
-and automatically composes your `pages/layout.*`, route components, loaders, and
-actions.
+Pages Routing adapters generate their own SSR and hydration entries and compose
+`pages/layout.*`, route components, loaders, and actions.
 
 ## Required entries
 
@@ -105,8 +100,7 @@ hydrateRoot(document.getElementById('root')!, <App url={window.location.pathname
 
 ## Client Asset Injection
 
-Void no longer mutates your rendered HTML automatically.
-You decide whether and where to inject client asset tags.
+Place the client asset tags in the HTML returned by your `render()` function.
 
 The `assetTags` values are computed by Void:
 

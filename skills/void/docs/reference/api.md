@@ -1193,7 +1193,7 @@ See [Markdown Pages](../guide/pages-routing/markdown.md) for setup and framework
 
 ## User-Facing Imports
 
-This table lists app-facing imports. Exported implementation subpaths such as `void/pages*`, `void/runtime/*`, and `void/remote*` are used by adapters, generated entries, or internal runtime wiring and are not documented as application APIs.
+Import Void's app-facing APIs from these paths:
 
 | Import path               | Contents                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

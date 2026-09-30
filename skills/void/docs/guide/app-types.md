@@ -104,7 +104,7 @@ export default defineConfig({
 
 `vitepress build` emits the site, then `vite build` copies `publicDir` into `dist/client` and emits the worker into `dist/ssr`. Keep `voidPlugin()` in the **root** `vite.config.ts` only — not in the generator's own config (e.g. `.vitepress/config.ts`).
 
-Because the worker now owns unmatched requests, add [`routing.notFound`](../reference/config.md#routing-notfound) if you want the generator's `404.html` instead of the SPA-style `index.html` fallback:
+The Worker handles unmatched requests. Set [`routing.notFound`](../reference/config.md#routing-notfound) to serve the generator's `404.html` for those requests:
 
 ```json
 { "routing": { "notFound": "404-page" } }

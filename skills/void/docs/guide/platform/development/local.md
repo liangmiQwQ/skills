@@ -16,7 +16,7 @@ vpr install:void-dev
 void-dev --help
 ```
 
-Use the Node.js version recorded in `.node-version`. The workspace uses public npm packages; a GitHub Packages token is not required.
+Use the Node.js version recorded in `.node-version`.
 
 `install:void-dev` builds the CLI, shared packages, and platform runtime, then makes this checkout's built CLI globally available as `void-dev`. Public packages export their built files, so run `vp run build:core` after later source changes to refresh the alias. The installer refuses to replace an unrelated global command. Remove only this checkout's alias with `vpr uninstall:void-dev`. The commands on these development pages run from the repository root.
 

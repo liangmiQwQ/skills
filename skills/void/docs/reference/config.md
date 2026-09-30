@@ -316,6 +316,17 @@ Void writes a generated Cloudflare config for its tooling and records provisione
 
 If you need to remove a value that Void previously generated, remove it from the `resolved` object in `void.lock.json`. Void refreshes the generated Cloudflare file on the next command. Put ongoing custom settings in `cloudflare` in `void.config.ts`.
 
+### `deploy.cloudflare.mode`
+
+Direct Cloudflare deploys use `staged` by default: Void checks the new Worker before sending it production traffic. If Cloudflare cannot stage an existing Durable Object Worker, choose `atomic` after reviewing the pending Worker and database changes:
+
+```ts
+// Inside defineConfig({ ... })
+deploy: { cloudflare: { mode: 'atomic' } },
+```
+
+This choice applies to subsequent `void deploy` runs. Atomic deployment sends traffic to the new Worker before Void checks readiness; a Durable Object class migration cannot be rolled back across its migration boundary. Use `--atomic` for a single deployment instead. `deploy` is a Void setting and is not passed to Cloudflare's Worker config.
+
 `worker.limits.cpu_ms` sets the CPU time limit per request, from 1 to 300000 ms. On a Void platform, deploy fails if the limit exceeds the account plan; lower it in `void.config.ts` before retrying. Rollback instead caps the old limit at the current plan ceiling. On direct deploys, [Cloudflare enforces the value](https://developers.cloudflare.com/workers/platform/limits/#cpu-time): Workers Free allows up to 10 ms and Workers Paid up to 300000 ms per request.
 
 ```json

@@ -31,7 +31,7 @@ This runs once before plugins initialize, so the results are available to config
 
 Auth detection also triggers when importing the `auth` specifier from `void/client` or a framework-specific client subpath such as `void/client/react` (but not when importing only `fetch`).
 
-Durable state uses a filesystem convention rather than the import scanner. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and adds a `new_sqlite_classes` migration. See [Durable State](../guide/durable-state.md).
+Durable state is inferred from files in `durable-objects/`. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and adds a `new_sqlite_classes` migration. See [Durable State](../guide/durable-state.md).
 
 ## Scanned Directories
 

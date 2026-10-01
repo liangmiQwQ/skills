@@ -17,7 +17,7 @@
       "source": "antfu/design",
       "sourceType": "github",
       "skillPath": "skills/antfu-design/SKILL.md",
-      "computedHash": "fb7e37d58f8bedd61353d42de6ada5a5adbb8bf86e6fdca8cb297913100740f1"
+      "computedHash": "597125f7a45ba7328cd877a68b525611862bd230cf542ab3c343ace8fde3f30a"
     },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",

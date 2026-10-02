@@ -360,7 +360,7 @@ ISR uses the shared cache protocol. Entries are scoped to a deployment and hostn
 
 With Cloudflare selected, `void secret`, `void domain`, `void project status|list|logs|rollback`, and remote `void db` commands use the saved Worker and account. Database commands operate on the selected D1 database. Logs are a live tail; Void doesn't provide hosted log history for direct deploys.
 
-Custom domain changes update routes immediately without rewriting schedules, queues, or workflows. Removing the final custom domain requires `CLOUDFLARE_API_TOKEN` with Workers Scripts: Edit because that operation uses Cloudflare's domain-record API.
+Custom domain changes update routes immediately without rewriting schedules, queues, or workflows. Removing the final custom domain uses your browser session from `void cloudflare login` or an API token with Workers Scripts: Edit permission.
 
 `void project delete` doesn't remove direct Cloudflare resources, which may be shared. Review their use and remove them explicitly in Cloudflare.
 

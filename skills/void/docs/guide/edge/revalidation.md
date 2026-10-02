@@ -105,7 +105,7 @@ revalidation, Void removes its HTML, Pages JSON, and KV cache entries.
 
 ## Cache bypass
 
-Requests with `Cookie` or `Authorization` headers bypass the ISR cache entirely and always dispatch to the worker. This ensures personalized or authenticated pages are never served from a shared cache.
+Requests with `Cookie`, `Authorization`, or Cloudflare Access's `Cf-Access-Jwt-Assertion` header bypass the ISR cache entirely and always dispatch to the worker. Authenticated responses are not shared between users, including when Access authentication supplies no cookie.
 
 ## Cache keys and rewrites
 

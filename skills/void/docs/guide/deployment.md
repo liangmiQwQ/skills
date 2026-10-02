@@ -150,7 +150,7 @@ void github join
 void github connect --executor container
 ```
 
-Organization installations always require a browser proof for the specific repository, including for the person who installed the App. Void does not reveal the installation's full private repository list. If an upgraded platform marks an older organization connection as requiring reconnection, run the same `void github connect` command again to renew that repository-scoped authorization before builds resume.
+Organization installations always require a browser proof for the specific repository, including for the person who installed the App. Void does not reveal the installation's full private repository list.
 
 4. Verify the connection
 

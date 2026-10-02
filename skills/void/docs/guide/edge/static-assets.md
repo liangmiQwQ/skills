@@ -51,6 +51,7 @@ Cached at the edge until the next deploy. Browsers always revalidate on the next
 - `/api/*` routes, which always hit the worker
 - SSR-rendered pages (paths without file extensions in SSR projects)
 - Non-GET requests
+- Requests carrying `Cookie`, `Authorization`, or `Cf-Access-Jwt-Assertion` credentials
 - Responses other than a complete `200`
 
 ### Opting out

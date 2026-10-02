@@ -80,3 +80,7 @@ Void shows the proposed access change and asks you to confirm it. Once approved,
 To see who can join, run `void platform signup show`. You can also allow an email address or a domain such as `*@example.com`. For an OIDC user without verified email, use `void platform signup allow identity <connection-id> <subject>`; the subject match is exact and the provider's domain or group restrictions still apply. Remove that grant with `void platform signup disallow identity <connection-id> <subject>`. `void platform signup open` permits public signup; `void platform signup restrict` requires an allowlist match again.
 
 Your administrator session lasts for one hour. Use it to inspect users, projects, logs, and platform health. The [Platform Administration guide](/guide/platform-administration) walks through those workflows, previews, and automation. You can also open `<API origin>/admin/login` to use the browser admin UI.
+
+### Protect Project Hostnames with Zero Trust
+
+After installation, an administrator can require Cloudflare Access on new project hostnames while allowing each project owner or project administrator to opt out. This is independent of Access login and protection for the platform API itself, and it needs its own Cloudflare API token. See [Project Zero Trust](/guide/platform/administration/zero-trust) for the requirements, setup command, and recovery.

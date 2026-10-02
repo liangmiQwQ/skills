@@ -229,31 +229,31 @@ VOID_REMOTE=1 pnpm dev
 
 ### `sandbox`
 
-Enable and configure Cloudflare Sandboxes for Void apps. Importing from `void/sandbox` enables this automatically; set `sandbox` when you need custom container settings.
+Enable and configure Cloudflare Sandboxes. Importing from `void/sandbox` enables this automatically.
 
 ```json
 {
   "sandbox": {
     "image": "./Dockerfile.sandbox",
-    "platformImage": "registry.example.com/acme/sandbox:latest",
-    "instanceType": "lite",
-    "maxInstances": 2
+    "platformImage": "registry.cloudflare.com/<account-id>/sandbox@sha256:<digest>",
+    "instanceType": "standard-1"
   }
 }
 ```
 
-| Field               | Type     | Default                              |
-| ------------------- | -------- | ------------------------------------ |
-| `binding`           | `string` | `SANDBOX`                            |
-| `className`         | `string` | `Sandbox`                            |
-| `containerName`     | `string` | `void-sandbox`                       |
-| `image`             | `string` | Matching published sandbox SDK image |
-| `imageBuildContext` | `string` | Directory of `image`                 |
-| `platformImage`     | `string` | Matching sandbox SDK registry image  |
-| `instanceType`      | `string` | `lite` on Void deploy                |
-| `maxInstances`      | `number` | `20` on Void deploy                  |
+| Field               | Type     | Default                     |
+| ------------------- | -------- | --------------------------- |
+| `binding`           | `string` | `SANDBOX`                   |
+| `className`         | `string` | `SandboxV1`                 |
+| `containerName`     | `string` | `void-sandbox-v1`           |
+| `image`             | `string` | Packaged Node.js Dockerfile |
+| `imageBuildContext` | `string` | Directory of `image`        |
+| `platformImage`     | `string` | `cloudflare/debian-trixie`  |
+| `instanceType`      | `string` | `lite`                      |
 
-Sandbox is available to Void apps on the Cloudflare target and requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Void checks access before provisioning or building. For a managed platform, its runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit. Apps without Sandbox use neither Containers nor an entitlement check. The default image matches the installed `@cloudflare/sandbox` version. If `sandbox.image` points to a local Dockerfile, set `sandbox.platformImage` to the pushed image for the platform.
+Supported sizes are `lite` and `standard-1` through `standard-4`. Native deploys build Dockerfiles with Docker; registry images must be digest-pinned references from the Cloudflare managed registry. Custom images must include the matching Sandbox SDK helper. For a local Dockerfile, supply `platformImage` when deploying to a managed platform. See [Sandboxes](../guide/sandboxes.md) for image setup and runtime examples.
+
+Sandbox requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access, checked before provisioning or building. Managed runtime tokens need Account / Containers: Edit and Account / Cloudchamber: Edit. Apps without Sandbox use neither Containers nor an entitlement check.
 
 ### `target`
 

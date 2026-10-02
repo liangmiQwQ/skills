@@ -51,7 +51,7 @@ The command disables the optional build containers, so basic API and admin work
 does not require Docker. To develop managed builds, install Docker and run the
 API with containers enabled.
 
-Open `http://localhost:8787/admin/`. Setup writes local development values to the API and dashboard `.dev.vars` files, including the development authentication bypass and local database connection. Those files are ignored by Git. Production installations get separate credentials through the installer.
+Open `http://localhost:8787/admin/`. Setup writes the API's local database connection and development authentication bypass to `platform/packages/api/.dev.vars`. It configures `platform/packages/dashboard/.env` for the separate dashboard. Both files are ignored by Git. Production installations get separate credentials through the installer.
 
 The API's development bypass lets you work on the browser admin UI without setting up OAuth. Operator CLI sessions still require administrator authentication; they do not use the browser bypass.
 
@@ -63,7 +63,7 @@ The dashboard is a separate source app. After API setup, start it in another ter
 vp run --filter @voidcloud/dashboard dev
 ```
 
-Its local `.dev.vars` should point to the API you started:
+Setup points the dashboard's local `.env` at the API you started:
 
 ```dotenv
 API_URL=http://localhost:8787

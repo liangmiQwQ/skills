@@ -10,12 +10,15 @@ const items = [
   { name: "db/", description: "Drizzle schema and SQL migrations", link: "#db" },
   { name: "crons/", description: "Scheduled cron jobs", link: "#crons" },
   { name: "queues/", description: "Async queue consumers", link: "#queues" },
+  { name: "email/", description: "Inbound email handlers", link: "#email" },
+  { name: "durable-objects/", description: "Durable State modules", link: "#durable-objects" },
   { name: "src/", description: "Shared app code", link: "#src" },
   { name: "public/", description: "Static assets (served as-is)", link: "#public" },
   { name: ".void/", description: "Auto-generated (gitignored)", link: "#void" },
   { name: "vite.config.ts", description: "Vite config with voidPlugin()", link: "#config-files" },
   { name: "void.config.ts", description: "Void project config (optional)", link: "#config-files" },
-  { name: ".env", description: "Environment variables", link: "#config-files" },
+  { name: ".env", description: "Local environment values", link: "#config-files" },
+  { name: "env.ts", description: "Environment schema", link: "#config-files" },
   { name: "package.json" },
   { name: "tsconfig.json" },
 ];
@@ -47,18 +50,6 @@ const dbItems = [
   },
 ];
 
-const voidItems = [
-  {
-    name: ".void/",
-    children: [
-      { name: "db.d.ts", description: "Drizzle DB instance types" },
-      { name: "routes.d.ts", description: "Typed fetch client types" },
-      { name: "queues.d.ts", description: "Queue consumer types" },
-      { name: "tsconfig.json", description: "TypeScript config fragment" },
-      { name: "v3/", description: "Local dev state (D1, KV, R2)" },
-    ],
-  },
-];
 </script>
 
 # Project Structure
@@ -102,11 +93,11 @@ Global middleware that runs on every request. Numeric prefixes control execution
 
 <FileTree :items="middlewareItems" default-expanded />
 
-Each file exports a `defineMiddleware()` handler. Use middleware to set shared context (auth, logging, rate limiting) available to all routes.
+Each file default-exports a `defineMiddleware()` handler. Use middleware to set shared context (auth, logging, rate limiting) available to all routes.
 
 ## `db/`
 
-[Drizzle schema](/guide/database#schema-definition) and SQL migration files for the [D1 database](/guide/database).
+[Drizzle schemas](/guide/database#schema-definition) and SQL migrations for D1, PostgreSQL, or MySQL.
 
 <FileTree :items="dbItems" default-expanded />
 
@@ -118,33 +109,19 @@ Generate schema with `void gen model` or write it by hand. Generate migrations w
 
 ## `crons/`
 
-[Scheduled jobs](/guide/jobs) that run on a cron schedule.
-
-```ts
-// crons/heartbeat.ts
-import { defineScheduled } from 'void';
-
-export const cron = '*/5 * * * *';
-
-export default defineScheduled(async (controller, env) => {
-  // runs every 5 minutes
-});
-```
+[Scheduled jobs](/guide/jobs). Each file exports a `cron` expression and a default `defineScheduled()` handler.
 
 ## `queues/`
 
-[Async queue consumers](/guide/queues) for background job processing.
+[Queue consumers](/guide/queues). Each file default-exports a `defineQueue()` handler.
 
-```ts
-// queues/email.ts
-import { defineQueue } from 'void';
+## `email/`
 
-export default defineQueue(async (batch, env) => {
-  for (const msg of batch.messages) {
-    // process message
-  }
-});
-```
+[Inbound email handlers](../guide/email/receiving.md#inbound). A file's name selects the recipient; `_default.ts` handles other addresses.
+
+## `durable-objects/`
+
+[Durable State](/guide/durable-state) modules. Each file default-exports a `defineDurableState()` definition.
 
 ## `src/`
 
@@ -156,11 +133,7 @@ Static assets served as-is at the root path. Files here are not processed by Vit
 
 ## `.void/`
 
-Auto-generated directory (gitignored). Contains:
-
-Generate or refresh it with `void prepare`, or let `vite dev` / `vite build` populate it during normal app workflows.
-
-<FileTree :items="voidItems" default-expanded />
+Generated types and local development state (gitignored). Run `void prepare` to create the types, or let `vite dev` and `vite build` update them.
 
 ## Config Files
 

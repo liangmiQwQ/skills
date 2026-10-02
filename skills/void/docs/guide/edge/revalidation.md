@@ -74,13 +74,9 @@ When multiple sources set a revalidate TTL, the most specific wins:
 
 ## How revalidation works
 
-1. **First request:** there is no cache entry yet. The worker renders the page, returns the response, and writes the result to KV in the background.
+The first request renders and caches the page. While the cached page is fresh, visitors receive it immediately. Once it becomes stale, Void serves it while rendering an updated version in the background.
 
-2. **Subsequent requests (fresh):** the cached response is served from the edge cache or KV. No worker call is needed.
-
-3. **Subsequent requests (stale):** the stale cached response is served immediately, and the worker re-renders in the background. The next request gets the fresh version.
-
-While a stale entry is available, visitors can receive it without waiting for the refresh. A request without a cached entry still needs to render the page.
+A request without a cached entry waits for the page to render.
 
 ## Per-response TTL override
 
@@ -100,8 +96,9 @@ export const GET = defineHandler(async (c) => {
 
 Only complete `200` responses are cached. A response with `Cache-Control: private`,
 `no-store`, or `no-cache`, or any `Set-Cookie` header, stays private to that request.
-If a previously public page starts returning one of those headers during background
-revalidation, Void removes its HTML, Pages JSON, and KV cache entries.
+If a public page starts returning one of those headers, Void removes its cached response.
+
+Responses that vary by request headers, such as `Vary: Accept-Language` or `Vary: Origin`, are rendered live. `Vary: *` also disables shared caching. Void's `X-VoidPages` header is supported because HTML and Pages JSON have separate cached responses.
 
 ## Cache bypass
 
@@ -114,16 +111,6 @@ For a dispatch rewrite, the cache key includes both the destination and original
 Query parameters are excluded by default. Add `routing.revalidateQueryAllowlist` when specific parameters should produce separate cached responses. Middleware `c.rewrite()` runs after the ISR lookup, so it doesn't create an additional cache variant.
 
 Purge the destination pathname with `revalidate({ paths })`. Purging `/en/docs/foo` clears both direct and rewritten variants. Purging only `/docs/foo` won't clear them, because the entries are stored under the destination.
-
-::: details Upgrading from the older ISR cache format
-
-The current format uses a `v3` host-scoped prefix and a cache-policy version in its
-metadata. Entries written before the current response-privacy policy are treated as
-cold misses and refill only from responses that are safe to share.
-
-Adding a rewrite also changes the affected page's cache key, so that page starts with a cold cache again.
-
-:::
 
 ## On-demand revalidation
 

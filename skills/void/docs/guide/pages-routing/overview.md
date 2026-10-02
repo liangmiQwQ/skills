@@ -86,9 +86,7 @@ export default defineConfig({
 
 :::
 
-The adapter generates the server entry, client entry, and hydration code.
-
-Each adapter plugin includes the framework's Vite plugin (`@vitejs/plugin-react`, `@vitejs/plugin-vue`, `@sveltejs/vite-plugin-svelte`, `vite-plugin-solid`) so you don't need to install or configure it separately. Pass framework plugin options via `voidReact({ react: { ... } })`, `voidVue({ vue: { ... } })`, `voidSvelte({ svelte: { ... } })`, or `voidSolid({ solid: { ... } })` if needed.
+Each adapter includes its framework's Vite plugin. Pass framework plugin options via `voidReact({ react: { ... } })`, `voidVue({ vue: { ... } })`, `voidSvelte({ svelte: { ... } })`, or `voidSolid({ solid: { ... } })` if needed.
 
 ## Directory Structure
 
@@ -106,15 +104,7 @@ File-based routing rules are the same as [server routing](../server-routing.md):
 
 ## How Navigation Works
 
-The first page load and later navigations use the same server loaders:
-
-| Request               | Response                                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Initial page load     | Full SSR HTML. Client hydrates automatically. Routes with `ssr = false` return a client-mounted shell instead. |
-| Subsequent navigation | JSON with component name + props. Client component swap or re-render.                                          |
-| Form submission       | Runs action, then returns fresh props or a redirect.                                                           |
-
-The first request receives rendered HTML. Later navigations load page data and update the UI without reloading the whole document.
+The first request receives rendered HTML. Later navigations run the loader and update the page without reloading the document. Form submissions run an action, then refresh page props or redirect.
 
 To opt a specific route out of server-rendered component HTML, export `ssr = false` from its companion `.server.ts` file:
 
@@ -182,7 +172,7 @@ import { Link } from "@void/solid";
 
 :::
 
-The `Link` components also support query data, history replacement, document navigation, and cancellable client-side navigation:
+`Link` also supports query data, history replacement, full-page navigation, and cancellation:
 
 ```tsx
 <Link href="/users" data={{ page: 2, tag: ['active', 'new'] }}>
@@ -209,7 +199,7 @@ The `Link` components also support query data, history replacement, document nav
 </Link>
 ```
 
-`prefetch` and `reloadDocument` are GET-only. Passing either prop to a mutation link throws. GET `data` is merged into the rendered `href` query string; arrays become repeated keys, `null` and `undefined` are omitted, and nested objects throw.
+`prefetch` and `reloadDocument` work only with GET links. GET `data` becomes query parameters; use scalar values or arrays.
 
 For programmatic navigation, use `useRouter()`:
 
@@ -235,13 +225,13 @@ export default function PostPage() {
 
 ## Scroll Restoration
 
-The Void Router automatically saves and restores scroll position during client-side navigation:
+Client-side navigation manages scroll position automatically:
 
 - **Back/forward navigation** restores the exact scroll position you were at before navigating away.
-- **Forward navigation** scrolls to the top of the page.
+- **New navigation** scrolls to the top of the page.
 - **Hash links** (`/docs#api`) scroll to the target element. Same-page hash links (`#section`) skip the server fetch entirely.
 
-This works out of the box with no configuration. If you need to opt out for a specific navigation, pass `preserveScroll: true`:
+To keep the current scroll position, pass `preserveScroll: true`:
 
 ```ts
 router.visit('/users', { preserveScroll: true });

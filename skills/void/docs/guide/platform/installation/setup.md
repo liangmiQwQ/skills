@@ -29,7 +29,7 @@ void platform install
 
 :::
 
-After `--plan`, run the install command printed at the end of the preview. Void recalculates the plan and asks you to confirm it; choose the same login methods again if you selected them interactively. Void then saves a local setup draft and opens the runtime-token page when that token is missing. Paste the token into the masked prompt. As you continue, it opens GitHub and R2 at their respective steps. Each page has a short checklist and a clickable fallback link in the terminal. Values already supplied through the environment or saved setup are reused without opening their pages again.
+After reviewing `--plan`, run the command printed under **Next step: run this command to install**. It carries your choices into installation. Confirm the plan, then follow the credential prompts. Void opens the relevant setup pages and provides fallback links in the terminal. It reuses values you have already supplied.
 
 ## Choose login methods
 
@@ -131,7 +131,9 @@ ID, and secret, without a `cloudflareAccess` block or Cloudflare management toke
 Follow Cloudflare's [OIDC application guide](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/saas-apps/generic-oidc-saas/)
 and register the exact callback printed by Void.
 
-For the default GitHub-only setup:
+### GitHub
+
+For GitHub login:
 
 1. The installer opens [GitHub's new OAuth App form](https://github.com/settings/applications/new) when it needs OAuth credentials. Sign in as the account that will own the login integration.
 2. Set **Application name** to your platform's display name and **Homepage URL** to the API URL Void just printed.
@@ -140,9 +142,11 @@ For the default GitHub-only setup:
 
 This OAuth App handles sign-in.
 
-For the default GitHub-only setup, the prompts collect the runtime token, administrator GitHub username, PostgreSQL URL, GitHub client ID and secret, R2 credentials, and signing/encryption keys. Other login methods collect their configured provider credentials and use the one-time administrator setup code described above. Secret values are masked and setup progress is encrypted locally using the system keychain. Keep a password-manager copy for recovery on another machine.
+## Finish installation
 
-Void shows installation progress while it prepares the database, provisions Cloudflare resources, deploys the services, and verifies platform health. Progress is checkpointed for recovery. When installation finishes, follow the printed administrator sign-in instructions and open the admin dashboard link. GitHub-only setup creates the first admin user when the selected GitHub account signs in; configurable setup uses the one-time `/setup` code and selected administrator login method. No app or CLI login is required. Void also prints the API URL to use when you [connect and deploy an app](/guide/platform/installation/first-deployment).
+The installer collects your runtime token, PostgreSQL URL, login-provider credentials, R2 credentials, and signing and encryption keys. It masks secret values and saves setup progress encrypted through your system keychain. Keep a password-manager copy for recovery on another machine.
+
+Once installation finishes, open the printed admin dashboard link. For GitHub-only setup, sign in as the administrator selected during installation. For configurable login, use the one-time `/setup` code to confirm the administrator’s identity. Use the printed API URL to [connect and deploy an app](/guide/platform/installation/first-deployment).
 
 Remove the management token from the shell when finished:
 
@@ -162,7 +166,7 @@ void platform install --resume --name <installation-id>
 
 Keep the management token available for any remaining DNS changes. When using a source build, also pass the same `--runtime` directory. Resume uses the saved checkpoint and original secrets; do not start a second installation or generate replacement keys. If setup failed before a checkpoint was saved, rerun the original command.
 
-If setup stops or fails, rerun `void platform install`. It lists unfinished installations, including those that reached provisioning, and offers **Continue setup** or **Start a new platform install**. Entering an existing unfinished name also asks whether to resume it; declining lets you enter another name. Continuing restores your saved answers and checkpoints. Starting new does not reuse or delete previous credentials or resources. `--resume --name <id>` continues directly and is required for non-interactive recovery. Read-only `--plan` runs do not save drafts. Completed platforms are managed with `platform status`, `repair`, or `upgrade`, not reinstalled.
+You can also rerun `void platform install` and choose **Continue setup** for an unfinished installation. For non-interactive recovery, use `--resume --name <id>`. Manage completed platforms with `platform status`, `repair`, or `upgrade`.
 
 If Cloudflare rejects a saved runtime token during continued credential setup, Void opens the token page and asks for a replacement in the same run. Network or service failures do not discard saved tokens. Tokens supplied through the environment must be corrected there instead.
 

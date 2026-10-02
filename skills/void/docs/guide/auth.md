@@ -5,7 +5,7 @@ outline: deep
 # Authentication
 
 ::: warning ⚠️ Void Apps Only
-Void-managed auth currently works only for Void apps. Meta-framework mode is not supported yet.
+Void-managed auth requires a native Void app on Cloudflare. For meta-frameworks or Node.js, Bun, and Deno, use Better Auth directly.
 :::
 
 Void configures [Better Auth](https://www.better-auth.com/) for your app, including its database connection, API routes, and client. Start with email and password, or add a social login provider.
@@ -14,17 +14,7 @@ Void configures [Better Auth](https://www.better-auth.com/) for your app, includ
 
 ### 1. Enable auth
 
-Add a provider to `void.config.ts`. Email/password is the default, so the simplest config is:
-
-```json
-{
-  "auth": {
-    "providers": ["email"]
-  }
-}
-```
-
-You can also skip this step entirely. Auth activates automatically when you import from `void/auth` or `void/client`.
+Import `auth` from `void/client` to enable email/password auth automatically. Use [configuration](#config) to add social providers.
 
 ### 2. Sign up and sign in
 
@@ -36,14 +26,14 @@ import { auth } from 'void/client';
 // sign up
 await auth.signUp.email({
   email: 'alice@example.com',
-  password: 's3cret',
+  password: 'example-password-123',
   name: 'Alice',
 });
 
 // sign in
 await auth.signIn.email({
   email: 'alice@example.com',
-  password: 's3cret',
+  password: 'example-password-123',
 });
 ```
 
@@ -83,8 +73,6 @@ export const loader = defineHandler(() => {
 await auth.signOut();
 ```
 
-The rest of this page covers configuration, server helpers, and advanced customization in detail.
-
 ## Config
 
 Auth turns on automatically when you:
@@ -94,9 +82,7 @@ Auth turns on automatically when you:
 - add `auth` to `void.config.ts`
 - add a root-level `auth.ts` file
 
-The simplest setup is no config at all. Email/password auth is enabled by default.
-
-Example:
+Email/password is enabled by default. To add social providers:
 
 ```json
 {
@@ -117,38 +103,9 @@ For example, `github` uses:
 
 ## Client Usage
 
-`void/client` exports a preconfigured Better Auth client:
+The `auth` client uses [Better Auth's client API](https://www.better-auth.com/docs/concepts/client) at `/api/auth`. Void selects the client for your framework automatically.
 
-```ts
-import { auth } from 'void/client';
-
-await auth.signUp.email({
-  email: 'alice@example.com',
-  password: 's3cret',
-  name: 'Alice',
-});
-
-await auth.signIn.email({
-  email: 'alice@example.com',
-  password: 's3cret',
-});
-
-await auth.signOut();
-```
-
-The client uses Better Auth's API, configured at `/api/auth`.
-
-See the official [Better Auth client docs](https://www.better-auth.com/docs/concepts/client) for the full client API.
-
-Framework-specific clients are selected automatically:
-
-- React pages apps use `better-auth/react`
-- Vue pages apps use `better-auth/vue`
-- Svelte pages apps use `better-auth/svelte`
-- Solid pages apps use `better-auth/solid`
-- other Void apps use `better-auth/client`
-
-For advanced usage, `void/client` also exports `createAuthClient`.
+For a custom client, import `createAuthClient` from `void/client`.
 
 ## Server Usage
 
@@ -162,67 +119,13 @@ import { getSession, getUser, requireAuth } from 'void/auth';
 - `getSession()` returns `{ user, session } | null`
 - `requireAuth(c)` returns the authenticated user or throws `401`
 
-Example:
-
-```ts
-import { defineHandler } from 'void';
-import { requireAuth } from 'void/auth';
-
-export const GET = defineHandler((c) => {
-  const user = requireAuth(c);
-  return { email: user.email };
-});
-```
-
-### `AuthUser`
-
-`AuthUser` maps to Better Auth's core user type:
-
-```ts
-interface AuthUser {
-  id: string;
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  image?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
-
-### `AuthSession`
-
-`AuthSession` maps to Better Auth's core session type:
-
-```ts
-interface AuthSession {
-  id: string;
-  token: string;
-  userId: string;
-  expiresAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-}
-```
+Import `AuthUser` and `AuthSession` from `void/auth` for type annotations. See their fields in the [API reference](../reference/api/auth.md#authuser).
 
 ## Behavior
 
-When auth is active, Void configures Better Auth with these conventions:
+Auth sessions use the same database as your app. Void creates `BETTER_AUTH_SECRET` on deploy if it is missing and reuses it on later deploys.
 
-- mount path: `/api/auth/*`
-- email/password enabled by default unless `auth.providers` is set without `"email"`
-- `auth.providers` can enable any built-in Better Auth social provider
-- deployed apps need an auth secret via `BETTER_AUTH_SECRET`
-- D1/SQLite uses the app `DB` binding
-- PostgreSQL apps (`"database": "pg"`) use the app `HYPERDRIVE` binding
-
-Auth sessions live in the same database system as the rest of the app.
-
-On both deployment targets, Void keeps an existing `BETTER_AUTH_SECRET` or generates one when it's missing. The value is stored as an encrypted Worker secret and reused by later versions.
-
-The Vite development server uses a built-in fallback secret automatically. A local preview of a production build needs `BETTER_AUTH_SECRET`; production deployment through Void manages the secret lifecycle for you.
+Local development needs no secret setup. To preview a production build locally, provide `BETTER_AUTH_SECRET`.
 
 ## Customization
 
@@ -245,19 +148,12 @@ For the full set of available options, see the official [Better Auth options ref
 
 Auth tables live alongside your app's tables. During local development, Void creates them automatically.
 
-A Void platform deploy creates the Better Auth tables at runtime after dispatch. A direct Cloudflare deploy requires those tables in your checked-in migrations. Generate them with:
+Void platforms create auth tables automatically. For a direct Cloudflare deploy, include them in your checked-in migrations:
 
 ```sh
 void db generate
 ```
 
-Void adds the production Better Auth schema, including configured model names and plugin tables, to Drizzle's migration input. Review and commit the SQL before deploying. You don't need to duplicate the auth tables in `db/schema.ts` or run a separate Better Auth CLI.
+Review and commit the SQL before deploying. Void includes your auth configuration and plugin tables; you don't need to duplicate them in `db/schema.ts` or run the Better Auth CLI.
 
 MySQL stores OAuth access, refresh, and ID tokens as unbounded text. Existing direct-deploy MySQL apps should run `void db generate` once after upgrading to widen earlier `varchar(255)` token columns. Void platform deployments apply the same safe widening automatically.
-
-## Unsupported Modes
-
-Void-managed Better Auth is supported only for Cloudflare Void apps in v1.
-
-- meta-framework mode should use Better Auth's official framework integrations directly
-- `target: "node" | "bun" | "deno"` should use Better Auth directly

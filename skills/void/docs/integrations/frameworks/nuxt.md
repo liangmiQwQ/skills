@@ -43,8 +43,6 @@ export default defineNuxtConfig({
 });
 ```
 
-By default, Nuxt's Cloudflare development runtime and `voidPlugin()` migrations share local state at `.wrangler/state/v3`, so no extra persistence configuration is required.
-
 ### 4. Create `void.config.ts`
 
 Void generates the Cloudflare config used by Nuxt's development runtime:
@@ -68,7 +66,7 @@ void auth login
 void deploy
 ```
 
-## Using Void Platform Features
+## Using Void Features
 
 Most [Void platform features](../../guide/app-types.md#void-apps) work with Nuxt. Use them in server routes, API handlers, and middleware:
 
@@ -87,71 +85,16 @@ export default defineEventHandler(async () => {
 ```
 
 ::: warning ⚠️ Nuxt limitation
-Nuxt uses Nitro, which bundles server routes outside of Vite's plugin pipeline. The schema cannot be injected into the `db` instance, so `db.query.*` relational queries are not available in Nuxt. Use the standard query builder API (`db.select().from(table)`) instead.
+Use `db.select().from(table)` for database queries in Nuxt. The `db.query.*` relational API is not available.
 :::
 
-### KV Storage
+### Other resources
 
-```ts
-import { kv } from 'void/kv';
-
-export default defineEventHandler(async () => {
-  return kv.get('app:settings');
-});
-```
-
-### Blob Storage
-
-```ts
-import { storage } from 'void/storage';
-
-export default defineEventHandler(async () => {
-  return storage.get('avatars/user-1.png');
-});
-```
-
-### AI
-
-```ts
-import { ai } from 'void/ai';
-
-export default defineEventHandler(async () => {
-  return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    prompt: 'Summarize the latest news',
-  });
-});
-```
-
-### Cron Jobs
-
-```ts
-// crons/daily-cleanup.ts
-import { defineScheduled } from 'void';
-
-export const cron = '0 0 * * *';
-
-export default defineScheduled(async () => {
-  // runs daily at midnight
-});
-```
-
-### Queue Consumers
-
-```ts
-// queues/emails.ts
-import { defineQueue } from 'void';
-
-export default defineQueue<{ to: string; subject: string }>(async (batch) => {
-  for (const msg of batch.messages) {
-    // process each message
-    msg.ack();
-  }
-});
-```
+Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
 
 ### Environment Variables
 
-Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
+Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
 
 `void/env` replaces `useRuntimeConfig()` and `event.context.cloudflare.env` for env-var access. Keep `event.context.cloudflare.env` around when you need raw binding access (D1, KV, R2, etc.), and `useRuntimeConfig()` when you need non-env runtime config.
 

@@ -65,11 +65,11 @@ await stream.send({
 await stream.comment('still connected');
 ```
 
-`data` may be a string or JSON-serializable value. Strings are sent as-is; other values are serialized with `JSON.stringify()`. Multi-line strings are split into multiple `data:` lines. Binary data is rejected because SSE is text-only.
+`data` accepts strings or JSON-serializable values. SSE is text-only.
 
-Void validates `event`, `id`, and `retry` before writing, so their values can't accidentally introduce extra SSE fields or events. Writing to a closed stream throws `SseStreamClosedError`.
+Writing to a closed stream throws `SseStreamClosedError`.
 
-If you already serialized the payload, use `formatSseText()` for lower-level formatting while keeping the same `id`, `event`, and `retry` validation:
+Use `formatSseText()` to format a payload you have already serialized:
 
 ```ts
 import { formatSseText } from 'void/sse';
@@ -98,8 +98,6 @@ return eventStream(start, {
 });
 ```
 
-The interval must be a positive finite number.
-
 ## Last Event ID
 
 Browsers send `Last-Event-ID` when reconnecting after an event with an `id` field. Use `getLastEventId()` to resume from your own storage:
@@ -114,8 +112,6 @@ export const GET = defineHandler((c) => {
   });
 });
 ```
-
-`void/sse` does not store or replay events. Persist event offsets in your own database, queue, or Durable Object when replay matters.
 
 ## Client
 
@@ -174,14 +170,4 @@ export const GET = defineHandler(async (c) => {
 
 Native `EventSource` can send cookies with `withCredentials: true`. For non-cookie auth, generate a short-lived signed URL and validate it in the route handler.
 
-## When to use SSE
-
-Plain SSE is enough when the producer belongs to the same request that opened the stream:
-
-- AI token streaming
-- One-off progress updates
-- Command output
-- Per-request deployment or build logs
-- Incremental status for a long-running action
-
-For shared topics and subscriptions, use [Live Event Streams](./live.md). For rooms with two-way communication, use [WebSockets](./websockets.md). Replay and database change streams need an application-level storage or delivery layer.
+For shared topics and subscriptions, use [Live Event Streams](./live.md). For two-way communication, use [WebSockets](./websockets.md).

@@ -4,7 +4,7 @@ outline: deep
 
 # Edge Prerendering
 
-You can instruct Void to prerender a page so it is served from cache immediately after a new deploy. Prerendering happens on the platform at deploy time. The platform invokes the uploaded worker and writes the result to the edge cache.
+Prerender pages at deploy time so the first visitor receives cached HTML.
 
 - [Markdown pages](../pages-routing/markdown.md) are auto-prerendered.
 - [Island pages](../pages-routing/islands) with no companion loader and no dynamic params are also auto-prerendered.
@@ -16,13 +16,9 @@ Export `prerender = true` from the companion `.server.ts` file:
 ```ts
 // pages/about.server.ts
 export const prerender = true;
-
-export const loader = defineHandler(async (c) => {
-  // ...
-});
 ```
 
-Pages with no dynamic params are automatically prerendered at their URL pattern (e.g. `/about`).
+Pages without dynamic params do not need `getPrerenderPaths()`.
 
 ## Dynamic pages (with params)
 
@@ -36,10 +32,6 @@ export async function getPrerenderPaths() {
   // Return param objects matching the URL pattern
   return [{ slug: 'hello-world' }, { slug: 'getting-started' }];
 }
-
-export const loader = defineHandler(async (c) => {
-  // ...
-});
 ```
 
 ## Custom SSR
@@ -53,21 +45,15 @@ export const prerender = true;
 export async function getPrerenderPaths() {
   return ['/', '/about', '/blog/hello-world'];
 }
-
-export default defineRender(async (c, assetTags) => {
-  // ...
-});
 ```
 
 ## Relationship to revalidation
 
 Setting `routing.isr: false` in `void.config.ts` disables ISR and this edge-prerendering behavior, including per-page exports. It does not disable build-time HTML generation with `output: "static"`.
 
-Pages with long revalidate TTLs (e.g. 1 year) are effectively static, but the first visitor after a deploy hits a cold cache. This is where prerendering helps - it ensures your users never get slow requests.
+Prerendered pages default to a one-year revalidate TTL. Deploys clear the ISR cache.
 
-Enabling prerendering for a page automatically sets `revalidate` to 1 year, so you don't need to export it yourself. Since the ISR cache is cleared on every deploy, the TTL only needs to be long enough to last between deploys.
-
-You can also explicitly set to it a different value to override the default:
+Override the TTL per page:
 
 ```ts
 // pages/about.server.ts
@@ -75,11 +61,10 @@ export const prerender = true;
 export const revalidate = 3600;
 ```
 
-Just be aware that if no new deploy happens before the revalidate expires, the first user request after expiration will miss the cache and incur a full render.
+If the cached page expires before your next deploy, the next request waits for a fresh render.
 
 ## Behavior details
 
 - Prerender happens once per deployment, before traffic is routed to the new version. Prerendered pages are cached at the edge.
-- Each deploy clears the ISR cache. The deployment shows `"prerendering"` during this phase.
 - Only paths with a positive revalidate TTL are prerendered (TTL `0` is skipped).
 - Prerender failures are logged but never block the deploy. The page will render on the first request as usual.

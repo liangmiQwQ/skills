@@ -12,13 +12,13 @@ import { getSandbox } from 'void/sandbox';
 
 export const POST = defineHandler(async (c) => {
   const sandbox = await getSandbox('default');
-  const process = await sandbox.exec(['node', '--version']);
-  const result = await process.output();
-
-  return c.json({
-    exitCode: result.exitCode,
-    stdout: new TextDecoder().decode(result.stdout),
-    stderr: new TextDecoder().decode(result.stderr),
+  return sandbox.run(['node', '--version']).match({
+    ok: (result) =>
+      c.json({
+        exitCode: result.exitCode,
+        stdout: new TextDecoder().decode(result.stdout),
+      }),
+    limited: (limit) => limit.response({ message: 'Execution is temporarily unavailable.' }),
   });
 });
 ```
@@ -27,7 +27,7 @@ Importing from `void/sandbox` enables the required resources. Local development,
 
 ## Configuration
 
-Most apps do not need config. The default binding is `SANDBOX`, the Durable Object class is `SandboxV1`, and the default environment provides Node.js 24 on Debian Trixie. Local development and native deploys build Void's packaged Dockerfile, so Docker must be running. Managed platform deploys use Cloudflare's managed Node.js image.
+The default environment provides Node.js 24 on Debian Trixie. Local development and native deploys need Docker running. Managed platform deploys use Cloudflare's managed Node.js image.
 
 Use `void.config.ts` when you need a custom image or container size:
 
@@ -62,7 +62,7 @@ WORKDIR /workspace
 CMD ["sleep", "infinity"]
 ```
 
-For a managed platform, push your custom image to that platform account's Cloudflare registry and set `platformImage` to its digest-pinned reference. If `image` is already a Cloudflare registry reference, it also becomes the default `platformImage`. External registry references and mutable tags are not supported by the new scheduling policy. See [Cloudflare's image management guide](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry).
+For a managed platform, push your custom image to that platform account's Cloudflare registry and set `platformImage` to its digest-pinned reference. If `image` is already a Cloudflare registry reference, it also becomes the default `platformImage`. External registries and mutable tags are not supported. See [Cloudflare's image management guide](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry).
 
 ## Runtime API
 
@@ -75,37 +75,45 @@ const sandbox = await getSandbox(`user-${user.id}`, {
   inactivityTimeoutMs: 10 * 60 * 1000,
   enableInternet: false,
 });
-await sandbox.files.writeFile('/workspace/input.txt', 'hello');
-const process = await sandbox.exec(['cat', '/workspace/input.txt'], {
-  signal: AbortSignal.timeout(5_000),
-});
-const { stdout, exitCode } = await process.output();
-const text = new TextDecoder().decode(stdout);
+const response = await sandbox
+  .run(['node', '--version'], {
+    signal: AbortSignal.timeout(5_000),
+  })
+  .match({
+    ok: (result) => Response.json({ exitCode: result.exitCode }),
+    limited: (limit) => limit.response(),
+  });
 ```
 
 Commands take an executable and arguments as an array. For shell syntax, explicitly run `['sh', '-c', command]`. Execution options include `cwd` (default `/workspace`), `env`, `user`, `signal`, `pty`, `stdin`, `stdout`, and `stderr`.
 
-`exec()` returns a process immediately after it starts. Read its `stdout` and `stderr` streams, or call `output()` to collect both as `ArrayBuffer`s together with the exit code. `exitCode` is a promise; `kill(signal?)` and `resize(cols, rows)` are asynchronous. Use `stdin: 'pipe'` to receive a writable `stdin` stream. A process can continue running after a request returns, until it exits or its container stops. When streaming output from a long command, await `process.exitCode` alongside consuming its streams. This keeps an explicit command wait active even while the command produces no output; unattended background commands can stop when the Sandbox becomes idle.
+`run()` collects command output and handles limits throughout execution with one required `.match({ ok, limited })`. Both handlers are required. Other failures still reject.
 
-File operations live under `sandbox.files`: `readFile`, `writeFile`, `stat`, `lstat`, `readDirectory`, `mkdir`, `rename`, and `remove`. `readFile()` returns a streaming `Response`; use `.text()`, `.arrayBuffer()`, or `.body`. `writeFile()` accepts text, binary data, or a byte stream. Relative file paths require an explicit `cwd` option.
+`exec()` returns a lazy operation yielding a process through its `ok` handler. Use `output()` to collect `stdout` and `stderr` as `ArrayBuffer`s with the exit code, or read the streams and match `exitCode`. Both `output()` and `exitCode` require their own `.match({ ok, limited })`. Matching `exitCode` keeps a long command active during pauses in its output; unattended background commands can stop when the Sandbox becomes idle.
 
-To reach a server inside the container, call `sandbox.fetch(port, new Request(url))`. `sandbox.running()` checks whether the container is running; `sandbox.destroy()` stops it.
+Use `stdin: 'pipe'` for a writable input stream. `kill(signal?)` stops a process, and `resize(cols, rows)` resizes its terminal.
+
+File operations live under `sandbox.files`: `readFile`, `writeFile`, `stat`, `lstat`, `readDirectory`, `mkdir`, `rename`, and `remove`. Each file operation requires `.match({ ok, limited })`. `readFile()` yields a streaming `Response` to `ok`; use `.text()`, `.arrayBuffer()`, or `.body`. `writeFile()` accepts text, binary data, or a byte stream. Relative file paths require an explicit `cwd` option.
+
+To reach a server inside the container, call `sandbox.fetch(port, new Request(url)).match({ ok, limited })`. `sandbox.running()` checks whether the container is running; `sandbox.destroy()` stops it.
 
 `getSandbox()` options include `inactivityTimeoutMs` (default ten minutes, maximum six hours), `enableInternet` (default `false`), and string `labels`. Internet access and labels take effect on the next container start. `binding` selects a custom native binding; managed platforms use the configured binding.
 
 For code that runs on both deployment targets, use `getSandbox()`. Direct access through `c.env.SANDBOX` is available only on local and native Cloudflare deployments.
 
+The `limited` handler receives `resource: 'sandbox'`, a `reason` of `concurrency` or `runtime_budget`, and `response({ message })` for a structured HTTP 429. Keep user input available so it can be retried. Resolving a Sandbox, checking `running()`, stopping a process, and `destroy()` do not need a quota handler; cleanup remains available after a limit.
+
 ## State persistence
 
 `getSandbox(id)` selects the same Durable Object for that ID within a deployment. Native Cloudflare deployments preserve that namespace across Worker versions. Each managed platform deployment has its own namespace; rolling back to a retained deployment reconnects to that deployment's namespace.
 
-Files, running processes, and listening servers last only as long as the container. It can stop after inactivity, crash, or restart. Save anything you need to keep in your database, KV, or R2. For custom Durable Object implementations, `void/sandbox` also exports the SDK's `Files`, `DirectoryBackup`, `DirectoryBackupGateway`, `S3Mount`, and `S3Gateway` helpers. Deleting a project on a Void platform removes both its Durable Objects and containers.
+Files, running processes, and listening servers last only as long as the container. It can stop after inactivity, crash, or restart. Save anything you need to keep in your database, KV, or R2. Deleting a project on a Void platform removes both its Durable Objects and containers.
 
 ## Deployment
 
-Sandboxes require [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Void checks this before provisioning or building. A managed platform's runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit. Applications without Sandbox do not require Containers or perform this entitlement check.
+Sandboxes require [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. A managed platform's runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit.
 
-`void deploy --platform cloudflare` builds native images and deploys the Sandbox alongside the application. `void deploy` on a connected Void Platform creates a deployment-scoped Sandbox controller, which enforces concurrency and runtime limits. Upgrade the platform before deploying an application built with this Sandbox API.
+`void deploy --platform cloudflare` builds native images and deploys the Sandbox alongside the application. `void deploy` on a connected Void Platform applies the platform's Sandbox concurrency and runtime limits. Upgrade the platform before deploying an application built with this Sandbox API.
 
 ## Moving from Sandbox SDK 0.x
 

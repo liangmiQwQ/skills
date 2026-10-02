@@ -6,7 +6,7 @@ outline: deep
 
 `void deploy` builds your app, provisions its resources, applies migrations, and deploys it to your own Cloudflare account or a Void platform run by your team.
 
-Choose Cloudflare for your own account or Void for a shared team platform. You can [install a Void platform](./self-hosted-platform.md) in your team's Cloudflare account.
+You can [install a Void platform](./self-hosted-platform.md) for shared team deployments.
 
 ## Deployment Targets
 
@@ -51,21 +51,13 @@ Your choice is saved in `.void/project.json`, so the next deploy is just `void d
 
 Already have a Cloudflare Worker and a root `wrangler.jsonc` or `wrangler.json`? Run `void deploy`. If no destination is selected, Void offers to link and deploy using the existing Worker and resources. Accept once to keep deploying to that site. See [Deploy an existing Worker](../integrations/cloudflare.md#deploy-an-existing-worker) for the first-deployment checks.
 
-To connect to your team's platform and sign in, run `void connect <url>` using the URL from your administrator. Use `void connect --platform cloudflare` to set up your own Cloudflare account. Connecting preserves existing project links. New Void projects need a platform connection.
+To set up deployment later, use `void connect --platform cloudflare` or `void connect <platform-url>`.
 
 Owners can [share a platform project](./project-collaboration.md) with readers, collaborators, and project administrators. This does not apply to direct Cloudflare deployments.
 
 ### Migrations
 
-If your app uses Drizzle, `void deploy` runs migrations as part of the deploy flow:
-
-1. Build the app
-2. Read SQL migrations from `db/migrations/`
-3. Check that the migrations match your current schema
-4. Apply pending migrations to the target database
-5. Make the new deploy live
-
-If you've changed your schema without a matching migration, deploy stops. Run `void db generate`, review and commit the SQL, then deploy again. For the full database workflow and backend-specific details, see the [Database guide](./database.md).
+Deploy applies pending SQL migrations from `db/migrations/`. If your schema has changes without a migration, deploy stops. Run `void db generate`, review and commit the SQL, then deploy again. See the [Database guide](./database.md).
 
 ### Flags
 
@@ -117,131 +109,53 @@ If your platform supports managed GitHub builds, the Void GitHub App can build a
 
 You don't need a deployment workflow file or a repository `VOID_TOKEN` for this path.
 
-1. Initialize your Void project
+With a linked project, connect the repository:
 
-```bash
-void init
-# Or, for existing Void project:
-void project link
-```
-
-2. Install the Void GitHub app
-
-```bash
+```sh
 void github install
-```
-
-Void opens GitHub so you can install and authorize the `Void Deploy` app.
-
-In the browser, select the GitHub account/organization and grant access to the repository.
-
-:::details If someone already installed the App for your organization
-Join that installation instead:
-
-```bash
-void github join
-```
-
-:::
-
-3. Link your repository to your project
-
-```bash
 void github connect --executor container
-```
-
-Organization installations always require a browser proof for the specific repository, including for the person who installed the App. Void does not reveal the installation's full private repository list.
-
-4. Verify the connection
-
-```bash
 void github status
 ```
 
-The output shows the repository, branch, and build executor:
+If your organization already installed the App, Void can join that installation during setup. Organization repositories require browser authorization.
 
-```bash
-Repository      <owner/repository>
-Branch          main
-Build executor  container
-Deploy workflow .github/workflows/void-deploy.yml (unused for container builds)
-
-```
-
-5. Push to the configured branch to trigger a new deploy
-
-```bash
-git push origin main
-```
-
-6. Follow the build
-
-```bash
-void build logs --follow
-```
+Push to the configured branch to deploy, then follow progress with `void build logs --follow`. See [GitHub commands](../reference/cli/github.md#github) for installation sharing and connection options.
 
 ### GitHub Actions
 
-On platforms that support it, the generated workflow uses [GitHub OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect) to obtain a short-lived deploy token for your project. `void deploy` handles the exchange automatically. Keep `permissions: id-token: write` in the workflow so GitHub can issue that credential.
+Run `void init --github` to generate the workflow for your saved platform and package manager. On Void platforms with GitHub Actions support, authorize the repository once:
 
-The generated workflow uses the platform selected during `void init`. Core self-hosted installations don't yet support this integration, so Void doesn't offer the workflow for them. For a platform that does, the npm version looks like this; set the repository's `VOID_API_URL` variable to your platform's API URL:
-
-```yaml
-name: Deploy to Void
-on:
-  push:
-    branches: [main]
-
-# Latest push wins: a newer commit cancels an in-flight deploy for the same
-# repo + branch, so an older commit can never overtake a newer one.
-concurrency:
-  group: void-deploy-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  id-token: write
-  contents: read
-
-env:
-  VOID_API_URL: ${{ vars.VOID_API_URL }}
-  VOID_PROJECT: my-app
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: npm
-      - run: npm ci
-      - name: Deploy
-        run: npx void deploy --platform void --project "$VOID_PROJECT"
+```sh
+void github connect <project> --repo <owner/repo> --executor github_actions
 ```
 
-Authorize the repository once with `void github connect <project> --repo <owner/repo> --executor github_actions`. Choose the `github_actions` executor for this workflow; `container` runs builds on the platform instead.
+Set the repository's `VOID_API_URL` variable to your platform's API URL. Keep `permissions: id-token: write` in the workflow for [GitHub OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect). The workflow uses your linked project, or the `VOID_PROJECT` repository variable.
 
-The generated workflow uses your package manager and linked project. If no project is linked, it reads the `VOID_PROJECT` repository variable.
+Core self-hosted installations do not support this integration. Use your own CI workflow with a [project deploy token](./platform/installation/first-deployment.md).
 
 ## Other Targets
 
 ### Your own Cloudflare account
 
-Select Cloudflare during setup, or run:
-
-```sh
-void deploy --platform cloudflare
-```
-
-Void supports full Worker apps, static sites, SPAs, and Cloudflare builds from supported frameworks. It provisions resources, applies migrations, and manages secrets for you. `.env` stays local; production server keys declared in `env.ts` must exist in encrypted remote secret storage and are rejected as plaintext Worker vars. Commands such as `void secret put`, `void project logs`, and `void project rollback` then use the same account and Worker.
-
-See the [Cloudflare guide](../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account) for supported features, CI setup, and deployment limits.
+Select Cloudflare during setup, or run `void deploy --platform cloudflare`. See the [Cloudflare guide](../integrations/cloudflare.md) for configuration, CI credentials, and deployment limits.
 
 ### Node.js, Bun, and Deno
 
 Set [`target`](../reference/config.md#target) in `void.config.ts` to build a standalone server for Node.js, Bun, or Deno. You can run the result on your own server or in a container.
 
-Deploy `dist/ssr` and `dist/client` together. The server loads the Pages client manifest and assets relative to its emitted module; start it from the app root with `node dist/ssr/index.js`, `bun dist/ssr/index.js`, or `deno run -A dist/ssr/index.js`.
+Deploy `dist/ssr` and `dist/client` together. See the target guide for startup commands.
 
 These targets don't provide Cloudflare bindings such as D1, KV, R2, and Workers AI. See the [Node.js, Bun, and Deno guide](../integrations/nodejs-bun-deno.md) for the features available on each target.
+
+## Usage and execution limit pages
+
+Void platforms show a built-in page when an app exhausts its request allowance or an invocation exceeds its CPU limit. API requests and Pages action requests receive a structured HTTP 429 with `code: 'usage_limit'`, `resource`, `reason`, and `message`.
+
+To customize browser error pages, add either optional file to your app's public assets:
+
+- `public/usage-limit.html` for exhausted request allowances.
+- `public/execution-limit.html` for execution limits.
+
+Use standalone HTML with inline CSS and data-URL images. These pages run with scripts, external assets and form submissions disabled, so they remain usable while application requests are blocked. Void serves them directly from the deployed assets; your Worker, loaders and database are not involved. A missing or unreadable custom page uses the built-in page.
+
+Responses are not cached. Once a streaming response has started, it cannot be replaced with an error page; clients should display stream failures and end their pending state. These platform pages apply to Void platform deployments. Direct Cloudflare runtime limits use Cloudflare's own response behavior.

@@ -8,11 +8,9 @@ outline: deep
 Typed WebSocket routes currently work in native Void apps. They aren't available in meta-framework mode yet.
 :::
 
-Create a `.ws.ts` route to add a typed WebSocket endpoint. Void runs each route instance in a Cloudflare Durable Object, which coordinates the clients connected to it. These routes require the Cloudflare target; Node.js, Bun, and Deno builds reject them.
+Create a `.ws.ts` route to send typed messages between your server and connected clients. Each route instance has its own Cloudflare Durable Object for shared state. WebSocket routes require the Cloudflare target.
 
-New WebSocket route classes use SQLite-backed Durable Objects on both deployment platforms.
-
-For example, a chat route at `/rooms/[id]` gives each room its own instance. Use it for chat, presence, collaborative documents, or notifications.
+For example, `/rooms/[id]` gives each chat room its own instance. Use it for chat, presence, collaborative documents, or notifications.
 
 ## Route files
 
@@ -115,51 +113,6 @@ export default defineWebSocket({
 });
 ```
 
-## Typed messages
-
-Define schemas for messages sent by the client and server:
-
-- `messages.client` validates what the browser may send
-- `messages.server` validates what the server may send
-- `onMessage()` receives the parsed, validated client event
-- `ctx.room.broadcast()`, `ctx.connection.send()`, and `ctx.socket.send()` are typed from `messages.server`
-- `connect()` infers route params, outgoing client messages, and incoming server messages from generated route types
-
-The default protocol is JSON events. Raw string or binary framing is not the primary API.
-
-## Ambient auth
-
-WebSocket hooks use the same built-in session resolution as HTTP auth. When Void auth is enabled, `ctx.user` is available in:
-
-- `onBeforeConnect`
-- `onConnect`
-- `onMessage`
-- `onClose`
-- `onRequest`
-
-This makes cookie-authenticated sockets work without re-parsing the session manually.
-
-## Hooks
-
-Both `defineRoom()` and `defineWebSocket()` support:
-
-- `onBeforeConnect(ctx)`: return a `Response` to reject the upgrade
-- `onConnect(ctx)`: runs after the socket is accepted
-- `onMessage(ctx, event)`: receives the validated client event
-- `onClose(ctx, details)`: receives `{ code, reason, wasClean }`
-- `onRequest(ctx)`: handles ordinary HTTP requests to the same path
-
-Every hook receives a context with:
-
-- `ctx.id`: deterministic route instance id
-- `ctx.params`: matched route params
-- `ctx.user`: resolved auth user or `null`
-- `ctx.request`
-- `ctx.env`
-- `ctx.storage`
-
-If a route does not define `onRequest()`, non-WebSocket requests return `426 Upgrade Required`.
-
 ## Client
 
 Use `connect()` from `void/ws` on the client:
@@ -182,20 +135,95 @@ socket.send({ type: 'chat.message', text: 'hello' });
 
 `connect()` resolves relative URLs against the current origin and automatically uses `ws:` or `wss:`. It also buffers messages until the socket opens and reconnects by default.
 
+## Typed messages
+
+Define schemas for messages sent by the client and server:
+
+- `messages.client` validates what the browser may send
+- `messages.server` validates what the server may send
+- `onMessage()` receives the parsed, validated client event
+- `ctx.room.broadcast()`, `ctx.connection.send()`, and `ctx.socket.send()` are typed from `messages.server`
+- `connect()` infers route params, outgoing client messages, and incoming server messages from generated route types
+
+Messages are JSON events. Raw string and binary messages are not supported.
+
+## Authentication
+
+When Void auth is enabled, every WebSocket hook receives the current user as `ctx.user`, or `null` for an anonymous connection. Use `onBeforeConnect` to reject unauthenticated clients.
+
+## Hooks
+
+Both `defineRoom()` and `defineWebSocket()` support:
+
+- `onBeforeConnect(ctx)`: return a `Response` to reject the upgrade
+- `onConnect(ctx)`: runs after the socket is accepted
+- `onMessage(ctx, event)`: receives the validated client event
+- `onClose(ctx, details)`: receives `{ code, reason, wasClean }`
+- `onRequest(ctx)`: handles ordinary HTTP requests to the same path
+
+Void completes the WebSocket close handshake automatically. Use `onClose` for application cleanup;
+you do not need to close the socket again in this hook.
+
+Every hook receives a context with:
+
+- `ctx.id`: deterministic route instance id
+- `ctx.params`: matched route params
+- `ctx.user`: resolved auth user or `null`
+- `ctx.request`
+- `ctx.env`
+- `ctx.storage`
+
+If a route does not define `onRequest()`, non-WebSocket requests return `426 Upgrade Required`.
+
+## Move a route while keeping its state
+
+Before moving a deployed route, run `void info`. For `routes/chat/[room].ws.ts`, the output includes:
+
+```text
+To preserve this resource when moving its code, add this to 'defineRoom':
+  name: "chat-room",
+```
+
+Add the displayed name to your existing definition:
+
+```ts
+export default defineRoom({
+  name: 'chat-room',
+  messages: { client: ClientMessage, server: ServerMessage },
+  // Keep your existing hooks.
+});
+```
+
+Move the file to `routes/rooms/[room].ws.ts`, update clients to connect to `/rooms/:room`, and deploy normally. Keep the same parameter names and values: room `general` still uses its existing storage. The Worker class, binding, and migration history stay the same on both Cloudflare and Void platform deployments.
+
+Both `defineRoom()` and `defineWebSocket()` accept optional `name`. Use a static string, inline or in a local `const`. Each route must produce a distinct Worker class; changing the name selects a different resource. If you already moved a route, `void info` also shows unmatched identities recorded in `void.lock.json`. Identify the original resource before adopting its suggested name; otherwise restore the original source and discover the name there.
+
+### Rename a route parameter
+
+By default, the instance key includes parameter names. `/chat/:room` with `room: 'general'` uses `room=general`; a route without parameters uses `default`. Multiple parameters are joined in route order, for example `team=acme&room=general`. If a multi-parameter route has a value containing `&`, its key uses a versioned encoding to keep rooms separate.
+
+When upgrading an existing multi-parameter route with `&` in its parameter values, those rooms start with isolated storage. The previous storage is retained, but may have been shared by multiple rooms. Migrate only data whose ownership you have verified into each new room. Single-parameter rooms and multi-parameter rooms without `&` keep their existing identities.
+
+If you also rename `[room]` to `[id]`, preserve the old key explicitly:
+
+```ts
+// routes/rooms/[id].ws.ts
+export default defineRoom({
+  name: 'chat-room',
+  key: ({ params }) => `room=${params.id}`,
+  messages: { client: ClientMessage, server: ServerMessage },
+  // Keep your existing hooks.
+});
+```
+
+Clients now connect to `/rooms/:id` with `params: { id: 'general' }`. The key remains `room=general`, so storage and `ctx.id` stay the same. Returning only `params.id` would select a different instance.
+
+`key` is optional on both WebSocket helpers. It must return a string synchronously and consistently for the same parameters. Preserve the complete old key when migrating multiple parameters. Keep the callback stable after deployment.
+
 ## Constraints
 
-WebSocket routes currently support:
-
-- Cloudflare-only
-- one route-derived connection target per socket
-- no Socket.IO-style dynamic room join/leave API
-- no global pub/sub abstraction
-- JSON event messages only
-
-Each socket connects to one route instance. Applications that need to switch rooms should manage that connection change explicitly.
+Each socket connects to one route instance. To switch rooms, close the current connection and open another. For publishing to multiple topics, see [Live Event Streams](./live.md).
 
 ## Deployment
 
-`void deploy --platform cloudflare` persists the required binding and append-only SQLite class migration in `void.lock.json`, then deploys the generated Worker directly to your account. Commit this migration history and never delete or reorder a step after deployment.
-
-`void deploy --platform void` uses the same shared migration planner in the hosted uploader. Existing hosted WebSocket classes created on legacy storage remain there; only genuinely new classes use SQLite.
+WebSocket routes work on Cloudflare and Void platform deployments. Commit `void.lock.json` when Void adds a binding or migration. Do not delete or reorder deployed migration steps.

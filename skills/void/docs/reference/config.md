@@ -154,11 +154,9 @@ Configuration for the [email integration](../guide/email.md).
 | ------ | -------- | -------------------------------------------------------------------------------------------------------------- |
 | `from` | `string` | Default sender for `sendEmail()`: one address, optionally with a display name (`Acme <noreply@mail.acme.com>`) |
 
-What `from` does depends on where the app runs:
+During development, `email.from` is the default sender in the local inbox. On a Void platform, use your project's shared sender or registered domain.
 
-- **`void dev`** — becomes the default `from` of every `sendEmail()` call, captured in the dev inbox; no mail leaves the machine.
-- **`void deploy`** (managed platform) — not used: the sender is pinned to your project's own platform address, which Void fills in for you.
-- **`void deploy --platform cloudflare`** (your own Cloudflare account) — the address host (`mail.acme.com`) is the domain Void sets Email Routing and Email Sending up on, and the address becomes the default `from` (written into the worker as the `__VOID_EMAIL_FROM` var). The host must be a zone in the pinned Cloudflare account, or a subdomain of one; a subdomain is the usual choice, and the apex is refused when it already receives mail elsewhere. An app that uses email without `email.from` deploys without it and prints the line to add. Void never picks a zone or writes `void.config.ts` for you. See [Your own Cloudflare account](../guide/email.md#your-own-cloudflare-account).
+For direct Cloudflare deployment, this address selects the mail domain and default sender. Use a zone or subdomain in your account; an existing mail provider's MX records are preserved. See [Email setup](../guide/email/domains.md#your-own-cloudflare-account).
 
 ### `head`
 
@@ -199,7 +197,7 @@ Output mode. Controls the default rendering strategy for pages.
 | `"server"` (default) | `false`           | `export const prerender = true`  | Deploy-time (platform ISR) |
 | `"static"`           | `true`            | `export const prerender = false` | Build or deploy post-build |
 
-When set to `"static"`, all pages are prerendered as static HTML files written to `dist/client/`. A standalone `vite build` renders them in the build; managed `void deploy` renders immediately afterward in the trusted deploy process so build plugins never receive platform credentials. Individual pages can opt out with `export const prerender = false`. Dynamic pages (with route params) without a `getPrerenderPaths()` export are implicitly not prerendered.
+When set to `"static"`, pages are prerendered to HTML in `dist/client/`. Individual pages can opt out with `export const prerender = false`. Dynamic pages need `getPrerenderPaths()` to be prerendered.
 
 When omitted or set to `"server"`, pages are server-rendered on request. Individual pages can opt into deploy-time prerendering with `export const prerender = true`, or opt out of server-rendered component HTML with `export const ssr = false`.
 
@@ -209,7 +207,7 @@ When omitted or set to `"server"`, pages are server-rendered on request. Individ
 
 ### `remote`
 
-Use remote D1/KV/R2 bindings during local development instead of local miniflare. When enabled, the Void plugin replaces local bindings with proxy-backed versions that forward operations to your deployed project's real resources via the Void proxy.
+Use a deployed Void project's D1, KV, and R2 resources during local development. Writes affect real data. See [Remote Development](../guide/remote-dev.md).
 
 ```json
 { "remote": true }
@@ -253,7 +251,7 @@ Enable and configure Cloudflare Sandboxes. Importing from `void/sandbox` enables
 
 Supported sizes are `lite` and `standard-1` through `standard-4`. Native deploys build Dockerfiles with Docker; registry images must be digest-pinned references from the Cloudflare managed registry. Custom images must include the matching Sandbox SDK helper. For a local Dockerfile, supply `platformImage` when deploying to a managed platform. See [Sandboxes](../guide/sandboxes.md) for image setup and runtime examples.
 
-Sandbox requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access, checked before provisioning or building. Managed runtime tokens need Account / Containers: Edit and Account / Cloudchamber: Edit. Apps without Sandbox use neither Containers nor an entitlement check.
+Sandbox requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Managed runtime tokens need Account / Containers: Edit and Account / Cloudchamber: Edit. See [Sandbox deployment](../guide/sandboxes.md#deployment).
 
 ### `target`
 
@@ -345,7 +343,7 @@ Routing and edge configuration for headers, redirects, rewrites, and caching.
 
 #### `routing.headers`
 
-Custom response headers for dispatch-worker responses. Keys are URL patterns, values are arrays of `"Name: value"` strings. See [Custom Headers](../guide/edge/headers) for details.
+Custom response headers. Keys are URL patterns, values are arrays of `"Name: value"` strings. See [Custom Headers](../guide/edge/headers) for details.
 
 ```json
 {
@@ -388,7 +386,7 @@ URL rewrites. Keys are source URL patterns, values are destination paths. Serves
 }
 ```
 
-Destinations use the `RewriteDestination` shape — typed route patterns plus `string`, so known routes autocomplete while dynamic paths remain accepted. See [Programmatic rewrites in middleware](../guide/edge/rewrites#programmatic-rewrites-in-middleware) for the trade-off and performance notes.
+Destinations use the `RewriteDestination` shape — typed route patterns plus `string`, so known routes autocomplete while dynamic paths remain accepted. See [Programmatic rewrites](../guide/edge/rewrites#programmatic-rewrites-in-middleware).
 
 #### `routing.fallbacks`
 
@@ -416,7 +414,7 @@ Boolean switch for Void's ISR caching. When omitted or `true`, Void infers cachi
 }
 ```
 
-This does not disable `output: "static"` build-time HTML generation or delete existing KV resources. Set it to `true` to enable your configured cache policies again. Existing-Worker migration saves this choice before provisioning, so it remains consistent on retries and later deployments.
+Build-time HTML generation with `output: "static"` is unaffected. Set `isr` to `true` to enable your configured cache policies again.
 
 #### `routing.revalidate`
 
@@ -464,7 +462,7 @@ Paths to prerender as static HTML at deploy time. Each path must start with `/`.
 
 #### `routing.notFound`
 
-Override how the asset layer answers a request that matched no asset and no worker route. One of `"single-page-application"`, `"404-page"`, or `"none"`. If omitted, Void infers it — see [Static Assets](../guide/edge/static-assets.md#unmatched-requests).
+Override how the asset layer answers a request that matched no asset and no worker route. One of `"single-page-application"`, `"404-page"`, or `"none"`. If omitted, Void infers it — see [Static Assets](../guide/edge/static-assets.md#navigation-and-middleware).
 
 ```json
 {
@@ -474,13 +472,9 @@ Override how the asset layer answers a request that matched no asset and no work
 }
 ```
 
-Set `"404-page"` when your assets come from a static site generator (VitePress, Docusaurus, …) and you want unknown URLs to serve the generator's own `404.html` with a real HTTP 404. Without it, an app whose only backend is API routes keeps the inferred SPA fallback, so every unknown URL returns `index.html` with a `200` — correct for a single-page app, wrong for a generated site, and bad for crawlers.
+Use `"404-page"` for a generated static site with a `404.html`, `"single-page-application"` for a client router, or `"none"` to keep the Worker's own 404. API and middleware routing remain unchanged.
 
-`run_worker_first` is untouched, so API routes, auth, and `/__void/*` still reach the worker first. When the worker owns HTML routing it also serves the resolved behavior itself, since `run_worker_first: ["/**"]` means the platform switch never runs — see [Unmatched requests](../guide/edge/static-assets.md#unmatched-requests).
-
-This does **not** apply to SvelteKit, Nuxt, Analog, or Astro deploys: those pin `not_found_handling` to `"none"` because the framework's own worker owns unmatched HTML, and `void deploy` warns if you set `routing.notFound` anyway.
-
-TanStack Start, React Router, and vinext honor it on a managed `void deploy`, which resolves the asset config itself. Void writes no `assets` policy into their generated Worker config (`dist/server` for TanStack Start and vinext App, `build/server` for React Router, `dist/ssr` for vinext Pages). A custom config must declare a complete `assets` policy — `binding`, `directory`, `not_found_handling`, and `run_worker_first`. Void leaves those fields untouched, so your own policy is honored; with none, Cloudflare's default applies. `vite build` warns when it is set. See [Static Assets](../guide/edge/static-assets.md#unmatched-requests) for the per-framework paths.
+SvelteKit, Nuxt, Analog, and Astro use their own error pages and ignore this setting. For direct Cloudflare deployment with TanStack Start, React Router, or vinext, set a complete asset policy in your framework's Cloudflare config. See [Static Assets](../guide/edge/static-assets.md#navigation-and-middleware).
 
 ### `inference`
 
@@ -488,7 +482,7 @@ Configuration for build-time inference, including how Void detects your app type
 
 #### `inference.bindings`
 
-Explicitly control inferred Cloudflare bindings. If omitted, bindings are [automatically inferred](./resource-inference.md) by scanning your source files for binding usage. If provided, explicit values take precedence and inference is skipped entirely.
+Explicitly control inferred Cloudflare bindings. If omitted, bindings are [automatically inferred](./resource-inference.md) by scanning your source files for binding usage. Explicit values override the named bindings; omitted bindings are still inferred. Auth and checked-in migrations still require a database even when `db` is `false`.
 
 Each binding accepts `true` (use default name), `false` (disable), or a string (custom binding name):
 

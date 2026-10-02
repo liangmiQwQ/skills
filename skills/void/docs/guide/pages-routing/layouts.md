@@ -50,38 +50,15 @@ function namedLayoutItems(ext) {
   ]
 }
 
-function blogLayoutItems(ext) {
-  return [
-    {
-      name: "pages/",
-      children: [
-        {
-          name: "_layouts/",
-          children: [
-            { name: `post${ext}`, description: "sidebar, date, author" },
-          ],
-        },
-        { name: `layout${ext}`, description: "nav + footer" },
-        {
-          name: "blog/",
-          children: [
-            { name: `layout${ext}`, description: "blog sidebar" },
-            { name: "hello.md", description: "layout: post → chain: [root, _layouts/post]" },
-            { name: `archive${ext}`, description: "(no layout) → chain: [root, blog/layout]" },
-          ],
-        },
-      ],
-    },
-  ]
-}
-
 </script>
 
 # Layouts & Shared Data
 
+Use layouts for navigation, headers, and other UI shared by several pages. Layouts nest with your directories and keep their component state as you navigate.
+
 ## Layouts
 
-Place a layout file in any `pages/` directory to wrap all pages in that subtree:
+Place a layout file in a `pages/` directory to wrap its pages:
 
 <FileTree :items="layoutBasicItems" adapter-tabs default-expanded />
 
@@ -169,8 +146,6 @@ When a page renders, the layout wraps it. The page component is injected as the 
 
 <img src="./layout-nesting.svg" alt="Layout nesting diagram: pages/layout wraps pages/users/layout wraps pages/users/[id] page component" style="max-width: 520px; width: 100%;" />
 
-Layouts nest automatically and persist across navigations within their subtree, so component state is preserved.
-
 ## Named Layouts
 
 Named layouts let individual pages opt into a different layout without changing the URL structure. Define them in `_layouts/` directories within `pages/`:
@@ -237,68 +212,9 @@ layout: post
 | `"!landing"` | Replace the **entire** chain. Only the named layout wraps the page.            |
 | `false`      | No layout wrapping at all. Page renders standalone.                            |
 
-"Innermost" means the deepest layout in the resolved chain. If the chain is `[root, docs/layout]`, the named layout replaces `docs/layout`. If the chain is only `[root]`, it replaces root.
+A named layout replaces the deepest default layout: in `[root, docs/layout]`, it replaces `docs/layout`; in `[root]`, it replaces the root.
 
-### Resolution order
-
-When a page specifies `layout: "post"`, the scanner walks up the directory tree to find `_layouts/post`:
-
-```
-pages/guide/intro.md  (layout: post)
-
-1. pages/guide/_layouts/post.vue  → not found
-2. pages/_layouts/post.vue        → found ✓
-```
-
-Closest ancestor wins, same as default layout chain. If no matching named layout is found in any ancestor, the build fails with a clear error.
-
-### Examples
-
-**Blog with shared nav but post-specific layout:**
-
-<FileTree :items="blogLayoutItems" adapter-tabs default-expanded />
-
-`layout: post` on `blog/hello.md` replaces the innermost default layout (`blog/layout`) with `_layouts/post`. The root layout still wraps.
-
-**Fullscreen page with no layout:**
-
-::: code-group
-
-```tsx [React]
-export const layout = false;
-
-export default function Landing() {
-  return (
-    <div className="hero fullscreen">
-      <h1>Welcome</h1>
-    </div>
-  );
-}
-```
-
-```vue [Vue]
-<script>
-export const layout = false;
-</script>
-
-<template>
-  <div class="hero fullscreen"><h1>Welcome</h1></div>
-</template>
-```
-
-:::
-
-**Exclusive layout (skip all ancestors):**
-
-```md
----
-layout: '!landing'
----
-
-# Standalone Landing Page
-```
-
-Only `_layouts/landing` wraps this page, and the root layout is skipped entirely.
+Void uses the closest matching `_layouts/` file in the page's directory or an ancestor. A missing named layout fails the build.
 
 ## Shared Data
 
@@ -322,42 +238,4 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-Access it on the client with `useShared()`. The return type is inferred from your augmentation:
-
-::: code-group
-
-```tsx [React]
-import { useShared } from '@void/react';
-
-export default function Page() {
-  const { auth } = useShared(); // { auth: { user: AuthUser | null } }
-  return <p>Hello, {auth?.user?.name}</p>;
-}
-```
-
-```vue [Vue]
-<script setup lang="ts">
-import { useShared } from '@void/vue';
-const { auth } = useShared(); // { auth: { user: AuthUser | null } }
-</script>
-```
-
-```svelte [Svelte]
-<script>
-  import { useShared } from "@void/svelte";
-  const { auth } = useShared(); // { auth: { user: AuthUser | null } }
-</script>
-```
-
-```tsx [Solid]
-import { useShared } from '@void/solid';
-
-export default function Page() {
-  const shared = useShared(); // { auth: { user: AuthUser | null } }
-  return <p>Hello, {shared.auth?.user?.name}</p>;
-}
-```
-
-:::
-
-Shared data is separate from page props. Props come from the loader, while `useShared()` returns global data from middleware. See [Type Safety](../type-safety.md#context-variables) for more on augmenting `CloudContextVariables`.
+Call `useShared()` from your framework adapter, as in the layout examples above. Its return type is inferred from `CloudContextVariables`. Shared data comes from middleware; page props come from the loader. See [Context variables](../type-safety.md#context-variables).

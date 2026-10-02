@@ -40,8 +40,6 @@ export default defineConfig({
 });
 ```
 
-By default, Astro's Cloudflare runtime and `voidPlugin()` migrations share local state at `.wrangler/state/v3`, so no extra persistence configuration is required.
-
 ### 4. Create `void.config.ts`
 
 Void uses this config for the Cloudflare adapter during development and deployment:
@@ -67,7 +65,7 @@ void auth login
 void deploy
 ```
 
-## Using Void Platform Features
+## Using Void Features
 
 Most [Void platform features](../../guide/app-types.md#void-apps) work with Astro in both local dev and production when using Astro 6+ with `nodejs_als`.
 
@@ -97,76 +95,13 @@ export const GET: APIRoute = async () => {
 };
 ```
 
-### KV Storage
+### Other resources
 
-Use `void/kv` in both dev and production:
-
-```ts
-import type { APIRoute } from 'astro';
-import { kv } from 'void/kv';
-
-export const GET: APIRoute = async () => {
-  const settings = await kv.get('app:settings');
-  return Response.json(settings);
-};
-```
-
-### Blob Storage
-
-```ts
-import type { APIRoute } from 'astro';
-import { storage } from 'void/storage';
-
-export const GET: APIRoute = async () => {
-  const avatar = await storage.get('avatars/user-1.png');
-  return new Response(avatar);
-};
-```
-
-### AI
-
-```ts
-import type { APIRoute } from 'astro';
-import { ai } from 'void/ai';
-
-export const POST: APIRoute = async () => {
-  const result = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    prompt: 'Summarize the latest news',
-  });
-  return Response.json(result);
-};
-```
-
-### Cron Jobs
-
-```ts
-// crons/daily-cleanup.ts
-import { defineScheduled } from 'void';
-
-export const cron = '0 0 * * *';
-
-export default defineScheduled(async () => {
-  // runs daily at midnight
-});
-```
-
-### Queue Consumers
-
-```ts
-// queues/emails.ts
-import { defineQueue } from 'void';
-
-export default defineQueue<{ to: string; subject: string }>(async (batch) => {
-  for (const msg of batch.messages) {
-    // process each message
-    msg.ack();
-  }
-});
-```
+Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
 
 ### Environment Variables
 
-Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
+Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
 
 Void always uses `VITE_*` for client-exposed schema keys, including in Astro projects. Astro's separate `PUBLIC_*` convention still applies to direct `import.meta.env` access, but it does not change the `void/env` server/client boundary.
 
@@ -195,7 +130,3 @@ const { DB } = Astro.locals.runtime.env;
 const { results } = await DB.prepare("SELECT * FROM users").all();
 ---
 ```
-
-::: tip Direct Binding Access
-`Astro.locals.runtime.env` is still useful when you need direct access to raw Cloudflare bindings.
-:::

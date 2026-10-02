@@ -4,18 +4,11 @@ outline: deep
 
 # Custom SSR
 
-Void supports framework-agnostic SSR via explicit server and client entries. This is for advanced use cases where you want full control over rendering and hydration.
+Use custom SSR to choose your own router, data loading, HTML shell, and hydration code. If you want Void to handle these for you, use [Pages Routing](./pages-routing/overview).
 
-::: tip
-For most apps, [Pages Routing](./pages-routing/overview) handles SSR automatically. You do not need entry files or hydration code.
-:::
+## Create the app
 
-## Relationship to Pages Routing
-
-Custom SSR is separate from Pages Routing. Use Custom SSR when you want to bring
-your own root component, router, data loading, HTML shell, and hydration logic.
-
-The `App` component below is the root of this custom-rendered application:
+Start with a root component. This React example renders a page based on the request path:
 
 ```tsx
 // src/App.tsx
@@ -24,50 +17,21 @@ export default function App({ url }: { url: string }) {
 }
 ```
 
-Pages Routing adapters generate their own SSR and hydration entries and compose
-`pages/layout.*`, route components, loaders, and actions.
-
 ## Required entries
 
-SSR mode is enabled when both of these exist:
+Create both entry files:
 
 - `src/main.ssr.ts` or `src/main.ssr.tsx`
 - `src/main.client.ts` or `src/main.client.tsx`
 
-Only one server entry and one client entry may exist.
-If only one side is present, build/deploy fails with a clear error.
+Use one server entry and one client entry. Both are required.
 
 ## Render API
 
-`src/main.ssr.ts(x)` must export either:
-
-```ts
-render(c: CloudContext, assetTags: RenderAssetTags): Response | Promise<Response>
-```
-
-or:
-
-```ts
-export default defineRender((c, assetTags) => Response | Promise<Response>);
-```
-
-The recommended form is `defineRender(...)` for inferred types.
-
-`assetTags` contains the HTML tags for your client assets:
-
-```ts
-{
-  css: string; // stylesheet links for <head>
-  preloads: string; // modulepreload/Vite client+preamble tags for <head>
-  body: string; // main client entry script tag before </body>
-}
-```
-
-If no render export is found, build/deploy fails with a clear error.
-
-Example:
+Wrap your server renderer with `defineRender()` and return an HTML response. Insert `assetTags.css` and `assetTags.preloads` in `<head>`, and `assetTags.body` before `</body>`:
 
 ```tsx
+// src/main.ssr.tsx
 import { renderToString } from 'react-dom/server';
 import { defineRender } from 'void';
 import App from './App';
@@ -89,34 +53,22 @@ export default defineRender(async (c, assetTags) => {
 });
 ```
 
-`src/main.client.ts(x)` should hydrate/mount your app:
+You can also export a named `render(c, assetTags)` function with the same signature. See [`defineRender`](../reference/api/handlers.md#definerender-handler) for the types.
+
+## Hydrate in the browser
+
+In the client entry, hydrate the same component:
 
 ```tsx
+// src/main.client.tsx
 import { hydrateRoot } from 'react-dom/client';
 import App from './App';
 
 hydrateRoot(document.getElementById('root')!, <App url={window.location.pathname} />);
 ```
 
-## Client Asset Injection
-
-Place the client asset tags in the HTML returned by your `render()` function.
-
-The `assetTags` values are computed by Void:
-
-- In production: from `dist/client/.vite/manifest.json` (entry script, CSS, modulepreload)
-- In dev: includes Vite HMR client and React refresh preamble (when React plugin is active), plus the client entry script
-
 ## Caching
 
 See [Revalidation](./edge/revalidation.md) for stale-while-revalidate caching of SSR pages.
 
-## Request flow
-
-With SSR enabled:
-
-1. `/api/*` requests go to worker API routes
-2. static asset hits are served from R2
-3. unmatched non-API requests fall back to `render(c, assetTags)`
-
-Without SSR entries, non-API requests keep SPA static fallback behavior.
+API routes and static files are served before custom rendering. Unmatched non-API requests use `render(c, assetTags)`.

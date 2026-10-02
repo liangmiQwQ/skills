@@ -4,281 +4,9 @@ outline: deep
 
 # Rewrites
 
-A rewrite serves one route's content at another URL while keeping the browser's address unchanged. For example, `/docs` can serve the content from `/en/docs`.
+A rewrite serves a route at a different URL without changing the browser's address. For example, `/docs` can serve `/en/docs`. Use a [redirect](./redirects) when the browser should move to the destination instead.
 
-Define source patterns and destination paths in `routing.rewrites` in [`void.config.ts`](../../reference/config):
-
-```json
-{
-  "routing": {
-    "rewrites": {
-      "/": "/en",
-      "/docs": "/en/docs",
-      "/docs/*": "/en/docs/:splat"
-    }
-  }
-}
-```
-
-## When to use rewrites
-
-Use rewrites to decouple the **public URL** from the **internal route**. Common scenarios:
-
-- **i18n routing** — serve the default locale at unprefixed paths (`/docs` serves `/en/docs`)
-- **URL restructuring** — reorganize internal route files without changing public URLs or SEO
-- **Vanity URLs** — map `/pricing` to `/marketing/pricing-page` without exposing the internal structure
-- **API versioning** — route `/api/users` to `/api/v3/users` internally so consumers use clean, unversioned endpoints
-- **Incremental migration** — old URL structure continues working at the edge while route handlers move to new paths
-- **Multi-app composition** — serve different internal apps under a unified URL namespace (e.g., `/docs/*` rewrites to a docs app, `/app/*` to the main app)
-
-If you **do** want the user to see the new URL (e.g., for SEO canonical signals or moving a page permanently), use a [redirect](./redirects) instead.
-
-## Rules
-
-- **Source patterns** start with `/`. `*` matches any characters including `/`.
-- **Destinations** are strings starting with `/` (only internal paths are supported).
-- `:splat` in the destination is replaced with the portion of the path matched by `*` in the source pattern.
-- When multiple rules match, the **first match wins**. Put more-specific rules above more-general ones (matches Netlify `_redirects` and Vercel `vercel.json` semantics).
-- On the default target, rewrites are evaluated at the edge **before** the request reaches the worker. On `node` / `bun` / `deno` targets they run in-process as Hono middleware, still before route dispatch. Either way, the rewritten path is then used for static asset serving, ISR, and SSR.
-
-## Example: i18n routing
-
-Define route files only under `[locale]/` and rewrite the default locale to unprefixed paths:
-
-```json
-{
-  "routing": {
-    "rewrites": {
-      "/": "/en",
-      "/docs": "/en/docs",
-      "/docs/*": "/en/docs/:splat"
-    }
-  }
-}
-```
-
-A request to `/docs/getting-started` serves the content from `/en/docs/getting-started`, but the browser URL stays at `/docs/getting-started`. Non-default locales like `/zh-CN/docs/getting-started` work as-is because they match the `[locale]/` route directly.
-
-## Example: vanity URLs
-
-Map short marketing URLs to internal route paths:
-
-```json
-{
-  "routing": {
-    "rewrites": {
-      "/pricing": "/marketing/pricing-page",
-      "/start": "/onboarding/get-started",
-      "/jobs": "/company/careers"
-    }
-  }
-}
-```
-
-## Example: API versioning
-
-Route unversioned API paths to the current version internally:
-
-```json
-{
-  "routing": {
-    "rewrites": {
-      "/api/users": "/api/v3/users",
-      "/api/users/*": "/api/v3/users/:splat"
-    }
-  }
-}
-```
-
-When v4 ships, update the rewrite — no client-side changes needed.
-
-## Example: path restructuring
-
-After reorganizing from `/blog/:slug` to `/posts/:slug`, keep the old URLs working:
-
-```json
-{
-  "routing": {
-    "rewrites": {
-      "/blog/*": "/posts/:splat"
-    }
-  }
-}
-```
-
-Users on `/blog/hello-world` see the content from `/posts/hello-world` at the original URL.
-
-## Programmatic rewrites in middleware
-
-For dynamic rewrite logic — like i18n locale negotiation based on cookies or headers — use `c.rewrite()` in middleware:
-
-```ts
-import { defineMiddleware } from 'void';
-
-export default defineMiddleware(async (c, next) => {
-  const locale = detectLocale(c.req);
-  if (!c.req.path.match(/^\/(en|zh-CN)\//)) {
-    return c.rewrite(`/${locale}${c.req.path}`);
-  }
-  return next();
-});
-```
-
-`c.rewrite(path)` re-dispatches the request through the router with the new pathname. You must `return` the result — same shape as `c.redirect()`. A queryless destination preserves the incoming query string; a destination with `?` replaces it, so `c.rewrite('/search')` keeps `?q=...` and `c.rewrite('/search?q=all')` forwards exactly `?q=all`.
-
-`path` uses the [`RewriteDestination`](../../reference/api#rewritedestination) type. Your editor suggests known route patterns, and you can still pass dynamic strings. The suggestions don't guarantee that a destination exists.
-
-### Runtime rewrites cannot reach static assets
-
-`c.rewrite()` can only re-dispatch to paths the worker itself handles — routes, SSR entries, API handlers. It **cannot** re-dispatch into the static asset handler, because the Void platform serves assets in front of your worker. A call like `c.rewrite('/hero.png')` re-enters the worker's route table, doesn't match anything, and 404s.
-
-This is enforced at the call site: if the destination's final path segment ends in a known static-asset extension, `c.rewrite()` throws `VoidAssetRewriteError` (exported from `"void"`, catchable by name) before the re-dispatch, with the attempted destination in the message. Query strings and fragments are stripped before matching, so `c.rewrite('/hero.png?v=2')` also throws.
-
-The guarded extensions are:
-
-```
-.png .jpg .jpeg .gif .webp .avif .svg .ico
-.css .js .mjs .cjs
-.woff .woff2 .ttf .otf .eot
-.mp4 .webm .mp3 .wav
-.pdf .txt .xml .json .wasm .map
-```
-
-`.html` is allowed because a path such as `/about.html` can be a route. If it returns `404`, inspect the development `X-Void-Routing` header to see how the request was resolved.
-
-Static rewrites are different: `_redirects` `200!` entries and `routing.rewrites` run at the platform layer **before** the asset handler, so they _can_ rewrite into assets. If you need "rewrite into an asset" behavior dynamically, model it as a static rule (possibly with a broader source pattern) rather than doing it from middleware.
-
-After `c.rewrite()`, Void skips static rewrite rules on the second router pass. It tracks the request itself, so a client-supplied header can't bypass this check. Use [`c.originalUrl()`](#original-url-access) to read the URL before the rewrite.
-
-Your middleware still runs on each pass. Avoid cycles such as `/a → /b → /c → /a` across middleware: Void can't detect those automatically. Each middleware should skip paths that are already in its intended form.
-
-Also avoid deep rewrite chains for performance: every hop re-runs all middleware from the top, so `/a → /b → /c → /d` costs four router passes.
-
-### Performance notes
-
-- Static `routing.rewrites` and `routing.fallbacks` rules are evaluated in order, first-match-wins, at O(rules) per request. The list is small in practice, but keep it bounded — don't programmatically generate thousands of entries.
-- Each `c.rewrite()` hop replays the full middleware stack against a fresh `Request`. A chain of three middleware rewrites with four middleware in the stack is roughly twelve middleware invocations, not four.
-- The loop check skips static rules after a rewrite, but it doesn't skip your middleware. Keep middleware rewrite chains short and ensure they terminate.
-
-### Side effects in re-dispatched middleware
-
-Every rewrite runs middleware again. Database lookups and auth checks repeat, and counters or loggers may record the same request more than once.
-
-For work that should happen only before a rewrite, check `c.isRewritten()`. Keep access checks wherever the destination needs them:
-
-```ts
-if (c.isRewritten()) return next();
-```
-
-`c.isRewritten()` returns `true` after either a static edge rewrite or `c.rewrite()` in middleware. Void records this on the request after accepting the edge's rewrite metadata.
-
-::: tip
-This is the recommended approach for i18n libraries. The library can export a middleware factory that handles locale detection and rewriting, and users just drop it into their `middleware/` directory.
-:::
-
-## Original URL access
-
-When a request has been rewritten — either by a static rule at the edge or by `c.rewrite()` in middleware — `c.originalUrl()` returns the URL the user originally requested. This is useful for canonical links, locale detection, and building correct hrefs:
-
-```ts
-export default defineHandler((c) => {
-  const original = c.originalUrl();
-  // original is a `URL` instance for the full URL the user requested
-  // before the rewrite, or null if the request was not rewritten.
-});
-```
-
-On managed Void deployments, the edge passes the original URL to the Worker as trusted request metadata. On direct Cloudflare deployments, the generated Worker records that metadata when it applies the rewrite itself. Further middleware rewrites update the same metadata without requiring you to parse headers.
-
-## Fallbacks
-
-`routing.fallbacks` shares the same shape as `rewrites` but runs **only when no static asset or route matched** — i.e. the request would otherwise return a 404. This lets you add catch-all rewrites without preempting real routes.
-
-Void only treats generated no-route 404s as fallback-eligible, whether the check runs in managed dispatch or in a native Cloudflare Worker. A route handler or API endpoint that intentionally returns `404` is returned as-is, so catch-all fallbacks do not turn missing API resources into HTML. Third-party framework deployments do not expose Void's no-route marker, so their fallback rules still apply after the framework worker returns `404`.
-
-```json
-{
-  "routing": {
-    "fallbacks": {
-      "/*": "/index.html"
-    }
-  }
-}
-```
-
-Common uses:
-
-- **SPA shell** — serve `/index.html` for any unmatched path so client-side routing can take over (for app types that don't already do this automatically).
-- **Default-locale catch-all** — send unmatched paths to `/en/:splat` without stealing requests that already resolve to an existing page under `/zh-CN/…`, `/ja/…`, etc.
-
-Ordering:
-
-- `rewrites` are evaluated **before** the static asset lookup; a matching rule always wins.
-- `fallbacks` are evaluated **after** the static asset lookup, only when it would 404.
-
-Use `rewrites` when you want to force a path mapping regardless of what exists; use `fallbacks` when the rule should only kick in as a safety net.
-
-### SPA app type + `routing.fallbacks`
-
-For the `spa` app type, the platform already serves `/index.html` for any asset miss by default (`not_found_handling: 'single-page-application'`). Adding `routing.fallbacks` to a SPA app is **additive, not an override**:
-
-1. Your `routing.fallbacks` rules are checked first, in the order they appear (first match wins among user rules).
-2. If none of them match, the implicit `/* → /index.html` SPA fallback still fires.
-
-So a SPA app can carve out specific paths without losing the SPA shell behavior for everything else:
-
-```json
-{
-  "routing": {
-    "fallbacks": {
-      "/docs/*": "/docs.html"
-    }
-  }
-}
-```
-
-With this config, an asset miss under `/docs/getting-started` resolves to `/docs.html`, while an asset miss under `/app/settings` still resolves to `/index.html` (the SPA default).
-
-You don't need to write `"/*": "/index.html"` yourself — the CLI **appends** a synthetic `{ source: '/*', destination: '/index.html' }` rule to the fallback list when packaging a SPA deploy that has user fallbacks. Because evaluation is first-match-wins, user rules come before the synthetic entry and take precedence; the synthetic rule only fires when no user rule matched. This is why the shipped manifest may contain more fallback rules than you wrote in `void.config.ts`. If you do write `"/*": "/index.html"` yourself, the CLI emits a warning on `void deploy` noting that the rule duplicates the default and can be omitted.
-
-## `_redirects` file
-
-Rewrites can also be defined in a `_redirects` file placed in Vite's `publicDir` (defaults to `public/`). Void mirrors Netlify-compat semantics for the `200` status code:
-
-```text
-# plain 200 = fallback (asset-miss only, equivalent to routing.fallbacks)
-/*         /index.html    200
-
-# 200! with force suffix = always rewrite (equivalent to routing.rewrites)
-/docs/*    /en/docs/:splat 200!
-```
-
-| File-based form | `void.config.ts` equivalent | Behavior                                                                 |
-| --------------- | --------------------------- | ------------------------------------------------------------------------ |
-| `... 200`       | `routing.fallbacks`         | Fires only when no static asset and no route matched (would have 404'd). |
-| `... 200!`      | `routing.rewrites`          | Always fires, overriding any static asset that would have served.        |
-
-- `void.config.ts` rules are applied **before** file-based rules. Since the first match wins, `routing.rewrites` / `routing.fallbacks` in `void.config.ts` take precedence.
-- The `_redirects` file can mix 3xx redirects, `200` fallbacks, and `200!` force rewrites. Ordering is preserved within each bucket.
-- The `!` force suffix is only meaningful on `200`. On a 3xx entry like `301!`, the `!` is silently stripped — 3xx redirects always "force" by their nature (they change the URL), so the suffix is meaningless. `void deploy` prints a single aggregated warning tallying all `301!` / `302!` / `307!` / `308!` entries so you can clean them up.
-
-## Precedence: `_redirects` vs `void.config.ts`
-
-When the same source pattern appears in both a `_redirects` file and `void.config.ts` (`routing.redirects` / `routing.rewrites` / `routing.fallbacks`), the rules don't replace each other — they **merge into a single ordered list per phase**, and the first match wins.
-
-Rules are bucketed by phase before merging:
-
-- **Pre-asset phase** (always fires, runs before static asset lookup): `routing.redirects` + `routing.rewrites` + `_redirects` 3xx entries + `_redirects` `200!` entries.
-- **Post-asset phase** (only fires on an asset miss): `routing.fallbacks` + `_redirects` plain `200` entries. For SPA app types, the synthetic `/* → /index.html` rule is **appended last** in this phase, so user fallbacks evaluated earlier take precedence under first-match-wins.
-
-Within each phase, `void.config.ts` rules run first, followed by `_redirects` rules. The first matching rule wins, so a `void.config.ts` rule takes precedence over the same source pattern in `_redirects`.
-
-### Concrete example
-
-```text
-# _redirects
-/docs/*    /en/docs/:splat    200!
-```
+Define rewrites in [`void.config.ts`](../../reference/config):
 
 ```ts
 import { defineConfig } from 'void/config';
@@ -286,73 +14,117 @@ import { defineConfig } from 'void/config';
 export default defineConfig({
   routing: {
     rewrites: {
-      '/docs/*': '/handbook/:splat',
+      '/': '/en',
+      '/docs': '/en/docs',
+      '/docs/*': '/en/docs/:splat',
     },
   },
 });
 ```
 
-A request to `/docs/intro` matches both rules. Merged order is `[void.config.ts: /docs/* → /handbook/:splat, _redirects: /docs/* → /en/docs/:splat]`, so `void.config.ts` wins and the request resolves to `/handbook/intro`.
+A request to `/docs/getting-started` serves `/en/docs/getting-started`. Other locales, such as `/ja/docs/getting-started`, keep their own routes.
 
-To confirm precedence in practice, check the [`X-Void-Routing` dev header](#debugging-with-x-void-routing) on any response during `vite dev` — it names the winning rule and its origin (`_redirects:<line>` vs `void.config.ts#routing.rewrites`).
+## Rules
 
-## How rewrites work
+- Sources and destinations start with `/`. Destinations must be paths within the app.
+- `*` matches any characters, including `/`. Use `:splat` in the destination for the matched portion.
+- The first matching rule wins. Put specific patterns before catch-all patterns.
+- Rewrites run before static assets and application routes.
 
-**Static rewrites** (`void.config.ts` and `_redirects` file) on managed Void deployments:
+## Programmatic rewrites in middleware
 
-1. `void deploy` reads rewrite rules from the `_redirects` file (status `200` entries) and `routing.rewrites` in `void.config.ts`, then includes them in the deploy manifest alongside redirect rules.
-2. The platform stores the rules in the KV routing entry for your project.
-3. The dispatch worker evaluates all routing rules (redirects and rewrites) before any worker invocation. If a rewrite matches, the request pathname is updated internally and the request continues through the normal pipeline (static assets, ISR, worker). The original URL is passed as `X-Void-Original-URL`.
+Use `c.rewrite()` when the destination depends on the request, such as a locale chosen from a cookie:
 
-On direct Cloudflare deployments of native Void apps, Vite compiles the same merged redirects, rewrites, headers, and fallbacks into the generated Worker. They run there without managed dispatch, and rewrite metadata remains internal to the Worker.
+```ts
+import { defineMiddleware } from 'void';
 
-**Middleware rewrites** (`c.rewrite()`):
+export default defineMiddleware(async (c, next) => {
+  if (c.req.path.match(/^\/(en|ja)(\/|$)/)) return next();
 
-1. The request reaches the worker with its original (or edge-rewritten) pathname.
-2. Your middleware calls `c.rewrite(newPath)`, which constructs a new request with the rewritten pathname and re-dispatches it through the Hono router.
-3. The re-dispatched request runs through all middleware and route handlers as if it were a fresh request to the new path.
+  const locale = detectLocale(c.req);
+  return c.rewrite(`/${locale}${c.req.path}`);
+});
+```
 
-Static rewrites run before application routes: in dispatch for managed deployments and in generated middleware for direct Cloudflare deployments. Middleware rewrites repeat routing inside the Worker, which lets them use request-specific logic.
+Return the result of `c.rewrite()`. Middleware runs again at the destination, so skip paths that are already rewritten to avoid a loop. Use `c.isRewritten()` to skip work that should happen only once:
 
-## Caveat: client navigation skips rewrites
+```ts
+if (c.isRewritten()) return next();
+```
 
-Rewrites run on the server. A full HTTP request to `/docs` resolves through `routing.rewrites` and serves `/en/docs` content. But a client-side `<Link to="/docs">` navigation in Pages mode fetches loader data directly for `/docs` — the Void Router doesn't know about the server's rewrite table, so there's no lookup against `/en/docs` on that path.
+Keep access checks on any destination that needs them.
 
-In practice this only matters when the source and destination have **different loader behavior**. If `/docs` has no route handler but `/en/docs` does, clicking a `<Link to="/docs">` will fail where a fresh page load would succeed. The first render (server) and a subsequent client nav (CSR) to the same URL can diverge.
+A destination without `?` preserves the incoming query string. `c.rewrite('/search')` keeps `?q=...`, while `c.rewrite('/search?q=all')` replaces it.
 
-Two mitigations:
+Your editor suggests known routes through the [`RewriteDestination`](../../reference/api/rewrites.md#rewritedestination) type. Dynamic strings are also accepted.
 
-- Use a plain `<a href="/docs">` when you need the navigation to round-trip through the server (and therefore through rewrites).
-- If the URL change is meant to be authoritative, use a [redirect](./redirects) instead — the Void Router follows redirects via HTTP, so behavior is consistent.
+### Runtime rewrites cannot reach static assets
+
+`c.rewrite()` targets application routes. To serve an asset such as `/hero.png` at another URL, use `routing.rewrites` or a `_redirects` rule instead. A middleware rewrite to a recognized asset extension throws `VoidAssetRewriteError`.
+
+## Original URL access
+
+`c.originalUrl()` returns the URL requested before a static or middleware rewrite, or `null` when no rewrite occurred. Use it for canonical links or locale detection:
+
+```ts
+import { defineHandler } from 'void';
+
+export default defineHandler((c) => {
+  const original = c.originalUrl();
+  return c.json({ pathname: original?.pathname ?? c.req.path });
+});
+```
+
+## Fallbacks
+
+`routing.fallbacks` uses the same patterns as rewrites, but applies only when no asset or route matches:
+
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  routing: {
+    fallbacks: { '/*': '/index.html' },
+  },
+});
+```
+
+Use a fallback for a client-side router or a default-locale catch-all. An intentional `404` from a Void route remains a `404`. For third-party frameworks, fallbacks can also replace the framework's `404` response.
+
+SPA apps already fall back to `/index.html`. Custom fallback rules run first; unmatched paths still use the SPA shell. You don't need to add `'/*': '/index.html'` yourself.
+
+## `_redirects` file
+
+You can also place rules in Vite's `publicDir`, which defaults to `public/`:
+
+```text
+# Fallback: only when no asset or route matches
+/*         /index.html     200
+
+# Rewrite: before assets and routes
+/docs/*    /en/docs/:splat  200!
+```
+
+The file can include [3xx redirects](./redirects) too. Rules in `void.config.ts` take precedence over file rules; within each group, the first match wins.
+
+## Client navigation
+
+Rewrites run on the server. In Pages mode, a client-side `<Link to="/docs">` navigation may fetch loader data for `/docs` rather than the rewritten route `/en/docs`.
+
+Use `<a href="/docs">` to make a full server request when the destination has a different loader. Use a redirect if the URL should change.
 
 ## ISR cache keys with rewrites
 
-If you use [`routing.revalidate`](./revalidation) on a dispatch rewrite (`routing.rewrites`, `routing.fallbacks`, or `_redirects` 200/200!), the cache slot is keyed on the **rewritten** pathname plus the original request URL's pathname. By default, query parameters are dropped from the rewrite variant key to avoid unbounded cache fanout; add `routing.revalidateQueryAllowlist` when selected query params should vary cached output. So a direct request to `/en/docs/foo` and a rewrite from `/docs/foo → /en/docs/foo` cache independently — useful when your worker reads `c.isRewritten()` or `c.originalUrl()`. Middleware `c.rewrite()` runs after ISR lookup, so it does not create a separate ISR variant.
+Static rewrites cache the destination separately for each original pathname. Query parameters vary the cache only when included in `routing.revalidateQueryAllowlist`. Middleware rewrites don't create a separate cache variant.
 
-`revalidate({ paths })` operates on the rewritten pathname (the slot's primary key). Purging `/en/docs/foo` removes all variants — direct + every rewrite source — under that path. Purging the source path (`/docs/foo`) invalidates nothing, because no slot is written under the source.
+Purge the destination with `revalidate({ paths: ['/en/docs/foo'] })` to clear direct and rewritten requests. Purging only `/docs/foo` does not clear that entry. See [Revalidation](./revalidation).
 
 ## Debugging with `X-Void-Routing`
 
-During `vite dev`, every response carries an `X-Void-Routing` header that traces how the request was resolved. Open the Network tab in devtools and inspect the response headers:
+During development, inspect the `X-Void-Routing` response header in your browser's Network tab. It shows the matching rule and where it was declared:
 
-```
-X-Void-Routing: redirect[/old] -> /new 301 (_redirects:12)
-X-Void-Routing: rewrite[/api/*] -> /backend/:splat (void.config.ts#routing.rewrites)
-X-Void-Routing: fallback[/docs/*] -> /docs.html (void.config.ts#routing.fallbacks)
+```text
+X-Void-Routing: rewrite[/docs/*] -> /en/docs/:splat (void.config.ts#routing.rewrites)
 X-Void-Routing: c.rewrite -> /new-path (middleware)
 X-Void-Routing: pass-through
 ```
-
-Phases are separated by `->` so the diagnostic value stays valid as an HTTP header. The parenthesised source hint points at the exact declaration — a line number for `_redirects`, a config path for `void.config.ts`, or `spa-default` for the synthetic SPA catch-all. The header is **only emitted in dev** — production builds strip both the trace code and the per-rule `origin` metadata from the bundle and manifest.
-
-::: info What fires in `vite dev`
-`vite dev` applies the full static routing pipeline on every target — `node`, `bun`, `deno`, and the default target alike. `void.config.ts` rules (`routing.redirects` / `routing.rewrites` / `routing.fallbacks` / `routing.headers`) and file-based rules (`public/_redirects`, `public/_headers`) are merged at plugin load and compiled into the Hono middleware your worker runs behind. Editing `_redirects` or `_headers` during a dev session re-runs the merge and reloads the page — no restart needed. `c.rewrite()` calls in middleware work everywhere because they live inside the worker itself, and the `X-Void-Routing` dev header reports every decision on every target.
-
-A few things still only run in the deployed runtime, not `vite dev`:
-
-- [ISR caching](./revalidation) (`routing.revalidate`) — served cold in dev, no cached slot warm-ups.
-- Custom-domain rewriting and per-project asset prefixes — dev always runs against the root.
-- AI Gateway metering for `void/ai` calls — dev hits the provider directly.
-
-For everything else, the rule that fires in `vite dev` is the rule that will fire after `void deploy`.
-:::

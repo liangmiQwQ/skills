@@ -19,13 +19,15 @@ If nameservers, certificates, or project Zero Trust protection are pending, foll
 
 Use `--installation <id>` to select an installation explicitly, `--zone example.com` for an app domain such as `apps.example.com`, or `--dedicated-zone` for catch-all routing on a dedicated zone. Nested domains still need the wildcard certificate described below. This command adds the first domain; replacing an existing application domain is not currently supported. It uses the installed runtime and does not require `--runtime` or an app redeploy.
 
+Choose an application domain whose wildcard leaves existing Worker Custom Domains reachable. Existing more-specific routes covering all requests can preserve those hostnames. If Void reports a conflict, choose another application domain; for a new installation, you can start with `void platform install --workers-dev` and add a suitable domain later.
+
 Browser login sessions are specific to each origin. Apps using their own OAuth providers may need to register their new callback URLs. Void's built-in auth uses the request origin automatically unless the app overrides that configuration.
 
 ### What Changes in Testing Mode?
 
-Each deployed app gets a small forwarding Worker and its own `workers.dev` origin. It forwards requests, including WebSockets and SSE, through the same platform router. Names include installation and project IDs; a later project with the same slug cannot inherit a deleted project's test URL.
+In testing mode, each app gets a `workers.dev` URL. These URLs continue working after you add a domain; new apps then use the domain.
 
-Testing origins use shared ISR storage but bypass the extra edge response cache because you cannot use your zone's purge API for `workers.dev`. Custom-domain requests use the normal edge cache after activation. Existing test URLs and forwarding Workers are retained when you add a domain; new apps then use the domain without creating more forwarding Workers. Like other platform Workers, forwarders are retained for manual cleanup on uninstall; platform disablement and project suspension still apply to their traffic.
+Testing URLs support WebSockets, SSE, and shared ISR storage, but skip the extra edge response cache. Their forwarding Workers remain for manual cleanup after uninstall. Platform disablement and project suspension still block their traffic.
 
 ## Other Domain Options
 
@@ -48,6 +50,32 @@ void platform install --application-domain apps.example.com --zone example.com -
 The management token needs **SSL and Certificates: Read** (or Edit) on that zone for the certificate check. Void does not order certificates or enable paid products automatically. Leave `--dedicated-zone` off: that flag is only for installations whose application domain is the entire zone and adds catch-all routes for otherwise unmatched traffic.
 
 :::
+
+## Optional Dashboard
+
+The API's `/admin/` pages are included in the core installation. You can deploy
+the optional user dashboard separately and configure its HTTPS origin during
+installation with `--dashboard-url https://dash.example.com`.
+
+For an existing installation, preview and apply the configuration with:
+
+```sh
+void platform repair <installation-id> --dashboard-url https://dash.example.com --plan
+void platform repair <installation-id> --dashboard-url https://dash.example.com --yes
+```
+
+The origin must contain no credentials, path, query, or fragment. Void saves it
+for login callbacks and keeps it across upgrades and repairs. The command does
+not create a dashboard Worker or DNS records; deploy that app separately. Omit
+the option to keep the saved origin. The dashboard provides sign-in, linked
+login methods, and sign-out; use the CLI for user project and team management.
+
+If Access protects the platform, its application must cover this dashboard
+origin too. Configure the origin when installing protection. To change it on an
+already protected platform, deliberately remove protection through authentication
+configuration, apply the origin, then enable protection again. Choose a separate
+admission rule first if signup depends on the Access gate. Maintenance stops if
+the configured origin is outside the active coverage.
 
 ## Cloudflare footprint
 

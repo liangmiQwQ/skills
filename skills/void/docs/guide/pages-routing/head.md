@@ -4,9 +4,9 @@ outline: deep
 
 # Head Management
 
-Pages mode manages `<head>` tags (title, meta, links, scripts, HTML/body attributes) across three layers with clear precedence: **page > middleware > config**.
+Set page titles and metadata with `head()`, middleware, or site-wide defaults. Page values take precedence over middleware and config.
 
-## Page `head()` Export
+## Page titles and metadata
 
 Export a `head()` function from your `.server.ts` file. It receives the Hono context and the resolved loader props, and returns a `HeadDescriptor`:
 
@@ -37,7 +37,7 @@ export const head = defineHead<Props>((c, props) => {
 
 `head()` runs server-side only, after the loader resolves.
 
-## Config Defaults
+## Site defaults
 
 Set site-wide head defaults in `void.config.ts`:
 
@@ -56,9 +56,9 @@ Set site-wide head defaults in `void.config.ts`:
 
 `titleTemplate` wraps the page title. `%s` is replaced with whatever `head()` returns as `title`. A page returning `{ title: "About" }` with the template above produces `<title>About | My Site</title>`.
 
-## Middleware Defaults
+## Middleware defaults
 
-Middleware can inject head defaults that apply to every page. This is useful for things like a theme script that must run before first paint:
+Set `headDefaults` in middleware to apply defaults to every page. For example, a theme script can run before first paint:
 
 ```ts
 // middleware/01.head.ts
@@ -77,7 +77,7 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-## Merge Precedence
+## Precedence
 
 When multiple layers provide head data, they merge with this precedence:
 
@@ -90,7 +90,7 @@ When multiple layers provide head data, they merge with this precedence:
 | `htmlAttrs` | Shallow merge, page wins conflicts.                                                                                  |
 | `bodyAttrs` | Shallow merge, page wins conflicts.                                                                                  |
 
-## HeadDescriptor Shape
+## HeadDescriptor
 
 ```ts
 interface HeadDescriptor {
@@ -108,7 +108,7 @@ interface HeadDescriptor {
 }
 ```
 
-## Markdown Auto-Head
+## Markdown pages
 
 Markdown pages (`.md` files) automatically generate head tags from frontmatter. You do not need a `.server.ts` file:
 
@@ -123,8 +123,8 @@ Your content here...
 
 This produces `<title>Getting Started</title>` and `<meta name="description" content="Learn how to use Void">`, with `titleTemplate` applied if configured.
 
-## Client-Side Updates
+## Client-side updates
 
-On SPA navigation, head tags update automatically. The framework tracks managed tags with a `data-void-head` attribute and preserves matching tags across navigations, so unchanged stylesheet and preload links are not torn down and re-added. Tags that are no longer present are removed, and new tags are inserted.
+Titles, meta tags, and links update automatically on client-side navigation.
 
 `script`, `htmlAttrs`, and `bodyAttrs` are SSR-only. They are not re-applied on client-side navigation.

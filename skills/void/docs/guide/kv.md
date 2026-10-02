@@ -4,7 +4,7 @@ outline: deep
 
 # Key-Value Storage
 
-Void provides a typed KV client with automatic JSON serialization for [Cloudflare Workers KV](https://developers.cloudflare.com/kv/). Import `kv` from `void/kv` and start reading and writing data.
+Read and write data in [Cloudflare Workers KV](https://developers.cloudflare.com/kv/) with `kv` from `void/kv`. Values are stored as JSON, and `kv.map()` gives a collection its own key prefix and value type.
 
 ## Basic Operations
 
@@ -25,7 +25,9 @@ Values are automatically parsed as JSON. If the stored value isn't valid JSON, t
 await kv.put('user:123', { name: 'Alice', role: 'admin' });
 ```
 
-Objects are automatically JSON-stringified. Strings are stored as-is.
+Values, including strings, are JSON-serialized. Reads preserve their types, so a string such as `"123"` or `"null"` comes back as a string.
+
+If an older Void version stored a JSON-looking string as raw text, rewrite that key with `kv.put(key, originalString)`. Existing stored values keep their previous read behavior; Void cannot distinguish an old raw string such as `"123"` from a stored number. Use the original string or read its raw text through `c.env.KV.get(key)` when rewriting it.
 
 Add a TTL (in seconds) or absolute expiration (Unix timestamp):
 
@@ -96,12 +98,4 @@ const result = await sessions.list();
 
 Maps have the same methods as the base client (`get`, `put`, `delete`, `list`, `getWithMetadata`) but with a typed value and automatic prefixing.
 
-## How It Works
-
-The KV client is a thin wrapper over the Cloudflare KV API that adds two things:
-
-1. **Auto serialization:** `put()` calls `JSON.stringify()` on non-string values. `get()` calls `JSON.parse()` with a fallback to the raw string for values that are not JSON. You can store and retrieve objects without manual serialization.
-
-2. **Typed maps:** `kv.map<T>(prefix)` returns a scoped client where all keys are prefixed with `"prefix:"` and values are typed as `T`. This is useful for organizing related data such as sessions, cache entries, and feature flags without manually managing prefixes.
-
-> **Escape hatch:** The `kv` client covers the most common KV operations. For advanced use cases like `getWithMetadata` with specific cache behaviors, you can access the raw `KVNamespace` binding via `c.env.KV` in a route handler.
+For operations beyond this client, access the raw `KVNamespace` through `c.env.KV` in a route handler.

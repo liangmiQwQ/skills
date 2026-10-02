@@ -35,13 +35,14 @@ for (const obj of listed.objects) {
 const head = await storage.head('uploads/photo.jpg');
 ```
 
-The `storage` object is a full `R2Bucket`. Every method from the [Cloudflare R2 API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/) is available directly, with no wrapper layer.
+`storage` supports the full [R2Bucket API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/).
 
 ## Serving Files
 
 A common pattern is serving uploaded files from an API route:
 
 ```ts
+import { defineHandler } from 'void';
 import { storage } from 'void/storage';
 
 export const GET = defineHandler(async (c) => {
@@ -60,8 +61,12 @@ export const GET = defineHandler(async (c) => {
 });
 ```
 
-## How It Works
+## Custom bindings
 
-`storage` resolves the `env.STORAGE` binding when you use it. It exposes the R2 API directly, so methods and options work as described in Cloudflare's documentation.
+Use `createStorage(bucket)` with your own R2 binding, or in tests:
 
-The `createStorage()` factory exists for testing and for frameworks that manage their own routing. It accepts an `R2Bucket` and returns it directly.
+```ts
+import { createStorage } from 'void/storage';
+
+const storage = createStorage(env.MY_BUCKET);
+```

@@ -56,6 +56,8 @@ Repair recreates missing infrastructure that the installer owns. It does not res
 
 ### Upgrade the platform
 
+Keep the platform runtime current when updating the Void CLI. If a developer's CLI reports that project lookup requires an upgrade, upgrade the platform before retrying.
+
 Use the installed CLI's packaged runtime to upgrade:
 
 ```sh
@@ -80,7 +82,7 @@ Database migrations only move forward. Void checks compatibility before upgradin
 
 Upgrades automatically enable managed Sandboxes. The platform runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit, and the Cloudflare account must use Workers Paid before its first Sandbox application deploy. The upgrade itself does not probe Containers access, so platforms that do not deploy Sandbox applications need no additional plan or permissions.
 
-When upgrading from a release that used tenant-owned Sandbox containers, the upgrade may first ask you to finish the legacy cleanup. Follow the [`sandbox-drain` instructions](/reference/cli#operator-system), then rerun the upgrade. Administrator login remains available during that maintenance step.
+When upgrading from a release that used tenant-owned Sandbox containers, the upgrade may first ask you to finish the legacy cleanup. Follow the [`sandbox-drain` instructions](../../../reference/cli/platform-operations.md#operator-system), then rerun the upgrade. Administrator login remains available during that maintenance step.
 
 After a successful upgrade, you can restore a declared-compatible earlier runtime without reversing migrations:
 

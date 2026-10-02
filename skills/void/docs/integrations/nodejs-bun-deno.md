@@ -10,16 +10,6 @@ Set `target` in `void.config.ts` to build for Node.js, Bun, or Deno. You can run
 { "target": "node" }
 ```
 
-## Supported Targets
-
-| Target   | Server                                                                    | Static Assets                    |
-| -------- | ------------------------------------------------------------------------- | -------------------------------- |
-| `"node"` | [`@hono/node-server`](https://github.com/honojs/node-server)              | `@hono/node-server/serve-static` |
-| `"bun"`  | [`Bun.serve()`](https://bun.sh/docs/api/http)                             | `hono/bun`                       |
-| `"deno"` | [`Deno.serve()`](https://docs.deno.com/runtime/fundamentals/http_server/) | `hono/deno`                      |
-
-All three produce the same project structure and use the same Hono-based routing. The only difference is the HTTP server and static file middleware.
-
 ## Getting Started
 
 ### 1. Configure the target
@@ -43,7 +33,7 @@ npm install @hono/node-server
 npx vite dev
 ```
 
-The dev server runs your Hono routes in Node.js through Vite's SSR module loading. You get the same hot-reload experience as the Cloudflare target, but without `workerd`.
+The development server reloads routes and pages when you edit them.
 
 ### 4. Build and run
 
@@ -68,7 +58,7 @@ deno run -A dist/ssr/index.js
 
 Run these commands from your app directory. The server listens on `PORT` (env variable) or `3000` by default.
 
-Pages builds load their client manifest from `dist/client/.vite/manifest.json` and serve the generated JavaScript, CSS, and public assets. Keep `dist/ssr` and `dist/client` together when deploying. Asset paths resolve from the emitted server module, so the app also works when imported or started from another working directory.
+Deploy `dist/ssr` and `dist/client` together.
 
 ## Build Output
 
@@ -120,7 +110,7 @@ The following imports are **not available** with a non-CF target and produce a c
 
 If you need a database or storage, use an external provider and connect via standard Node.js libraries.
 
-Void-managed WebSocket route files (`*.ws.ts`) are still Cloudflare-only because they compile to Durable Objects. The `void/ws` subpath is not compile-time blocked on non-CF targets, so browser-side `connect()` code can still be bundled when a WebSocket runtime is available.
+WebSocket route files (`*.ws.ts`) require Cloudflare. You can still use the `void/ws` browser client to connect to a separately hosted WebSocket server.
 
 ### No cron job runtime
 
@@ -128,11 +118,11 @@ You can still define [cron jobs](../guide/jobs.md) in `crons/` and they will com
 
 ### No inbound email
 
-Inbound [email handlers](../guide/email.md#inbound) in `email/` need Cloudflare Email Routing to invoke the worker's `email()` export, and the Node.js entry exposes HTTP only. An `email/` directory fails the build with guidance. Outbound `sendEmail` has no send transport on these targets either: it returns a `BINDING_MISSING` error.
+[Inbound email handlers](../guide/email/receiving.md#inbound) and `sendEmail` require Cloudflare. Use an external mail provider on other targets.
 
 ### No prerendering
 
-[Prerendering](../guide/edge/prerendering.md) is a platform feature that relies on Cloudflare's edge cache and the Void deploy pipeline. It is not available for non-CF targets.
+[Edge prerendering](../guide/edge/prerendering.md) requires Cloudflare. Build-time [static generation](../guide/ssg.md) is available on all targets.
 
 ### No `void deploy`
 
@@ -148,60 +138,6 @@ Void warns and ignores these Cloudflare-specific `void.config.ts` fields on othe
 - `routing.revalidate`: edge caching, only on Cloudflare
 
 If you enable auth through `void/auth`, `void/client`, or `auth.ts`, Void fails the build for non-CF targets. Use Better Auth directly for Node/Bun/Deno deployments.
-
-## Example: API + Pages
-
-A typical Node.js Void app with API routes and React pages:
-
-```
-my-app/
-  pages/
-    layout.tsx
-    index.tsx
-    index.server.ts
-    about.tsx
-    about.server.ts
-  routes/
-    api/
-      hello.ts
-  package.json
-  vite.config.ts
-  void.config.ts
-```
-
-```json
-// void.config.ts
-{ "target": "node" }
-```
-
-```ts
-// vite.config.ts
-import { defineConfig } from 'vite';
-import { voidPlugin } from 'void';
-import { voidReact } from '@void/react/plugin';
-
-export default defineConfig({
-  plugins: [voidPlugin(), voidReact()],
-});
-```
-
-```ts
-// routes/api/hello.ts
-import { defineHandler } from 'void';
-
-export const GET = defineHandler((c) => {
-  return c.json({ message: 'Hello from Node.js!' });
-});
-```
-
-```bash
-# Development
-npx vite dev
-
-# Production
-npx vite build
-node dist/ssr/index.js
-```
 
 ## Programmatic Usage
 

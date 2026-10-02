@@ -30,10 +30,7 @@ the company sign-in before Void login. Interactive Access authentication uses a
 locally installed `cloudflared` and saves its short-lived credential in your
 system keychain for that platform origin. You do not need to copy browser cookies.
 
-For CI, Access credentials do not replace Void deployment credentials. A project
-owner creates the latter with `void project token create`; it is independently
-revocable, expires within 90 days, and authorizes only that project's deploy
-workflow. Human and operator tokens cannot be renewed by Access service proof.
+For CI, use a [project deploy token](/guide/platform/installation/first-deployment) alongside your Access credentials. An Access service token does not authorize a Void deployment.
 
 Store Access credentials in origin-keyed `VOID_ACCESS_CREDENTIALS`. A deploy
 that uses prerendering or remote bindings needs entries for both the exact API

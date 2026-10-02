@@ -21,6 +21,8 @@ void deploy --platform void --project my-first-app
 
 `void connect` validates the platform and signs you in when needed. Confirm project creation when deploy asks. To use a project that already exists, run `void project link` instead. An app already linked to another platform keeps its existing destination; use a fresh app directory for your first test.
 
+Once accepted by the platform, a deployment continues independently of the CLI connection. The CLI reconnects automatically after a connection failure. Use `void project status` to inspect a deployment after closing the CLI, or `void project cancel` to request cancellation.
+
 The CLI stores login credentials in your system keychain, separately for each platform URL. With no URL, `void connect` offers Cloudflare or a Void platform; `void connect --platform void` offers saved platforms and an option to enter another URL.
 
 For CI, create a bounded, project-scoped deploy credential while signed in as

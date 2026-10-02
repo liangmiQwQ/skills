@@ -4,11 +4,16 @@ outline: deep
 
 # Prerequisites
 
-Start with a Cloudflare account you can administer, an account with your chosen login provider, and an empty hosted PostgreSQL database. GitHub is the default and is optional when another method is selected. A domain is recommended. If yours is not ready, choose **Use workers.dev for testing** during installation and [add a domain later](/guide/platform/installation/domains#adding-a-domain). The steps below explain how to get the credentials the installer asks for.
+To run a Void platform, you need:
+
+- A Cloudflare account with Workers for Platforms and R2 enabled.
+- An empty hosted PostgreSQL database.
+- An account with your chosen login provider. GitHub is the default; Google, OIDC, and Cloudflare Access are also supported.
+- A domain for your apps, or `workers.dev` for testing. You can [add a domain later](/guide/platform/installation/domains#adding-a-domain).
 
 Void creates the Workers, storage, queues, routing, and database tables through the CLI.
 
-This setup has costs: Workers for Platforms requires a paid plan, and your database and Cloudflare usage have their own pricing. External PostgreSQL is required in either mode.
+Workers for Platforms requires a paid plan. Your database and Cloudflare usage are billed separately.
 
 ## Prepare Your Cloudflare Account and Domain
 
@@ -31,15 +36,7 @@ pnpm add --global void
 void platform install --plan
 ```
 
-Void checks your saved Cloudflare login while you enter the installation name. If sign-in is needed, it opens your browser after you submit the name; press Ctrl+C to cancel. The plan command then asks for the account and basic configuration and shows the resources it would create. It does not require the database or runtime secrets and does not change Cloudflare resources.
-
-The installer first offers these choices, with the domain option selected:
-
-```text
-Where should your apps live?
-  Use a domain — recommended
-  Use workers.dev for testing — add a domain later
-```
+Sign in to Cloudflare when prompted, then choose an installation name and account. `--plan` previews the resources without changing them or requiring runtime secrets.
 
 For a domain installation, use these answers. Testing mode skips the application domain, zone, and catch-all questions:
 
@@ -52,9 +49,9 @@ For a domain installation, use these answers. Testing mode skips the application
 | Optional custom API hostname            | Leave empty to use `workers.dev`                    |
 | Dedicate all unmatched traffic to Void? | Yes only if this whole zone belongs to the platform |
 
-Platform resources use your installation name: `team` creates names such as `void-team-api`, `void-team-proxy`, and `void-team-routing`, with no random suffix. Use a different installation name for another platform in the same account. If a required resource already exists and belongs to another installation, Void stops without overwriting it. Existing installations keep their recorded resource names.
+Choose an unused installation name in your account. For example, `team` creates resources such as `void-team-api` and `void-team-proxy`.
 
-The preview shows the actual resource names and login callback URL that installation will use with the same configuration. It also links directly to the runtime-token form and the account's R2 token page. When you select GitHub login, it links to GitHub OAuth registration. It does not open credential setup pages or save an installation draft; Cloudflare browser login still opens when needed.
+The preview includes your login callback URL and links for creating credentials. Keep it open while following [Credentials](/guide/platform/installation/credentials), then run the install command printed at the end.
 
 You can select either path directly:
 
@@ -69,7 +66,7 @@ void platform install --workers-dev --plan
 
 Use an empty PostgreSQL database dedicated to this platform. It stores users, projects, and deployments; individual apps can still use D1. Void creates the tables and the Hyperdrive connection, but does not provision the PostgreSQL server.
 
-Void does not require a particular database provider. Use an existing PostgreSQL host or choose a service such as **PlanetScale Postgres**, **Neon**, **Supabase**, or others.
+Use any PostgreSQL provider that accepts connections from your computer and Cloudflare:
 
 1. Create a fresh database or project dedicated to the platform, with no existing application tables. Use a database role that can create and manage its tables and schemas.
 2. Open the provider's connection details and select the primary database. Use a direct connection or a session-mode pooler, not transaction pooling. The connection must work from both your computer and Cloudflare.
@@ -85,4 +82,12 @@ For a dedicated Supabase project, [disable the Data API](https://supabase.com/do
 
 Once installation claims the database, continue using that same database for resume and maintenance commands. Uninstall never deletes external PostgreSQL.
 
-During interactive installation, choose whether Void creates Hyperdrive or uses an existing configuration in your Cloudflare account. Select an existing configuration by name and confirm its database, host, port, runtime user, and disabled SQL result caching. If you need a new separately managed configuration, choose **Set up a separately managed Hyperdrive**; Void pauses and gives you setup instructions. Create it with any unused name, point it at the dedicated PostgreSQL database using a runtime user, and disable SQL result caching. See [Cloudflare's Hyperdrive setup guide](https://developers.cloudflare.com/hyperdrive/get-started/), or ask your organization's Hyperdrive administrator to create it. Rerun the installer and select it. Paste a database owner connection into the PostgreSQL URL prompt for installation and migrations. Void verifies the selected Hyperdrive against that database, records its identity for later maintenance, and leaves its configuration under your external manager's control. For unattended installation, supply the existing Hyperdrive ID, origin host, and runtime user through the environment variables in [Install from CI](/guide/platform/installation/ci).
+### Use an existing Hyperdrive
+
+The installer can create Hyperdrive for you or use one you manage separately. For an existing configuration:
+
+1. Point it at the dedicated platform database using a runtime user, and disable SQL result caching.
+2. Select it in the installer and confirm the database, host, port, and runtime user.
+3. Supply a database owner connection at the PostgreSQL URL prompt so Void can apply migrations.
+
+To create one first, choose **Set up a separately managed Hyperdrive** and follow the printed instructions or [Cloudflare’s setup guide](https://developers.cloudflare.com/hyperdrive/get-started/). Rerun the installer once it is ready. Void leaves its configuration under your control. For unattended setup, use the Hyperdrive variables in [Install from CI](/guide/platform/installation/ci).

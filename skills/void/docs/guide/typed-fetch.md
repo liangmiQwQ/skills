@@ -4,7 +4,7 @@ outline: deep
 
 # Typed Fetch
 
-Void ships a typed `fetch` client that knows every route in your app. Import it from `void/client` and get autocomplete for paths, type-checked request bodies, and fully inferred response types.
+Import `fetch` from `void/client` for route autocomplete, checked request bodies, and inferred response types.
 
 ## Basic Usage
 
@@ -25,8 +25,6 @@ const user = await fetch('/api/users/:id', {
   params: { id: '42' },
 });
 ```
-
-No type annotations needed. Everything is inferred from your route handlers.
 
 ## What Gets Type-Checked
 
@@ -90,7 +88,7 @@ try {
 
 ## Isomorphic Fetch During SSR
 
-`fetch()` from `void/client` works during server-side rendering and inside route handlers without an HTTP round-trip. In the worker environment, it calls your Hono app directly through `app.fetch()` and skips the network entirely.
+`fetch()` also works in server-side rendering and route handlers. Calls to your app run without an HTTP round-trip.
 
 ```ts
 // src/main.ssr.tsx
@@ -108,6 +106,4 @@ export default defineRender(async (c, assetTags) => {
 });
 ```
 
-**Automatic header forwarding**: `cookie` and `authorization` headers from the incoming request are automatically forwarded to subrequests, so authentication context is preserved. If you pass these headers explicitly, your values take precedence.
-
-**How it works**: In the browser, `fetch()` uses the normal HTTP client. In the worker, Void redirects the import to a virtual module that calls `app.fetch()` directly using the Hono app instance. AsyncLocalStorage threads the outer request context so headers and `waitUntil()` work correctly.
+Server-side calls forward the incoming request's `cookie` and `authorization` headers. Explicit headers take precedence.

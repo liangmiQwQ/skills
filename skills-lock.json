@@ -107,7 +107,7 @@
       "source": "liangmiQwQ/vp-config",
       "sourceType": "github",
       "skillPath": "skills/use-vp-config/SKILL.md",
-      "computedHash": "6bc1e22882b6137854556c962893d4ec5e74e05b0dc3725bb31a38be3b2c0eff"
+      "computedHash": "c885c94c045304a62876acbddc99ae9f17543394dd2795725c746ea7c3ba4a23"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",

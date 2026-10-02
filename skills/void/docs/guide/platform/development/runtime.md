@@ -52,12 +52,7 @@ If your fork has added managed GitHub builds and Cloudflare Access protects its 
 to `/webhooks/github`: GitHub does not present your Access credentials. Do not add
 an Everyone or bypass policy to the API application.
 
-The API source package includes an optional, path-isolated Worker for this case.
-It accepts only `POST /github`, validates GitHub's signature over the raw body,
-and forwards one authenticated internal operation over an API service binding.
-The API independently verifies both that internal proof and GitHub's signature
-before running the normal webhook handler. Installations without perimeter
-protection can continue using the API's direct `/webhooks/github` endpoint.
+Deploy the optional webhook ingress at a separate public hostname. It accepts signed GitHub deliveries at `POST /github` and forwards them to your API through a service binding. Without Access protection, use the API’s `/webhooks/github` endpoint directly.
 
 To deploy the optional ingress:
 
@@ -87,18 +82,13 @@ To deploy the optional ingress:
    ingress URL ending in `/github`. Use GitHub's test delivery and confirm a 2xx
    response before relying on push builds.
 
-The ingress has no login, dashboard, project, operator, proxy, or arbitrary
-forwarding route. It does not make the GitHub integration part of the core
-installer, provision build executors, create a GitHub App, configure Cloudflare
-Access, or manage either Worker's secrets. Its body limit is 25 MiB, based on
-GitHub's [documented 25 MB webhook payload cap](https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap);
-malformed or larger deliveries are rejected before event processing.
+The ingress accepts payloads up to 25 MiB. See [GitHub’s payload limit](https://docs.github.com/en/webhooks/webhook-events-and-payloads#payload-cap).
 
 ## Deploying Source Builds from CI
 
 Build `@void/platform` from your checkout and pass its runtime directory to `install`, `upgrade`, `repair`, `enable`, or `rollback` with `--runtime`. Custom runtimes get the same integrity, migration, health, and rollback checks as packaged releases.
 
-Void records the runtime's manifest digest, whether it was packaged or custom, and its source revision. A build from a Git checkout automatically records `HEAD`, or `<HEAD>-dirty` when the checkout has uncommitted files. Build systems can set `VOID_PLATFORM_SOURCE_REVISION` to override automatic detection.
+Use a clean Git checkout or set `VOID_PLATFORM_SOURCE_REVISION` to identify the revision you deploy.
 
 A fresh CI runner can discover the installation each time. Set `CLOUDFLARE_API_TOKEN` and `VOID_PLATFORM_DATABASE_URL` through its protected environment, then:
 

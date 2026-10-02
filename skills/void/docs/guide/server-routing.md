@@ -25,15 +25,9 @@ routes/
   api/metrics.prod.ts  →  production only
 ```
 
-`dev` is the Vite dev server. `prod` is every build, `void deploy`, and `vite preview` — preview serves a production build, so it uses the production routes.
+`.dev` routes run only in development; `.prod` routes run in builds, deployments, and production previews. A resource used only by `.dev` routes is not provisioned for production.
 
-Excluded routes aren't included in the Worker bundle, generated types, or route and WebSocket configuration.
-
-`void prepare` is the exception: it boots no Vite, so it has no environment to read. It generates types for routes in both environments.
-
-[Binding inference](../reference/resource-inference.md) follows the suffix for files in `routes/`. For example, a `void/storage` import used only in `api/debug.dev.ts` adds a development R2 binding, but does not provision a production bucket. Imports in other source directories remain available in both environments.
-
-The suffix applies to files in `routes/` only. It has no effect in `pages/`, `middleware/`, `crons/`, or `queues/`.
+Suffixes apply only in `routes/`, not in `pages/`, `middleware/`, `crons/`, or `queues/`. `void prepare` generates types for both environments.
 
 Each file exports named HTTP method constants to handle specific methods:
 
@@ -65,19 +59,9 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-The `db` helper provides a typed query API over D1. See [Database](./database.md) for the full API.
+See [Database](./database.md) for queries with D1, PostgreSQL, or MySQL.
 
 ## `defineHandler`
-
-`defineHandler` wraps a route handler function:
-
-```ts
-import { defineHandler } from 'void';
-
-export const GET = defineHandler((c) => {
-  return { data: 'hello' };
-});
-```
 
 The handler receives a Hono `Context` with typed Cloudflare bindings on `c.env` (see [Cloudflare](../integrations/cloudflare.md)). You can use the full Hono API (`c.json()`, `c.text()`, `c.header()`, etc.).
 
@@ -107,23 +91,6 @@ export const POST = defineHandler.withValidator({
 ```
 
 See [Database: Schema-Derived Validators](./database.md#schema-derived-validators) for how to set up `createInsertSchema` with column refinements.
-
-You can validate the body, query, and route parameters together:
-
-```ts
-// routes/api/users/[id].ts
-import { defineHandler } from 'void';
-import { db, eq } from 'void/db';
-import { users, updateUserSchema } from '@schema';
-
-export const PUT = defineHandler.withValidator({
-  body: updateUserSchema,
-})(async (c, { body }) => {
-  const id = Number(c.req.param('id'));
-  const [updated] = await db.update(users).set(body).where(eq(users.id, id)).returning();
-  return updated;
-});
-```
 
 ### Manual validators
 
@@ -160,7 +127,7 @@ When validation fails, a `400` response is returned with structured error detail
 }
 ```
 
-No extra dependencies are required. Void inlines the Standard Schema types, so you only need your chosen schema library.
+Install your chosen validator library; no separate Standard Schema dependency is needed.
 
 Validator schemas also power the [typed fetch client](./typed-fetch.md), so `body`, `query`, and `params` types are enforced at the call site.
 
@@ -208,9 +175,7 @@ export default defineMiddleware(async (c, next) => {
 });
 ```
 
-`defineMiddleware` uses Hono middleware semantics: `(c, next) => Promise<void> | void`.
-
-For a temporary full-site gate, use the built-in `basicAuth()` middleware with credentials from `void/env`. Void internal endpoints under `/__void` are excluded automatically so deploy migrations and dev tooling continue to work. Wrap `void/env` reads in functions so they are resolved per request after Void has bound the runtime env.
+Use `basicAuth()` for a temporary site gate. Void's reserved `/__void` endpoints remain accessible for deployment and development tooling. Read credentials through callbacks:
 
 ```ts
 // env.ts
@@ -238,25 +203,7 @@ Set `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` as local environment variabl
 
 For app-specific bypasses such as health checks or public webhooks, compose that logic in your own middleware before calling `basicAuth()`.
 
-Middleware can set typed context variables using `c.set()`. Augment the `CloudContextVariables` interface so downstream handlers get full type safety:
-
-```ts
-// middleware/01.request-id.ts
-import { defineMiddleware } from 'void';
-
-declare module 'void' {
-  interface CloudContextVariables {
-    requestId: string;
-  }
-}
-
-export default defineMiddleware(async (c, next) => {
-  c.set('requestId', crypto.randomUUID());
-  await next();
-});
-```
-
-Now every route handler can call `c.get("requestId")` and get `string` back, with no type assertion needed. See [Type Safety](./type-safety.md#context-variables) for more details.
+Use `c.set()` to share data with downstream handlers. Augment `CloudContextVariables` for typed access with `c.get()`. See [Context variables](./type-safety.md#context-variables).
 
 ### Per-route middleware
 
@@ -273,19 +220,9 @@ Middleware runs in order. Each can short-circuit (return a response without call
 import { defineHandler } from 'void';
 import { cors } from 'hono/cors';
 
-const addServerTiming = async (c, next) => {
-  const start = performance.now();
-  await next();
-  c.header('Server-Timing', `app;dur=${Math.round(performance.now() - start)}`);
-};
-
-export const GET = defineHandler(
-  cors({ origin: 'https://app.example.com' }),
-  addServerTiming,
-  (c) => {
-    return { stats: '...' };
-  },
-);
+export const GET = defineHandler(cors({ origin: 'https://app.example.com' }), (c) => ({
+  stats: '...',
+}));
 ```
 
 Up to 5 middleware can be passed before the handler, with full type inference for each position.

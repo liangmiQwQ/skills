@@ -8,13 +8,11 @@ Use queues to process work asynchronously, such as sending emails or handling up
 
 ## Defining queues
 
-Create files in `queues/**/*.ts`; `.mts`, `.js`, and `.mjs` also work. The queue name is inferred from its path, with nested path segments joined by `-`. For example, `queues/emails.ts` creates a queue named `"emails"`, and `queues/order/notifications.ts` creates `"order-notifications"`. A nested path must not normalize to the same name as another file: `queues/order/notifications.ts` and `queues/order-notifications.ts` conflict, so Void reports the collision and asks you to rename one.
+Create a consumer in `queues/`. TypeScript and JavaScript files are supported (`.ts`, `.mts`, `.js`, `.mjs`). Its path determines the queue name: `queues/emails.ts` creates `emails`, and `queues/order/notifications.ts` creates `order-notifications`. Each queue must have a unique name.
 
 The resulting name must follow Cloudflare's queue naming rules: 1–63 characters, only letters, digits, and `-`, beginning and ending with a letter or digit.
 
-If you previously used a nested queue locally, update producer calls from `queues['order/notifications']` to `queues['order-notifications']`. The derived binding remains `QUEUE_ORDER_NOTIFICATIONS`.
-
-Each queue file should export a default handler wrapped with [`defineQueue`](../reference/api.md#definequeue-t-handler). The generic `<T>` parameter defines the message body type. That is the type of each `msg.body` in the batch, and it is also used by the typed `queues` proxy for `send()` calls.
+Export a default handler wrapped with [`defineQueue<T>`](../reference/api/handlers.md#definequeue-t-handler). `T` defines the message body for both the consumer and calls to `send()`:
 
 ```ts
 // queues/emails.ts
@@ -55,8 +53,6 @@ export const POST = defineHandler(async (c) => {
   return c.json({ ok: true });
 });
 ```
-
-The binding name is derived automatically: `QUEUE_` + queue name uppercased with non-alphanumeric characters replaced by `_`. For example, `queues/emails.ts` creates binding `QUEUE_EMAILS`, while `queues/order/notifications.ts` creates binding `QUEUE_ORDER_NOTIFICATIONS`.
 
 ## Per-message acknowledgment
 
@@ -111,12 +107,14 @@ export default defineQueue<Message>(async (batch, env) => {
 
 - `maxBatchSize`: maximum number of messages per batch (default `10`)
 - `maxBatchTimeout`: maximum seconds to wait before delivering an incomplete batch (default `5`)
-- `maxRetries`: maximum number of retries before a message is dead-lettered (default `3`)
+- `maxRetries`: maximum number of retries before delivery is exhausted (default `3`)
 - `retryDelay`: seconds to wait between retries (default `0`)
 
-## Deployment behavior
+Void-managed queues do not configure a dead-letter queue. Cloudflare permanently
+deletes messages that exhaust their retries without one; see
+[Cloudflare's dead-letter queue guide](https://developers.cloudflare.com/queues/configuration/dead-letter-queues/).
 
-On deploy, Void includes all discovered queues in the deploy manifest. The platform provisions Cloudflare Queues, configures producer bindings on the user worker, and registers the dispatch worker as the queue consumer for relay delivery.
+Void provisions queues and connects their producers and consumers when you deploy.
 
 ## Local development
 

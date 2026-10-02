@@ -39,16 +39,13 @@ Define your tables in TypeScript, then query them with `db` from `void/db`. Void
 
 ## Choosing a Dialect
 
-Void supports three database backends. All use the same Drizzle-based workflow for schema definition, querying, and migrations.
+Choose a database during `void init`, or set `database` in `void.config.ts`:
 
-`void init` can start you with D1, PostgreSQL, MySQL, or no database yet. D1 stays implicit; PostgreSQL writes `"database": "pg"`; MySQL writes `"database": "mysql"`.
-
-|            | [D1 (SQLite)](./database/d1) | [PostgreSQL](./database/postgresql) | [MySQL](./database/mysql)     |
-| ---------- | ---------------------------- | ----------------------------------- | ----------------------------- |
-| Config     | Default                      | `"database": "pg"`                  | `"database": "mysql"`         |
-| Managed by | Void                         | Bring your own database             | Bring your own database       |
-| Best for   | Prototypes, read-heavy apps  | Complex queries, existing Postgres  | Existing MySQL infrastructure |
-| Connection | Automatic D1 binding         | Hyperdrive                          | Hyperdrive                    |
+|            | [D1 (SQLite)](./database/d1) | [PostgreSQL](./database/postgresql) | [MySQL](./database/mysql) |
+| ---------- | ---------------------------- | ----------------------------------- | ------------------------- |
+| Config     | Default                      | `"database": "pg"`                  | `"database": "mysql"`     |
+| Managed by | Void                         | Bring your own database             | Bring your own database   |
+| Connection | Automatic D1 binding         | Hyperdrive                          | Hyperdrive                |
 
 ## Schema Definition
 
@@ -235,25 +232,15 @@ const usersWithPosts = await db.query.users.findMany({
 });
 ```
 
-The user schema is automatically loaded into the `db` instance via a Vite plugin, so relational queries work out of the box.
-
 ::: warning ⚠️ Nuxt and Analog limitations
-Nuxt and Analog use Nitro, which bundles server routes outside of Vite's plugin pipeline. The schema cannot be injected into the `db` instance, so `db.query.*` relational queries are not available in Nuxt and Analog. Use the standard query builder API (`db.select().from(table)`) instead.
+In Nuxt and Analog, use the query builder (`db.select().from(table)`). The `db.query.*` relational API is not available in these frameworks.
 :::
 
 ## Seeding
 
 Use `void db seed` to reset your local database, re-apply migrations, and then run a seed file.
 
-Void resolves default seed files in this order:
-
-1. `db/seed.ts`
-2. `db/seed.mts`
-3. `db/seed.js`
-4. `db/seed.mjs`
-5. `db/seed.sql`
-
-If more than one default seed file exists, pass `--file <path>` explicitly.
+Use `db/seed.ts` for a programmatic seed or `db/seed.sql` for SQL. JavaScript and `.mts` / `.mjs` files also work. If more than one seed file exists, choose one with `--file <path>`.
 
 ### Programmatic seeding
 
@@ -274,7 +261,7 @@ export default defineSeed<typeof import('./schema')>(async ({ db, schema }) => {
 
 The seed context includes:
 
-- `dialect`: `"sqlite"` or `"postgresql"`
+- `dialect`: `"sqlite"`, `"postgresql"`, or `"mysql"`
 - `db`: a Drizzle instance for the local database
 - `schema`: the exports from your `db/schema.ts` or `db/schema/` modules
 
@@ -288,24 +275,13 @@ INSERT INTO messages (text) VALUES ('Hello from SQL');
 
 ## Schema-Derived Validators
 
-You can derive request validators from your Drizzle tables with [`void/drizzle-zod`](../reference/api.md#user-facing-imports), [`void/drizzle-valibot`](../reference/api.md#user-facing-imports), or [`void/drizzle-arktype`](../reference/api.md#user-facing-imports). These adapters use Void's bundled Drizzle version, keeping the validators compatible with your table types.
+Derive request validators from your tables with `void/drizzle-zod`, `void/drizzle-valibot`, or `void/drizzle-arktype`. Add the validator after your table definition:
 
 ::: code-group
 
 ```ts [Zod]
 // db/schema.ts
-import { sqliteTable, text, integer } from 'void/schema-d1';
-import { sql } from 'void/db';
 import { createInsertSchema } from 'void/drizzle-zod';
-
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull(),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-});
 
 export const insertUserSchema = createInsertSchema(users, {
   name: (schema) => schema.min(1),
@@ -315,19 +291,8 @@ export const insertUserSchema = createInsertSchema(users, {
 
 ```ts [Valibot]
 // db/schema.ts
-import { sqliteTable, text, integer } from 'void/schema-d1';
-import { sql } from 'void/db';
 import { createInsertSchema } from 'void/drizzle-valibot';
 import { pipe, minLength, email } from 'valibot';
-
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull(),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-});
 
 export const insertUserSchema = createInsertSchema(users, {
   name: (schema) => pipe(schema, minLength(1)),
@@ -337,19 +302,8 @@ export const insertUserSchema = createInsertSchema(users, {
 
 ```ts [ArkType]
 // db/schema.ts
-import { sqliteTable, text, integer } from 'void/schema-d1';
-import { sql } from 'void/db';
 import { createInsertSchema } from 'void/drizzle-arktype';
 import { type } from 'arktype';
-
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull(),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`(datetime('now'))`),
-});
 
 export const insertUserSchema = createInsertSchema(users, {
   name: type('string > 0'),
@@ -397,35 +351,29 @@ npm install arktype
 
 ## CLI Commands
 
-| Command            | Purpose                                                         |
-| ------------------ | --------------------------------------------------------------- |
-| `void db push`     | Apply schema directly to local database (no migration files)    |
-| `void db connect`  | Connect or provision PostgreSQL/MySQL and save `DATABASE_URL`   |
-| `void db generate` | Generate app and Better Auth SQL migrations for production      |
-| `void db migrate`  | Apply pending migrations locally                                |
-| `void db status`   | Show schema drift and pending migrations                        |
-| `void db reset`    | Drop the local DB and re-apply all migrations                   |
-| `void db seed`     | Reset + run seed file (`--file <path>`)                         |
-| `void db execute`  | Run ad-hoc SQL against local DB (`--file <path>`)               |
-| `void db studio`   | Open Drizzle Studio for the local database                      |
-| `void db export`   | Dump local DB as SQL (`--output`, `--no-data`, `--no-schema`)   |
-| `void db set-url`  | Update the PostgreSQL or MySQL connection string for deployment |
+| Command            | Purpose                                              |
+| ------------------ | ---------------------------------------------------- |
+| `void db push`     | Apply schema changes locally without migration files |
+| `void db generate` | Generate SQL migrations                              |
+| `void db migrate`  | Apply pending migrations locally                     |
+| `void db status`   | Check schema drift and pending migrations            |
+| `void db seed`     | Reset the local database and run a seed file         |
 
-See the [CLI reference](../reference/cli.md#database) for details.
+See the [CLI reference](../reference/cli/database.md#database) for connection setup, SQL execution, Studio, exports, and other commands.
 
 ## Scaffolding
 
 The `void gen model` command generates dialect-appropriate `sqliteTable`, `pgTable`, or `mysqlTable` definitions.
 
 ```bash
-void gen model post title:string body:text published:boolean
+void gen model posts title:string body:text published:boolean
 ```
 
 This creates:
 
-1. `db/schema/post.ts`: a Drizzle table definition with `id`, `createdAt`, `updatedAt`, and your columns
-2. Updates `db/schema.ts` with `export * from "./schema/post"`
+1. `db/schema/posts.ts`: a Drizzle table definition with `id`, `createdAt`, `updatedAt`, and your columns
+2. Updates `db/schema.ts` with `export * from "./schema/posts"`
 3. `routes/api/posts/index.ts`: `GET` for list and `POST` for insert with validation
 4. `routes/api/posts/[id].ts`: `GET` by id with `404` handling
 
-See the [CLI reference](../reference/cli.md#code-generation) for the full list of generators.
+See the [CLI reference](../reference/cli/generate.md#code-generation) for the full list of generators.

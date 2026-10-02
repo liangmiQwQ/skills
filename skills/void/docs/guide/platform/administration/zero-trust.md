@@ -8,8 +8,6 @@ Project Zero Trust puts Cloudflare Access in front of the hostnames of projects 
 
 This is separate from the Access login and protection for the platform API. Projects deployed directly to Cloudflare are not affected.
 
-The steps below set it up. [How Protection Works](#how-protection-works) explains what visitors see, which Access applications Void creates, and what happens while settings change.
-
 ## Requirements
 
 - A Cloudflare Zero Trust organization in the account that hosts the platform, with the identity providers and reusable Access policies you want to use. Select at least one Allow policy that matches people by identity. Void rejects Bypass and Service Auth policies, and rules that allow Everyone or any service token.
@@ -71,26 +69,11 @@ void platform zero-trust disable
 
 This removes the Access applications Void created and makes all projects public. On large installations it runs in steps; run it again, or check `void platform zero-trust status`, until Zero Trust shows as disabled with no operation running.
 
-Uninstalling the platform does not remove these applications. `void platform uninstall` refuses to start while Zero Trust is enabled, a change is still running, or some Void-managed Access applications are left. Its error lists their names. Disable Zero Trust first, then uninstall. Once the uninstall starts turning the platform off, Zero Trust changes and deployments are refused. If it stops after that point, run it again, or bring the platform back with `void platform enable` or `void platform repair`. If a project's applications could not be removed, Void retries every hour while the platform is enabled. If the error says a project deletion stopped partway, run `void project delete` for that project again to remove them.
+Disable Zero Trust and wait for its applications to be removed before [uninstalling the platform](/guide/platform/installation/uninstall). If project deletion stopped partway, retry `void project delete` for that project.
 
 ## How Protection Works
 
-Every request to a protected project passes two checks before your code runs:
-
-```text
-Visitor
-  │
-  ▼
-Cloudflare Access ─── not signed in ─────────▶ sign-in page
-  │ signed in and allowed by your policies
-  ▼
-Void checks the Access token ─── rejected ───▶ 403 page
-  │ token is valid for this hostname
-  ▼
-Your project: routes, pages, assets, WebSockets
-```
-
-A public project skips both. Access lets every visitor through, and Void does not look for a token.
+Cloudflare Access handles sign-in and applies your policies. Void also verifies the token before serving a protected project. Public projects allow visitors without sign-in.
 
 ### What Visitors See
 
@@ -108,7 +91,7 @@ Void only covers the `workers.dev` testing URLs of this installation. Other Work
 
 #### The 403 Page
 
-Void answers `403 Cloudflare Access authentication required` when a request reaches a protected project without a valid Access token for it. Page requests get a short HTML error page. Requests under `/api`, requests for files, requests that are not `GET` or `HEAD`, and requests that do not accept HTML get the same message as plain text. The response is never cached.
+A request without a valid token receives `403 Cloudflare Access authentication required`. Page requests show an HTML error; API and asset requests receive plain text. These responses are never cached.
 
 Visitors who went through the sign-in page normally never see it. They can see it:
 
@@ -122,28 +105,12 @@ Protection applies to the whole hostname. There are no path exceptions. `/api/*`
 
 #### Webhooks and Other Non-Browser Clients
 
-Void only accepts policies that match people by identity. It rejects Bypass and Service Auth policies, and rules that allow Everyone or any service token. So a machine cannot pass on its own. Payment and Git webhooks, CI jobs, uptime checks, and plain `curl` calls get the sign-in page or the 403 response.
+Project protection requires a person’s identity. Webhooks, CI jobs, uptime checks, and unauthenticated `curl` calls receive the sign-in page or a 403.
 
 If a project must accept such requests:
 
 - make the project public with `void project zero-trust public` and check callers in your own code, or
 - move the endpoints that machines call into a separate project, and make only that project public.
-
-### Two Checks on Every Request
-
-Cloudflare Access is the first check. It runs at Cloudflare's edge, shows the sign-in page, and applies your policies. Only visitors your policies allow get an Access token for the project.
-
-Void is the second check. Before a protected project runs, Void confirms that the request carries an Access token that:
-
-- was issued by your Zero Trust team;
-- belongs to one of the Access applications Void created for this project's hostname;
-- has not expired.
-
-If any of this fails, the visitor gets the [403 page](#the-403-page). Your routes, assets, and caches are never reached.
-
-This gives you one guarantee: **deleting a Void-managed Access application, or changing its hostnames, cannot make a protected project public.** If someone deletes Void's application, or points it at other hostnames, visitors are refused instead of let in. Loosening the policies of Void's application in the dashboard does widen who can sign in, until the next update puts Void's policies back.
-
-The second check does not look at your policies again. Who may sign in is decided only by the policies in Cloudflare Access. If you loosen a selected policy, the change applies to every protected project.
 
 ### Access Applications Void Creates
 
@@ -168,146 +135,50 @@ Use 1 instead of 2 on an installation without a domain. For example, 40 projects
 
 #### Recognizing Void's Applications
 
-Void adds no tags. Its application names follow this pattern:
-
-```text
-void-<installation>-<code>-<random>-project-zero-trust     shared project application
-void-<installation>-<code>-<random>-public-<project-id>    public exception
-void-<installation>-<code>-<random>-protected-<project-id> custom domain application
-void-<installation>-<code>-<random>-platform-health        health check exception
-```
-
-- `<installation>` is the start of your installation ID, which begins with your installation name.
-- `<code>` is 16 characters. It is the same for every application of one installation.
-- `<random>` is 32 random characters.
-- `<project-id>` is the project ID, such as `proj_abc123def456`. The project slug is not part of the name.
-
-To see the exact names Void recorded, run `void platform zero-trust status` for the shared application and the health check exception, and `void platform zero-trust project-status <project-id>` for a project's applications. There, the public exception is listed as `bypass application name` and the custom domain application as `protected application name`.
+Run `void platform zero-trust status` for the shared and health-check applications, or `void platform zero-trust project-status <project-id>` for a project's applications. These commands show their exact names and IDs.
 
 ### Editing Applications in the Dashboard
 
-Do not edit, rename, or delete Void's applications in the Cloudflare dashboard. Change the identity providers and policies with `void platform zero-trust configure` instead. See [Enable Zero Trust](#enable-zero-trust).
+Manage Void’s applications through `void platform zero-trust configure` and the project commands. Editing or deleting them in Cloudflare can block access until you reconcile. Dashboard edits may be replaced the next time Void updates an application.
 
-You can still edit the rules inside a selected reusable policy. Void's applications use your policies as they are. Void checks them again during `void platform zero-trust configure` and `void platform zero-trust reconcile`, which stop with an error, and during `status --check`, which reports `present: false`. A policy fails this check when it now allows Everyone or any service token, or uses a Bypass or Service Auth decision.
-
-#### What Happens If You Do
-
-Void writes an application when it updates it: during platform `configure` or `reconcile`, during a project's `protect`, `public`, or `reconcile`, when a custom domain is added to or removed from that project, and while it retries a project that is not settled. Scheduled maintenance does not look for dashboard changes on settled projects. Until one of these runs, your change stays in effect.
-
-| Change in the dashboard                                | Effect                                                                                                                                                                                                | Repair                                              |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Edit hostnames, policies, providers, or session length | Your change stays until the next update, which puts Void's settings back.                                                                                                                             | Run the reconcile command for that application      |
-| Delete the shared project application                  | Protected projects answer 403 on `<slug>.<your domain>` and `workers.dev` URLs. Their custom domains and public projects keep working.                                                                | `void platform zero-trust reconcile`                |
-| Delete a public exception                              | Visitors of that public project are asked to sign in, because the shared application now covers it.                                                                                                   | `void project zero-trust reconcile` in that project |
-| Delete a custom domain application                     | That protected project answers 403 on its custom domains.                                                                                                                                             | `void project zero-trust reconcile` in that project |
-| Delete the health check exception                      | Platform health checks fail with a redirect to sign-in, so the admin dashboard shows `dispatch` as unhealthy and `void platform upgrade` and `repair` stop at their health check.                     | `void platform zero-trust reconcile`                |
-| Rename an application                                  | Void stops updating or deleting it. Reconcile fails with `The recorded Access application no longer has its Void-owned name.` For the shared application, platform status then shows `error`.         | Rename it back to the recorded name, then reconcile |
-| Copy an application with the same name                 | Void ignores the copy while the original exists, and `disable` does not remove it. If the original is later deleted, reconcile fails with `Multiple Cloudflare Access applications are named <name>.` | Delete the copy, then reconcile                     |
-
-When Void recreates a deleted shared project application, the new application issues different Access tokens. Void then moves each protected project to it. On large installations this runs in steps, and protected projects answer 403 until Void reaches them.
-
-#### Checking for Changes
+You can edit a selected reusable policy’s rules in Cloudflare. Changes affect every project using that policy. Keep an identity-based Allow policy without Everyone or service tokens, then check it with:
 
 ```sh
 void platform zero-trust status --check
 ```
 
-This compares the shared project application and the health check exception with the saved settings, and checks your selected identity providers and policies again. The output includes:
+- `drifted: true`: run `void platform zero-trust reconcile`.
+- `present: false`: check the token, application, identity providers, and policies, then reconcile.
 
-```text
-checked: true
-live:
-  present: true
-  drifted: false
-```
-
-- `drifted: true` means the shared application or the health check exception no longer matches. Run `void platform zero-trust reconcile`.
-- `present: false` means Void could not read it. The application may be deleted, a selected identity provider or policy may be gone or no longer allowed, or the token may not work. Check the token and selections, then run `void platform zero-trust reconcile`.
-
-`--check` only reads. It changes nothing. It does not check public exceptions or custom domain applications. If you think one was changed, run a reconcile command.
+This checks the shared and health-check applications. For a public exception or custom-domain application, use the project's reconcile command.
 
 #### Repair Commands
 
-| Command                                                   | Rewrites                                                                                     | Who can run it                               |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `void platform zero-trust reconcile`                      | The shared project application, the health check exception, and every project's applications | Installation administrators                  |
-| `void platform zero-trust project-reconcile <project-id>` | One project's applications                                                                   | Installation administrators                  |
-| `void project zero-trust reconcile`                       | The linked project's applications, or pass `--project <slug>`                                | The project owner and project administrators |
+| Command                                                   | Scope                                 | Who can run it                           |
+| --------------------------------------------------------- | ------------------------------------- | ---------------------------------------- |
+| `void platform zero-trust reconcile`                      | Platform and all projects             | Installation administrators              |
+| `void platform zero-trust project-reconcile <project-id>` | One project                           | Installation administrators              |
+| `void project zero-trust reconcile`                       | Linked project, or `--project <slug>` | Project owner and project administrators |
 
-The two project commands work only when platform status is `ready`. While a platform change runs, or after it fails, run `void platform zero-trust reconcile` first.
+Project reconciliation requires platform status `ready`. Otherwise, reconcile the platform first.
+
+If an application was renamed, restore its recorded name before reconciling. Remove duplicate copies yourself. Deleting the shared application temporarily blocks protected projects; deleting the health-check exception can block upgrades and repair until it is restored.
 
 ### What Happens During Changes
 
-Void orders every change so that a protected project never becomes public by mistake. If a step fails, the project keeps its protection, or refuses visitors with the 403 page, until the change can finish.
+Protection changes can temporarily return a 403. If a step fails, a protected project stays protected or refuses visitors until the change finishes.
 
-Void's router can keep a project's previous setting for up to about a minute. During that time, some visitors may see the 403 page instead of the sign-in page.
+Protecting or making a project public usually finishes before the command returns. If it is still running or reports an error, inspect `void project zero-trust status`, fix the reported cause, and run `void project zero-trust reconcile`.
 
-#### Protecting or Making a Project Public
+Platform-wide changes run in steps. During initial setup, custom domains stay public until Void reaches their project. During disable, hostnames can become public at different times. Follow progress with `void platform zero-trust status`.
 
-`void project zero-trust protect` and `void project zero-trust public` usually finish before the command returns.
-
-- **Protect.** Void covers the custom domains first, then turns on its own check, then removes the public exception. Visitors may see the 403 page for a moment before Access starts asking them to sign in.
-- **Public.** Void adds the public exception first, then turns off its own check, then removes the custom domain application. Visitors may see the 403 page for a moment before the project opens.
-
-If the command prints `Zero Trust update is still in progress`, run `void project zero-trust reconcile` to continue, or wait for the hourly maintenance. If it fails with `Cloudflare Access could not be updated. Protection remains fail closed.`, fix the cause, then run `void project zero-trust reconcile`. Until then, a project that was protected stays protected. A project you were protecting may already ask for sign-in, or answer with the 403 page, but it is never more open than before. A project you were making public may already be open on some hostnames.
-
-Run `void project zero-trust status` to follow a change. `State:` shows `reconciling` while it runs, `error` when it needs attention, and `protected` or `public` when it is done. `Last error:` explains a failure.
-
-#### Enabling and Disabling Zero Trust
-
-Large changes run in steps. Platform status shows `configuring` or `disabling`, and project owners see `Available: no`. Scheduled maintenance continues within a few minutes.
-
-When you **enable** Zero Trust:
-
-1. Void adds the public exception for each project that stays public. These projects never ask visitors to sign in.
-2. Void creates the health check exception, then the shared project application. From here, the `<slug>.<your domain>` and `workers.dev` URLs of protected projects require sign-in.
-3. Void goes through the protected projects and covers their custom domains. A project's custom domains stay open until Void reaches it.
-
-If Void cannot add a project's public exception, the project shows `error`, and its visitors are asked to sign in until the next retry succeeds. Void retries every hour, or run `void project zero-trust reconcile` once platform status is `ready`.
-
-When you **disable** Zero Trust:
-
-1. Void turns off its own check for each protected project and removes its custom domain application. Custom domains open here.
-2. Void deletes the shared project application, then the health check exception. `<slug>.<your domain>` and `workers.dev` URLs open here.
-3. Void deletes the public exceptions. Public projects stay open the whole time.
-
-#### Custom Domains
-
-A custom domain on a protected project goes live only after Void adds it to the project's custom domain application. If Access cannot be updated, the domain stays pending and is not reachable. Void tries again each time it checks the domain.
-
-When you remove a custom domain, Void removes it from the project first, then from the Access application. If the Access update fails, the project shows `reconciling` or `error` and Void retries every hour. A protected project can have up to 100 custom domains. Custom domains on public projects need no Access change.
-
-#### New Projects
-
-A new project starts protected or public based on the default for new projects. If Void cannot set up its protection, creating the project still succeeds with a warning. See [Recovery](#recovery).
-
-#### Deploys and Rollbacks
-
-Deploys and rollbacks wait while a project's protection is not settled, so a deploy cannot publish a project before its protection is in place. They are refused with `Zero Trust protection for this project is not ready`, followed by the reason:
-
-- `Project Zero Trust is still being initialized.`
-- `The project public exception is still reconciling.`
-- `Project Zero Trust is still reconciling.`
-
-If the saved platform configuration is invalid, they are refused with `The platform Zero Trust configuration is invalid.` instead. Ask a platform administrator to repair it.
-
-A project that is already protected can still deploy during a platform-wide change. While it is being made public, deploys wait until that finishes. See [Project Overrides](#project-overrides) for what to do when a deploy is refused.
+A new custom domain becomes reachable only after its project’s protection is ready.
 
 ### Caching
 
-Responses for signed-in visitors are never shared between visitors. Void skips its shared caches for every request that carries an Access token: [ISR](/guide/edge/revalidation#cache-bypass) and the [static asset edge cache](/guide/edge/static-assets#non-hashed-assets). Each visitor gets a response made for their request.
-
-On a protected project, this means:
-
-- pages render on every request, and ISR never serves a cached page;
-- static files and hashed assets skip the edge cache;
-- the project handles more requests and may respond more slowly than a public project.
-
-Public projects keep using the shared caches as usual.
+Requests carrying an Access token bypass [ISR](/guide/edge/revalidation#cache-bypass) and the [static asset edge cache](/guide/edge/static-assets#non-hashed-assets). Protected pages render on each request, which can increase latency and request usage. Public projects keep their shared caches.
 
 ## Recovery
-
-A project never becomes public by mistake while a change is in progress. See [What Happens During Changes](#what-happens-during-changes).
 
 - **Status stays `configuring` or `disabling`.** Large changes run in steps. Scheduled maintenance continues them within a few minutes, or run `void platform zero-trust reconcile`.
 - **Status shows an error.** Fix the cause shown, such as token permissions or the application limit, then run `void platform zero-trust reconcile`. Otherwise Void retries every hour.

@@ -29,21 +29,6 @@ Deploy to [your own Cloudflare account](../integrations/cloudflare.md#deploy-to-
 
 [Static assets](./edge/static-assets) are cached at the edge. [Prerendering](./edge/prerendering) builds pages ahead of time, while [incremental revalidation](./edge/revalidation) caches pages rendered on demand. Database, storage, secrets, and deployment commands are available through Void.
 
-## How resource detection works
-
-```
-vite.config.ts                →  voidPlugin() (works with any Vite app)
-import { db }                 →  D1 database (auto-provisioned)
-import { kv }                 →  KV namespace (auto-provisioned)
-import { storage }            →  R2 bucket (auto-provisioned)
-import { ai }                 →  Workers AI inference (metered)
-db/schema.ts                  →  Drizzle schema (source of truth for DB types)
-db/migrations/*.sql           →  Applied to the selected database on deploy
-void deploy                   →  Deploy to the saved Cloudflare or Void target
-```
-
-The Vite plugin detects supported imports and adds the corresponding bindings. Void also detects your [app type](./app-types) to choose the build and deployment flow. Use `void.config.ts` when you need to control either choice.
-
 ## Next steps
 
 - [Quickstart](./quickstart): get a running app in minutes

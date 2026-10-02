@@ -4,7 +4,7 @@ outline: deep
 
 # MySQL
 
-Void supports MySQL through [Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/). You bring a MySQL-compatible database; Void provides the Drizzle runtime, local tooling, migration workflow, and deployment wiring.
+Connect your MySQL database through [Cloudflare Hyperdrive](https://developers.cloudflare.com/hyperdrive/), then define tables and query them with Drizzle. Void configures the connection and applies your migrations when you deploy.
 
 ## Configure
 

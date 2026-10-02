@@ -43,7 +43,7 @@ void auth login
 void deploy
 ```
 
-## Using Void Platform Features
+## Using Void Features
 
 Most [Void platform features](../../guide/app-types.md#void-apps) work with React Router. Use them in loaders and actions:
 
@@ -61,70 +61,15 @@ export async function loader({}: Route.LoaderArgs) {
 }
 ```
 
-### KV Storage
+### Other resources
 
-```tsx
-import { kv } from 'void/kv';
-
-export async function loader() {
-  return { settings: await kv.get('app:settings') };
-}
-```
-
-### Blob Storage
-
-```tsx
-import { storage } from 'void/storage';
-
-export async function loader() {
-  return { avatar: await storage.get('avatars/user-1.png') };
-}
-```
-
-### AI
-
-```tsx
-import { ai } from 'void/ai';
-
-export async function action() {
-  return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    prompt: 'Summarize the latest news',
-  });
-}
-```
-
-### Cron Jobs
-
-```ts
-// crons/daily-cleanup.ts
-import { defineScheduled } from 'void';
-
-export const cron = '0 0 * * *';
-
-export default defineScheduled(async () => {
-  // runs daily at midnight
-});
-```
-
-### Queue Consumers
-
-```ts
-// queues/emails.ts
-import { defineQueue } from 'void';
-
-export default defineQueue<{ to: string; subject: string }>(async (batch) => {
-  for (const msg of batch.messages) {
-    // process each message
-    msg.ack();
-  }
-});
-```
+Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
 
 ### Environment Variables
 
-Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
+Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
 
-React Router keeps loaders and components in the same route file. Void's client check therefore treats that file as reachable from the browser, even though React Router removes loaders from the client bundle. Read server secrets in a `.server.ts` companion module to keep that separation explicit.
+Read server secrets in a `.server.ts` companion module and import it into your loader or action. Void rejects server-secret reads in route files that also contain browser components.
 
 ## Accessing Bindings Directly
 

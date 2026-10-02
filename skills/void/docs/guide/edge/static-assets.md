@@ -14,7 +14,7 @@ Files in Vite's `build.assetsDir` (default `assets/`) are produced with content 
 Cache-Control: public, max-age=31536000, immutable
 ```
 
-Cached at the edge for up to one year. Browsers cache them indefinitely. Because the cache key is unversioned, hashed assets survive across deploys without re-fetching.
+Browsers and the edge can cache these files for one year and reuse them across deploys.
 
 If your Vite config customizes `build.assetsDir`, Void automatically detects this and applies the immutable optimization to the configured directory:
 
@@ -29,17 +29,23 @@ export default defineConfig({
 
 If `build.assetsDir` is set to `""`, meaning hashed files live at the root, the optimization is skipped because there is no directory-based way to distinguish hashed from non-hashed files.
 
-Void also includes presets for where supported meta frameworks (Astro, Nuxt, SvelteKit, etc.) place their hashed assets, so framework-generated assets enjoy optimal caching out of the box.
+Supported meta-frameworks use their own asset directories automatically.
+
+### Native Cloudflare deployments
+
+With `void deploy --platform cloudflare`, generated JavaScript bundles with content fingerprints receive immutable caching. Files copied from `public/` and custom build outputs with stable filenames keep normal revalidation, even when they live in the assets directory. CSS and other assets keep Cloudflare's default or your configured `Cache-Control`.
+
+Use [Custom Headers](./headers) to choose a cache policy for other files. Apply immutable caching only to URLs that change whenever their content changes.
 
 ## Non-hashed assets
 
-Everything else such as `index.html`, `favicon.ico`, and `/about` is edge-cached using deploy-versioned cache keys. On each deploy, the version changes and previous cache entries are invalidated automatically, so there is nothing to purge.
+Other static files, such as `index.html` and `favicon.ico`, are cached until the next deploy. You do not need to purge them manually.
 
 ```
 Cache-Control: public, s-maxage=31536000, max-age=0, must-revalidate
 ```
 
-Cached at the edge until the next deploy. Browsers always revalidate on the next request.
+Browsers revalidate these files on each request.
 
 **What gets cached:**
 
@@ -60,86 +66,30 @@ If your worker serves dynamic content at a URL that looks static (e.g., a dynami
 
 ## ETags and 304 Not Modified
 
-All static asset responses include an `ETag` header derived from the file's content hash in R2. When a browser revalidates a cached resource, it sends `If-None-Match` with the previous ETag. If the file has not changed, the edge returns **304 Not Modified** with no body. That saves bandwidth and speeds up page loads.
-
-This happens automatically for all static assets. No configuration is needed.
+Static assets include an `ETag` header. When a browser revalidates an unchanged file, Void returns `304 Not Modified` without downloading it again. No configuration is needed.
 
 ## Custom headers
 
 You can override caching headers or add your own for any static asset path using [Custom Headers](./headers).
 
-## Request pipeline
+## Navigation and middleware
 
-Static assets can run in front of the worker, behind the worker, or without any worker at all. Void chooses the pipeline from the app shape so static pages stay static unless application code must inspect document navigations.
+Void serves static files directly unless application code needs to handle the request first. API requests reach your Worker. Apps with middleware, routes outside `/api`, Pages, or SSR run application code before serving fallback HTML.
 
-### Deploy shapes
+SPAs serve `index.html` for unmatched HTML navigation so client-side routing works. For a static site with a `404.html` page, set [`routing.notFound`](../../reference/config.md#routing-notfound):
 
-| Shape                                                                              | Worker deployed | First handler for assets | First handler for document navigations | Miss behavior                                                                                                          |
-| ---------------------------------------------------------------------------------- | --------------- | ------------------------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `inference.appType: "static"`                                                      | No              | Asset platform           | Asset platform                         | Platform 404 page.                                                                                                     |
-| Static SPA deploy                                                                  | No              | Asset platform           | Asset platform                         | Platform serves `/index.html` for unmatched navigations. If user `routing.fallbacks` exist, Void ships fallback rules. |
-| Void app with only `/api` routes or managed auth                                   | Yes             | Worker first for `/api`  | Asset platform                         | Static navigations keep the platform SPA fallback; API requests, including document navigations, reach the worker.     |
-| Void app with `middleware/`, non-`/api` routes, document WebSockets, live bindings | Yes             | Worker first             | Worker first                           | Asset misses stay 404, then the worker serves `/index.html` for HTML requests after routes and middleware run.         |
-| Pages, SSR, and framework apps                                                     | Yes             | Worker first             | Worker first                           | Asset misses stay 404. Pages, SSR, or framework rendering owns HTML responses, including intentional HTML 404s.        |
+```ts
+import { defineConfig } from 'void/config';
 
-### Worker-first Void apps
-
-For worker-owned HTML, Void sets Cloudflare assets to `not_found_handling: "none"` and configures `run_worker_first`. The request order is:
-
-1. Platform routing rules that always run before assets, such as redirects and forced rewrites.
-2. Worker route table, middleware, auth, WebSocket upgrades, Pages, or SSR.
-3. `env.ASSETS.fetch()` from inside the worker for static files.
-4. For non-Pages, non-SSR Void apps only, a worker-side SPA fallback to `/index.html` when the original request accepts HTML.
-5. The worker's original 404.
-
-This is the path needed for preview auth and other middleware. Cloudflare's platform SPA fallback can serve `index.html` directly for browser navigations; when that happens, middleware never sees the request. Worker-owned HTML avoids that by moving fallback HTML behind middleware.
-
-### Asset-first Void apps
-
-For Void apps with only `/api` routes, Void keeps the platform SPA fallback and scopes `run_worker_first` to `/api` and `/api/*`. Static assets and non-API SPA navigations stay on the asset platform. API requests, including browser document navigations such as OAuth callbacks, reach the worker instead of being rewritten to `index.html`.
-
-### Unmatched requests
-
-`not_found_handling` decides what the asset layer does with a request that matched no asset and no worker route. Void infers it:
-
-| App shape                                         | Inferred value                   | Result for an unknown URL        |
-| ------------------------------------------------- | -------------------------------- | -------------------------------- |
-| Pages or SSR                                      | `none`                           | The worker's own 404             |
-| Worker owns HTML, no `pages/`, no SSR entry       | `none` + worker fallback         | `index.html` with status **200** |
-| Asset-first (only `/api` routes, or none)         | `single-page-application`        | `index.html` with status **200** |
-| Framework deploy (SvelteKit, Nuxt, Analog, Astro) | `none` — pinned, not overridable | The framework worker's own 404   |
-
-Apps with middleware, a route outside `/api`, document WebSockets, or Live send requests through the Worker first. If they have no Pages or SSR entry, the Worker can then serve `index.html` for HTML navigation. Middleware and auth run before that fallback.
-
-A SPA needs `index.html` for deep links so its client router can load. A generated static site usually needs a real `404.html` instead. Void can't distinguish the two from built files alone. Set [`routing.notFound`](../../reference/config.md#routing-notfound) for the behavior you want:
-
-```json
-{ "routing": { "notFound": "404-page" } }
+export default defineConfig({
+  routing: { notFound: '404-page' },
+});
 ```
 
-Choose `"single-page-application"`, `"404-page"`, or `"none"`. This leaves `run_worker_first` unchanged, so the same requests still reach your middleware and API handlers.
+Choose `single-page-application`, `404-page`, or `none`. These settings preserve which requests reach middleware and API handlers. Intentional API `404` responses keep their status and body.
 
-Choosing anything other than `"single-page-application"` disables the Worker's `index.html` fallback. With `"404-page"`, unmatched HTML navigation uses the asset layer's nearest `404.html`. Intentional API `404` responses keep their body, status, and headers. If no `404.html` exists, the Worker's original `404` is kept.
-
-SvelteKit, Nuxt, Analog, and Astro manage their own not-found behavior. Void ignores `routing.notFound` for those deploys and prints a warning. Their prerendered files are served first, and the framework handles unmatched routes without a platform SPA fallback replacing its error page.
-
-TanStack Start, React Router, and vinext follow the rows above on a managed `void deploy` — that path resolves the asset config itself and applies it to the uploaded Worker. Void writes no `assets` policy into their generated Worker config:
-
-| Framework      | Generated worker config      |
-| -------------- | ---------------------------- |
-| TanStack Start | `dist/server/wrangler.json`  |
-| React Router   | `build/server/wrangler.json` |
-| vinext (App)   | `dist/server/wrangler.json`  |
-| vinext (Pages) | `dist/ssr/wrangler.json`     |
-
-For direct Cloudflare deployment, these frameworks need a complete `assets` policy in their own config: `binding`, `directory`, `not_found_handling`, and `run_worker_first`. Void preserves that policy. Without one, Cloudflare's default applies. The build warns when `routing.notFound` is set so you know to check the framework's asset configuration.
-
-### Generated config
-
-Void owns the generated asset routing policy during dev and build for Void apps. If `cloudflare.assets` in `void.config.ts` contains stale `not_found_handling` or `run_worker_first` values, Void replaces those fields so generated config cannot accidentally change which layer sees a request first.
-
-TanStack Start and React Router are the exception: Void generates no asset policy for them and leaves both fields to your own Cloudflare config. Writing `not_found_handling` alone would make the asset layer answer unmatched requests and the framework Worker would never run, and completing the policy needs `assets.binding` and `assets.directory` that the framework owns, not Void.
+SvelteKit, Nuxt, Analog, and Astro handle their own error pages and ignore `routing.notFound`. For direct Cloudflare deployment with TanStack Start, React Router, or vinext, configure the asset binding, directory, and routing policy through the framework's Cloudflare config.
 
 ## API routes and SSR pages
 
-API responses (`/api/*`) and SSR-rendered pages without file extensions always hit the worker. They are **not** edge-cached by the dispatch layer.
+API responses and SSR pages are not cached as static assets. Use [Revalidation](./revalidation) to cache public rendered pages.

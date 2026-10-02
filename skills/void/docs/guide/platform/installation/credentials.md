@@ -12,11 +12,11 @@ For a domain installation, create two custom tokens using Cloudflare's [API toke
 
 For workers.dev testing with the default API hostname, browser login can authorize installation: you only need to create the runtime token and R2 credentials below. Skip the zone permissions until you add a domain.
 
-Browser login does not grant AI Gateway access. A preview can therefore show **inspect ai-gateway**: Void verifies that resource with the runtime token after you confirm installation, before creating any resources. Include **Account → AI Gateway → Edit** on that token. Other infrastructure continues using your browser login, and a normal API-token installation keeps using its management token when that token already has access.
+Browser login does not grant AI Gateway access. Include **Account → AI Gateway → Edit** on the runtime token so Void can verify and create that resource.
 
 The management token lets your CLI install and maintain the platform. The runtime token is stored as a Worker secret so the platform can deploy apps after you close your terminal. They are separate credentials.
 
-The runtime-token link preselects all required account permissions, including Workers Tail, Hyperdrive, and AI Gateway when needed. Review them against the short summary beside the link before creating the token. If the form differs, use that summary to correct it. For a domain installation, also select the indicated zone. See [Cloudflare's token template documentation](https://developers.cloudflare.com/fundamentals/api/how-to/account-owned-token-template/).
+The installer’s runtime-token link preselects required account permissions. Compare the form with the checklist shown beside the link, and select the indicated zone for a domain installation.
 
 ::: details Permissions to select for each token
 
@@ -57,13 +57,15 @@ void platform upgrade your-installation-id
 
 Set the same two variables before `void platform install` to enable email during a new installation. Void records the pair for later upgrades; an ordinary upgrade cannot replace it.
 
+Before installing, enable [Cloudflare Email Routing](https://developers.cloudflare.com/email-service/get-started/route-emails/) for the exact shared sender domain and confirm that its MX records point to Cloudflare. For a subdomain, add that name under the zone's **Email Routing → Settings → Subdomains**. Cloudflare adds the required MX and SPF records. The installer's shared-mail bootstrap verifies those records; it does not add them. Keep existing mail-provider records on other domain names in place.
+
 Enabling email lets administrators [register email domains for projects](/guide/platform/administration/email#registering-email-domains-for-projects) and lets projects register destination addresses through the runtime token. That needs **Email Routing Addresses: Edit** and **Email Sending: Edit** on the account, plus **Zone: Read**, **Zone Settings: Edit** and **Email Routing Rules: Edit** on the zones that will carry mail. The runtime-token link preselects them when email is enabled. Email Sending onboarding for arbitrary recipients needs Workers Paid.
 
-The installer deploys the email gateway, prepares the shared mail route, and verifies inbound readiness before opening platform traffic. If setup fails, correct the reported permission, mail-zone configuration, or routing conflict, then rerun the same install or upgrade command. A fresh install resumes with `void platform install --resume --name <installation-id>`.
+The installer deploys the email gateway, prepares the shared mail route, and verifies inbound readiness before opening platform traffic. If setup fails, correct the reported permission, exact-domain MX records, or routing conflict, then rerun the same install or upgrade command. A fresh install resumes with `void platform install --resume --name <installation-id>`; it continues the recorded email operation after the configuration is corrected.
 
 ## R2 Upload Credentials
 
-The installer opens the **R2 token creation** form directly, requesting an account token (or a user token if your role cannot create account tokens). Select **Object Read & Write**—the form starts with read-only access—and keep **Apply to all buckets in this account (including newly created buckets)** selected. This lets the token access the buckets Void creates afterward. Create the token and save its **Access Key ID** and **Secret Access Key**. These are different from the management/runtime tokens above. See [R2's token instructions](https://developers.cloudflare.com/r2/api/tokens/).
+In the **R2 token creation** form opened by the installer, select **Object Read & Write** and **Apply to all buckets in this account (including newly created buckets)**. Create an account token, or a user token if your role requires it. Save its **Access Key ID** and **Secret Access Key** in your password manager. These differ from the management and runtime API tokens. See [R2’s token instructions](https://developers.cloudflare.com/r2/api/tokens/).
 
 ## Signing and Encryption Keys {#signing-and-encryption-keys}
 

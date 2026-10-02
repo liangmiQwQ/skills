@@ -2,7 +2,7 @@
 
 Use `.env` for local development and remote secrets for server-side production values.
 
-## 1. Preserve production values and consolidate local development values
+## 1. Back up and consolidate values
 
 Before changing any dotenv files, securely back up the production values you need to migrate outside the project directory. Keep them out of Git. Do not delete the original files until the upload and verification in step 3 succeed.
 
@@ -23,9 +23,9 @@ Ensure `.env` is ignored by Git:
 .env
 ```
 
-## 2. Remove masking modifiers
+## 2. Update `env.ts`
 
-Update `env.ts` before running any secret commands: they import the schema to validate values, and the removed modifiers cause that import to fail.
+Remove `.secret()` and `.public()` from `env.ts` before running secret commands.
 
 Change:
 
@@ -45,9 +45,9 @@ export default defineEnv({
 });
 ```
 
-Server storage is selected by the absence of the client prefix, not a modifier. Invalid input is redacted uniformly.
+Server keys have no `VITE_` prefix; client keys do.
 
-## 3. Move production server values remotely
+## 3. Upload server secrets
 
 For managed Void projects, upload each non-client schema key:
 
@@ -78,11 +78,11 @@ After the upload succeeds, confirm that all expected server names appear in the 
 void secret list
 ```
 
-Remote stores return names only; plaintext values are validated during upload and again at worker startup. If an upload fails or a name is missing, retain the source values and retry before continuing.
+If an upload fails or a name is missing, keep the source values and retry before continuing.
 
 For direct Cloudflare deployments, remove the migrated server keys from `cloudflare.vars` in `void.config.ts` after confirming the upload. Void now treats any schema-declared server key in Worker `vars` as an error.
 
-## 4. Supply client values at build time
+## 4. Set client build values
 
 Move `VITE_*` production values to CI/build-shell variables, or make the value an explicit schema default:
 
@@ -92,13 +92,13 @@ export VITE_API_ORIGIN=https://api.example.com
 
 Keep these variables set for the remote check and deployment in step 5. Client values are compiled into browser assets and are public.
 
-The same public values are embedded in the server bundle for boot validation and `env.VITE_*` reads during server rendering. Do not upload them as remote secrets.
+These values are also available during server rendering. Do not upload them as remote secrets.
 
-## 5. Remove legacy files and verify
+## 5. Remove old files and verify
 
-Once the local values are in `.env`, the server values are uploaded and listed remotely, and the client values are available to the build, delete every `.env.*` file, `.env.example`, and `.dev.vars*` file from the project. Keep the secure backup until verification succeeds. Void's environment checks and deployment fail fast when they find a legacy file, rather than silently applying a precedence order.
+Once the local values are in `.env`, the server values are uploaded and listed remotely, and the client values are available to the build, delete every `.env.*` file, `.env.example`, and `.dev.vars*` file from the project. Keep the secure backup until verification succeeds. Environment checks and deployment reject these old files.
 
-`void env example` was removed because `.env.example` created a second dotenv source. Treat `env.ts` as the checked-in list of names, types, defaults, and requiredness.
+Use `env.ts` as the checked-in list of names, types, defaults, and requiredness. `void env example` is no longer supported.
 
 Then verify:
 

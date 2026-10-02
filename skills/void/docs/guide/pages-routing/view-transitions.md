@@ -4,7 +4,7 @@ outline: deep
 
 # View Transitions
 
-Pages mode supports the browser's native [View Transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API) for animated page transitions. When enabled, navigations are wrapped in `document.startViewTransition()`, which gives you a smooth cross-fade between pages by default. You can customize the effect entirely with CSS.
+Add animated page transitions with the browser’s [View Transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API). Pages cross-fade by default; use CSS to customize the animation.
 
 ## Enabling View Transitions
 

@@ -36,25 +36,17 @@ This connects directly to your Postgres database during local Vite development.
 
 ### 3. Deploy
 
-When deploying to a Void platform, the CLI asks for a connection string if Hyperdrive isn't configured:
+For a Void platform, deploy prompts for the connection string if needed. You can also set it with `void db set-url`. For direct Cloudflare deploys, export the production `DATABASE_URL` in your shell.
 
-```
-Your project uses PostgreSQL. Enter your connection string:
-> postgresql://user:password@host:5432/mydb?sslmode=require
-```
-
-Void provisions Hyperdrive and records its config ID. The connection string isn't written to `void.config.ts`, `void.lock.json`, or generated Worker config.
-Both `postgres://` and `postgresql://` URLs are supported, including provider-supplied query strings such as `?sslmode=require`.
-
-For a linked Void project, you can also configure the connection with `void db set-url`. For a direct Cloudflare deploy, export the production `DATABASE_URL` in your shell.
+Void provisions Hyperdrive without saving the connection string in project config. Both `postgres://` and `postgresql://` URLs are supported, including provider query strings such as `?sslmode=require`.
 
 ## Schema Definition
 
-With the `postgresql` dialect, import schema helpers from `void/schema-pg` (re-exports from `drizzle-orm/pg-core`):
+Import schema helpers from `void/schema-pg`:
 
 ```ts
 // db/schema.ts
-import { pgTable, serial, text, timestamp, boolean, doublePrecision } from 'void/schema-pg';
+import { pgTable, serial, text, timestamp, boolean } from 'void/schema-pg';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -86,20 +78,7 @@ void db status
 
 The main difference is that PostgreSQL supports **transactional DDL**. Each migration is wrapped in `BEGIN` and `COMMIT`, so a failure rolls back the whole migration instead of leaving the database half-updated.
 
-## Deploy Workflow
-
-When deploying a PostgreSQL project to a Void platform:
-
-1. The app is built
-2. Migration files are collected from `db/migrations/`
-3. If Hyperdrive hasn't been provisioned yet, you're prompted for the connection string
-4. Pending migrations run inside the deployed worker via Hyperdrive
-5. The new worker goes live
-
-When deploying to your own account with `void deploy --platform cloudflare`, export the production
-connection string as `DATABASE_URL`. Void uses it to provision Hyperdrive and apply the checked-in
-migrations transactionally before it uploads the Worker. The connection string is not written to
-`void.config.ts`, `void.lock.json`, or the generated Worker config.
+`void deploy` applies pending migrations before making the new version live. See [Deployment](../deployment.md).
 
 ## Updating the Connection String
 

@@ -10,6 +10,14 @@ Void provides a typed AI client for Workers AI and Cloudflare's [AI Gateway](htt
 import { ai } from 'void/ai';
 ```
 
+## Handling usage limits
+
+Every AI operation is lazy and must be executed with `.match({ ok, limited })`. Both handlers are required, including for provider-native requests, model listing and document conversion. Return a useful fallback from `limited`, or use `limit.response({ message: 'AI is temporarily unavailable.' })` to send a structured HTTP 429. Limits expose `resource`, `reason`, and an optional `retryAt`. Other failures still reject.
+
+Do not await the operation itself; await its `.match()` call. TypeScript checks your handlers and the resulting success/fallback union.
+
+Streaming responses end with a `void:error` SSE event if generation is interrupted after the response starts. A recognized quota interruption calls your `limited` handler and emits `void:limit`, preserving the message from `limit.response()`. `fetchStream()` throws on either terminal event so your UI can exit its generating state. This also applies to streaming provider responses and `ai.run()` with `stream: true`.
+
 ## Basic Usage
 
 Call `ai.run()` with a model name and inputs. Model names and input types are fully typed from `@cloudflare/workers-types`.
@@ -21,9 +29,11 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  const result = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const result = await ai
+    .run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [{ role: 'user', content: prompt }],
+    })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 
   return c.json(result);
 });
@@ -42,23 +52,27 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  return ai.stream('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    messages: [{ role: 'user', content: prompt }],
-  });
+  return ai
+    .stream('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [{ role: 'user', content: prompt }],
+    })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 });
 ```
-
-`ai.stream()` calls `ai.run()` with `stream: true` and wraps the result in a `Response` with `content-type: text/event-stream` and `cache-control: no-cache` headers.
 
 ## Listing Models
 
 Use `ai.models()` to list available models:
 
 ```ts
-const models = await ai.models();
+const models = await ai
+  .models()
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 
 // Filter by task
-const textModels = await ai.models({ task: 'Text Generation' });
+const textModels = await ai
+  .models({ task: 'Text Generation' })
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
 ## Markdown Conversion
@@ -66,7 +80,9 @@ const textModels = await ai.models({ task: 'Text Generation' });
 Use `ai.toMarkdown()` to convert documents to markdown:
 
 ```ts
-const result = await ai.toMarkdown([{ name: 'document.pdf', blob: pdfBytes }]);
+const result = await ai
+  .toMarkdown([{ name: 'document.pdf', blob: pdfBytes }])
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
 ## Local Development
@@ -80,12 +96,11 @@ npm run dev
 
 When the app imports `void/ai`, Void enables a remote Workers AI binding during
 development and preview. Requests use your Cloudflare account and its allowance;
-Workers AI has no local simulator. The session uses the same keychain-backed
-Cloudflare login as the CLI, or `CLOUDFLARE_API_TOKEN` in an automated environment.
+Workers AI has no local simulator. Use your Cloudflare login or
+`CLOUDFLARE_API_TOKEN` in an automated environment.
 
 For a team platform, use `void connect <platform-url>` and link your project.
-Development requests use that platform's HTTPS proxy and usage controls.
-Credentials are injected into server bindings automatically.
+Development requests use that platform's account and usage limits.
 
 ## Usage Limits
 
@@ -93,55 +108,54 @@ Workers AI usage is measured in [neurons](https://developers.cloudflare.com/work
 On a direct deployment, usage belongs to your Cloudflare account. Provider-native
 requests also use your provider credentials and their billing terms.
 
-A team platform tracks usage in its own account and can apply per-user limits.
-Fresh self-hosted installations assign the `custom` profile, which has no
-platform-imposed AI allowance. Administrators can select a quota profile through
-[Platform Administration](./platform-administration.md). These profiles do not
-subscribe users to a commercial plan or charge them automatically; the operator
-remains responsible for its infrastructure and provider accounts.
+A team platform uses its own Cloudflare account and may apply per-user limits. Ask your administrator about the available allowance.
 
 ## Cloudflare Gateway Models
 
 `ai.run()` mirrors Cloudflare's `env.AI.run()` model naming and input schemas. Third-party models use Cloudflare model IDs and Cloudflare-managed credentials.
 
 ```ts
-const result = await ai.run('google/gemini-2.5-flash', {
-  contents: [
-    {
-      role: 'user',
-      parts: [{ text: 'Explain Durable Objects in one paragraph.' }],
-    },
-  ],
-});
+const result = await ai
+  .run('google/gemini-2.5-flash', {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: 'Explain Durable Objects in one paragraph.' }],
+      },
+    ],
+  })
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
 OpenAI-compatible models use OpenAI-style `messages`:
 
 ```ts
-const result = await ai.run('openai/gpt-4.1-mini', {
-  messages: [{ role: 'user', content: 'Summarize this deploy.' }],
-});
+const result = await ai
+  .run('openai/gpt-4.1-mini', {
+    messages: [{ role: 'user', content: 'Summarize this deploy.' }],
+  })
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
 Pass Cloudflare AI Gateway options as the third argument:
 
 ```ts
-const result = await ai.run(
-  'openai/gpt-4.1-mini',
-  {
-    messages: [{ role: 'user', content: 'Summarize this deploy.' }],
-  },
-  {
-    gateway: {
-      skipCache: true,
+const result = await ai
+  .run(
+    'openai/gpt-4.1-mini',
+    {
+      messages: [{ role: 'user', content: 'Summarize this deploy.' }],
     },
-  },
-);
+    {
+      gateway: {
+        skipCache: true,
+      },
+    },
+  )
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
-Managed requests use the installation's gateway and project metadata. Direct
-requests use your Workers AI binding; provider-native requests require your own
-`ai.gateway` configuration.
+For provider-native requests on a direct deployment, configure [`ai.gateway`](../integrations/cloudflare.md#ai-self-host).
 
 ## Provider-Native Requests
 
@@ -159,13 +173,16 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  const response = await ai.provider('openai').fetch('/chat/completions', {
-    body: {
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 512,
-    },
-  });
+  const response = await ai
+    .provider('openai')
+    .fetch('/chat/completions', {
+      body: {
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 512,
+      },
+    })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 
   const result = await response.json();
   return c.json(result);
@@ -186,7 +203,8 @@ const response = await ai
         },
       ],
     },
-  });
+  })
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 
 const result = await response.json();
 ```
@@ -204,7 +222,8 @@ const response = await ai
   })
   .fetch('/v1/respond', {
     body: { prompt: 'Hello' },
-  });
+  })
+  .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
 ### Image Generation
@@ -214,38 +233,45 @@ Use `ai.run()` or `ai.image()` for Cloudflare-native image models:
 ```ts
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
-  return ai.image('@cf/black-forest-labs/flux-1-schnell', { prompt });
+  return ai
+    .image('@cf/black-forest-labs/flux-1-schnell', { prompt })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 });
 ```
 
-Use `ai.provider().fetch()` for provider-native image APIs:
+Use `ai.provider().fetch()` for provider-native image APIs. Match the [provider's request schema](https://developers.openai.com/api/reference/resources/images/methods/generate):
 
 ```ts
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  return ai.provider('openai').fetch('/images/generations', {
-    body: {
-      model: 'gpt-image-1.5',
-      prompt,
-      size: '1024x1024',
-      response_format: 'b64_json',
-    },
-  });
+  return ai
+    .provider('openai')
+    .fetch('/images/generations', {
+      body: {
+        model: 'gpt-image-2.5-sunburst',
+        prompt,
+        size: '1024x1024',
+      },
+    })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 });
 ```
 
-For multipart provider APIs, pass a `FormData` body. Void serializes the body through the proxy and reconstructs it before forwarding to AI Gateway:
+For multipart provider APIs, pass `FormData`:
 
 ```ts
 export const POST = defineHandler(async (c) => {
   const body = await c.req.parseBody();
   const form = new FormData();
-  form.set('model', 'gpt-image-1.5');
+  form.set('model', 'gpt-image-2.5-sunburst');
   form.set('prompt', String(body.prompt));
   form.set('image', body.image as Blob, 'source.png');
 
-  return ai.provider('openai').fetch('/images/edits', { body: form });
+  return ai
+    .provider('openai')
+    .fetch('/images/edits', { body: form })
+    .match({ ok: (result) => result, limited: (limit) => limit.response() });
 });
 ```
 
@@ -290,22 +316,6 @@ For local development, add it to `.env` in your project root:
 OPENAI_API_KEY=sk-...
 ```
 
-If the key is missing at runtime, `ai.provider().fetch()` throws a descriptive error telling you which env var to set.
-
 ### Streaming with Provider-Native APIs
 
-Provider-native streaming APIs return the provider response directly:
-
-```ts
-export const POST = defineHandler(async (c) => {
-  const { prompt } = await c.req.json();
-
-  return ai.provider('openai').fetch('/chat/completions', {
-    body: {
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      stream: true,
-    },
-  });
-});
-```
+Return the provider response directly. For example, add `stream: true` to the OpenAI request body shown above.

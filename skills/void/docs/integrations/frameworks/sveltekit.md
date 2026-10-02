@@ -64,13 +64,11 @@ export default defineConfig({
 });
 ```
 
-By default, SvelteKit's Cloudflare adapter, `voidPlugin()` migrations, and `void db` commands share local state at `.wrangler/state/v3`, so no extra `platformProxy.persist` configuration is required.
-
 ### 5. Configure `tsconfig.json`
 
-SvelteKit generates `.svelte-kit/tsconfig.json` and expects your root config to extend it. Void generates `.void/tsconfig.json` for project-specific aliases such as `void/db` and `@schema`.
+Extend SvelteKit’s generated config. The `withVoidTSConfig()` hook in the Vite config above adds Void’s types and aliases:
 
-Do not add Void's `compilerOptions.paths` to the root `tsconfig.json`; SvelteKit warns because root-level paths override its generated aliases. The `withVoidTSConfig()` hook merges Void's generated files and aliases into SvelteKit's generated config instead.
+Keep `compilerOptions.paths` out of the root config so it does not override SvelteKit’s aliases.
 
 ```json
 {
@@ -90,7 +88,7 @@ void auth login
 void deploy
 ```
 
-## Using Void Platform Features
+## Using Void Features
 
 Most [Void platform features](../../guide/app-types.md#void-apps) work with SvelteKit. Use them in server load functions, actions, and API routes:
 
@@ -108,70 +106,13 @@ export async function load() {
 }
 ```
 
-### KV Storage
+### Other resources
 
-```ts
-import { kv } from 'void/kv';
-
-export async function load() {
-  return { settings: await kv.get('app:settings') };
-}
-```
-
-### Blob Storage
-
-```ts
-import { storage } from 'void/storage';
-
-export async function load() {
-  return { avatar: await storage.get('avatars/user-1.png') };
-}
-```
-
-### AI
-
-```ts
-import { ai } from 'void/ai';
-
-export const actions = {
-  summarize: async () => {
-    return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-      prompt: 'Summarize the latest news',
-    });
-  },
-};
-```
-
-### Cron Jobs
-
-```ts
-// crons/daily-cleanup.ts
-import { defineScheduled } from 'void';
-
-export const cron = '0 0 * * *';
-
-export default defineScheduled(async () => {
-  // runs daily at midnight
-});
-```
-
-### Queue Consumers
-
-```ts
-// queues/emails.ts
-import { defineQueue } from 'void';
-
-export default defineQueue<{ to: string; subject: string }>(async (batch) => {
-  for (const msg of batch.messages) {
-    // process each message
-    msg.ack();
-  }
-});
-```
+Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
 
 ### Environment Variables
 
-Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
+Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
 
 ## Accessing Bindings Directly
 

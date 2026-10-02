@@ -16,26 +16,15 @@ The type is auto-detected from your project structure, or you can set it explici
 
 In a Void app, Void handles server routing and deployment. Use React, Vue, Svelte, or Solid for server-rendered pages, or build a frontend with any library that works with Vite.
 
-All Void features that involve backend logic are available in this mode, including [server routing](./server-routing.md), [pages mode](./pages-routing/overview.md), [authentication](./auth.md), [typed fetch](./typed-fetch.md), [cron jobs](./jobs.md), and [queues](./queues.md).
-
 A Void app can be **API-only** (just `routes/`), a **SPA + API** (frontend in `src/` with API routes), or **full-stack with pages mode** (server-rendered pages in `pages/` with co-located data loading):
 
 <VoidAppFileTree annotations />
 
-Your worker handles API routes, page rendering, and (optionally) [custom SSR](./ssr.md). Static assets are served from the edge via per-worker assets. Cloudflare bindings (D1, KV, R2) are [inferred from your source code](../reference/resource-inference.md) and provisioned automatically.
+Void serves API routes, page rendering, and optional [custom SSR](./ssr.md) alongside static assets. Resources such as D1, KV, and R2 are [inferred from your code](../reference/resource-inference.md) and provisioned when you deploy.
 
 Void apps can also use [`output: 'static'`](./ssg.md) to pre-render all pages at build time. That gives you a fully static site that can be deployed anywhere, with no Cloudflare Worker required.
 
 **Deploy:** `void deploy` builds the app, provisions resources, applies migrations, and uploads it to your saved Cloudflare or Void target. See [Deployment](./deployment.md) for setup.
-
-**Detected when any of these exist:**
-
-- `routes/` directory
-- `pages/` directory
-- `middleware/` directory
-- `crons/` directory
-- `queues/` directory
-- Custom SSR entry (`src/main.ssr.ts` or `src/main.ssr.tsx`)
 
 ## Meta Frameworks
 
@@ -50,15 +39,11 @@ Void supports deploying Vite-based meta-framework apps with `void deploy`. The f
 | [Analog](https://analogjs.org/)                     | `@analogjs/platform`    | [Guide](../integrations/frameworks/analog.md)         |
 | [Astro](https://astro.build/)                       | `astro`                 | [Guide](../integrations/frameworks/astro.md)          |
 
-Add `voidPlugin()` to the framework's Vite config to get binding inference, typed DB generation, migration management, cron jobs, queues, and caching. Void-managed auth is not supported in framework mode; use Better Auth's official integration for your framework. See the [Meta Frameworks Integration](../integrations/frameworks/overview.md) for the full feature matrix, deploy pipeline, and per-framework setup guides.
-
-**Deploy:** `void deploy` runs your framework's build, provisions resources, applies migrations, and deploys to the selected target. Your framework continues to handle routing and rendering.
-
-**Detected when** any of the above packages is in your dependencies.
+Add `voidPlugin()` to the framework's Vite config to get binding inference, typed DB generation, migration management, cron jobs, queues, and caching. Void-managed auth is not supported in framework mode; use Better Auth's official integration for your framework. See the [Meta Frameworks Integration](../integrations/frameworks/overview.md) for supported features and setup guides.
 
 ## Pre-built Static Sites
 
-Any project that produces static files, whether that is an SPA, a static site, or a plain directory. Assets are served directly from the edge, and a minimal passthrough worker is generated automatically. You do not need to write worker code yourself.
+Any project that produces static files, whether that is an SPA, a static site, or a plain directory. Void serves the assets without requiring application code.
 
 **SPAs** (client-side single-page apps) fall back all non-file paths to `index.html` with a 200 status, so client-side routing works out of the box. Detected when `vite` is a dependency and no backend files exist.
 
@@ -115,20 +100,6 @@ To deploy only the static output, set:
 ```json
 { "inference": { "appType": "static" } }
 ```
-
-## Auto-Detection
-
-When running `void deploy` and no `inference.appType` is set in `void.config.ts`, the detection logic runs in this order:
-
-| Priority | Condition                                                                                                       | Type                                        |
-| -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1        | `--dir` flag                                                                                                    | Static (or SPA with `--spa`)                |
-| 2        | Known SSG in dependencies (`vitepress`, `@docusaurus/core`)                                                     | Static, builds with SSG CLI                 |
-| 2a       | ...and backend files also exist                                                                                 | Refused — set `inference.appType` yourself  |
-| 3        | `@tanstack/react-start`, `@react-router/dev`, `@sveltejs/kit`, `nuxt`, `@analogjs/platform`, or `astro` in deps | Framework                                   |
-| 4        | Backend files exist (`routes/`, `pages/`, `middleware/`, `crons/`, `queues/`, SSR entry)                        | Void app                                    |
-| 5        | `vite` or `vite-plus` in dependencies, no backend files                                                         | SPA, builds with `vite build` or `vp build` |
-| 6        | `dist/index.html` or `./index.html` exists                                                                      | Static (no build step)                      |
 
 ## Explicit Configuration
 

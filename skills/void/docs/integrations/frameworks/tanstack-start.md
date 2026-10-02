@@ -45,7 +45,7 @@ void auth login
 void deploy
 ```
 
-## Using Void Platform Features
+## Using Void Features
 
 Most [Void platform features](../../guide/app-types.md#void-apps) work with TanStack Start. Use them in server functions:
 
@@ -63,71 +63,13 @@ const getUsers = createServerFn().handler(async () => {
 });
 ```
 
-### KV Storage
+### Other resources
 
-```tsx
-import { createServerFn } from '@tanstack/react-start';
-import { kv } from 'void/kv';
-
-const getSettings = createServerFn().handler(async () => {
-  return kv.get('app:settings');
-});
-```
-
-### Blob Storage
-
-```tsx
-import { createServerFn } from '@tanstack/react-start';
-import { storage } from 'void/storage';
-
-const getAvatar = createServerFn().handler(async () => {
-  return storage.get('avatars/user-1.png');
-});
-```
-
-### AI
-
-```tsx
-import { createServerFn } from '@tanstack/react-start';
-import { ai } from 'void/ai';
-
-const summarize = createServerFn().handler(async () => {
-  return ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    prompt: 'Summarize the latest news',
-  });
-});
-```
-
-### Cron Jobs
-
-```ts
-// crons/daily-cleanup.ts
-import { defineScheduled } from 'void';
-
-export const cron = '0 0 * * *';
-
-export default defineScheduled(async () => {
-  // runs daily at midnight
-});
-```
-
-### Queue Consumers
-
-```ts
-// queues/emails.ts
-import { defineQueue } from 'void';
-
-export default defineQueue<{ to: string; subject: string }>(async (batch) => {
-  for (const msg of batch.messages) {
-    // process each message
-    msg.ack();
-  }
-});
-```
+Use [KV](../../guide/kv.md), [object storage](../../guide/storage.md), and [AI](../../guide/ai.md) from server-side code with the same imports as a Void app. Add [cron jobs](../../guide/jobs.md) in `crons/` and [queue consumers](../../guide/queues.md) in `queues/`.
 
 ### Environment Variables
 
-Declare environment variables in `env.ts`, then read them with `import { env } from "void/env"`. Void supplies types, checks values during build and deploy, and stops the build if client code references a server-only key. See [Environment Variables](../../guide/env-vars.md).
+Declare variables in `env.ts` and read them with `import { env } from "void/env"`. See [Environment Variables](../../guide/env-vars.md) for local values, production secrets, and public `VITE_*` values.
 
 ## Accessing Bindings Directly
 

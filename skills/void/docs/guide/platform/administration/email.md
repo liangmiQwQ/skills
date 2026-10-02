@@ -6,7 +6,26 @@ outline: deep
 
 ## Managing Email
 
-These commands apply to a platform that enables email. Every project can send from and receive at `<slug>+tag@<mail domain>` on the platform's shared mail domain; the [email guide](/guide/email) describes what applications do with that.
+These commands apply to a platform that enables email. Every project can send from `<slug>+tag@<mail domain>` on the platform’s shared mail domain. Deploying an app with `email/` handlers sets up receiving at that address once its recipient rule is ready; the [email guide](/guide/email) describes what applications do with that.
+
+Shared inbound mail uses one exact routing rule per receiving project and enables Cloudflare’s per-zone plus addressing. Creating a project or deploying an app that only sends mail consumes no inbound rule. Existing rules and the apex catch-all remain in place. Cloudflare normally allows [200 routing rules per domain](https://developers.cloudflare.com/email-service/platform/limits/); remove unused rules or request a higher limit if the shared domain reaches capacity. An unrelated rule for a project’s base address or a plus address blocks its setup until that conflict is removed.
+
+If recipient creation is interrupted, inspect its retained intent:
+
+```sh
+void platform email shared-recipients --project my-app
+void platform email shared-recipient-resolve <recipient-id> --ended --outcome not-applied --reason "Provider audit confirms the request did not create a rule" --plan
+```
+
+Wait until the reported recovery time, confirm the original execution ended,
+and inspect the exact provider resource shown in the plan. Use `applied` when
+the exact owned rule exists, or `not-applied` only when the provider audit
+establishes that creation did not occur. Absence alone does not establish the
+outcome. Run the same command with `--yes` after inspection. Recovery records
+the decision in platform events without creating or deleting rules. Normal
+reconciliation verifies delivery afterward; a deleting project stays closed
+and its deletion can be retried. See [operator email commands](../../../reference/cli/platform-email.md#operator-email)
+for the recovery requirements.
 
 ### Deciding who mail may reach
 
@@ -19,7 +38,15 @@ void platform email policy-set any
 void platform email policy-set verified
 ```
 
-`domains` lets every project mail any address on the listed domains in addition to its verified recipients; `any` lifts the check. Cloudflare still refuses a recipient it has not verified until your mail domain is onboarded for Email Sending, which needs Workers Paid on the platform's account. Until then such sends come back as `UNVERIFIED_DESTINATION` for that recipient, whatever the policy says. Two things the policy never changes: sends from a project's own custom domain, and mail to any address on the platform's own mail domain — those stay verified-recipient-only, so no project reaches another project's inbox without its consent. A tightening applies to new send admissions as soon as it commits; previously admitted attempts may finish. The same setting is on the admin UI's **Email** page.
+Choose a policy in the admin UI's **Email** page or with the commands above:
+
+- `verified`: only each project's verified recipients.
+- `domains`: verified recipients plus any address on the listed domains.
+- `any`: any recipient.
+
+Unverified recipients still require Cloudflare Email Sending onboarding and [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans). Otherwise those sends return `UNVERIFIED_DESTINATION`. Mail from a project's custom domain, and mail to the platform's own mail domain, always requires recipient verification.
+
+Policy changes apply to new sends; admitted attempts may finish.
 
 ### Project caps
 
@@ -75,16 +102,16 @@ void platform email settings-set --domains admin
 Then register a domain for a project. The zone must be in the platform's Cloudflare account; the platform's own credential does the setup, and no Cloudflare credential is stored per domain:
 
 ```sh
-void platform email domain-add mail.example.com --project hr-portal
-void platform email domain-status mail.example.com
-void platform email domain-rotate-secret mail.example.com
+void platform email domain-add example.com --project hr-portal
+void platform email domain-status example.com
+void platform email domain-rotate-secret example.com
 void platform email domains
 ```
 
-Name the exact mail domain: a subdomain such as `mail.example.com` when the apex already receives mail, otherwise the apex itself. `domain-status` reports inbound, outbound, and management readiness separately. Follow any required DNS or Cloudflare dashboard step, then use `domain-sync` to reconcile. Use `domain-rotate-secret` when you need to replace the zone ingress credential explicitly. Email Sending onboarding needs Workers Paid; after upgrading, `domain-sync` re-attempts it. For a zone in another Cloudflare account, pipe an API token for that account on standard input:
+Use the apex of the selected Cloudflare zone. Platform-managed custom inbound email uses its catch-all, which does not cover subdomains; choose an apex without another mail provider or use the platform’s shared mail address. `domain-status` reports inbound, outbound, and management readiness separately. Follow any required DNS or Cloudflare dashboard step, then use `domain-sync` to reconcile. Use `domain-rotate-secret` when you need to replace the zone ingress credential explicitly. Email Sending onboarding needs Workers Paid; after upgrading, `domain-sync` re-attempts it. For a zone in another Cloudflare account, pipe an API token for that account on standard input:
 
 ```sh
-void platform email domain-add mail.other.example --project hr-portal --token-stdin --yes < token.txt
+void platform email domain-add other.example --project hr-portal --token-stdin --yes < token.txt
 ```
 
 Project owners see administrator-registered domains in `void email domain list` and `status`; `status` names the `void platform email` command for any step they cannot take themselves, and `sync` and `remove` point them at `domain-sync` and `domain-remove`. A domain an owner registered before you switched to `admin` stays theirs to renew, sync and remove. The runtime token needs the email permissions listed in the [self-hosting guide](/guide/platform/installation/credentials#runtime-token-permissions) for this to work.
@@ -97,7 +124,7 @@ to finish the retained cleanup. If its token has expired or been revoked, provid
 a replacement scoped to the same account and zone:
 
 ```sh
-void platform email domain-remove mail.other.example --token-stdin --yes < token.txt
+void platform email domain-remove other.example --token-stdin --yes < token.txt
 ```
 
 This recovery is available only after project deletion has begun and no other

@@ -6,16 +6,6 @@ outline: deep
 
 Void automatically detects which Cloudflare resources your project uses by scanning source files at startup. In most cases, there is no manual configuration. Use a resource in code, and Void provisions the matching binding for local development.
 
-## How It Works
-
-When `voidPlugin()` initializes, it synchronously scans your source files using a three-tier approach optimized for speed:
-
-1. **Import detection:** uses `es-module-lexer` to check for `void/*` imports. This is the fastest pass and does not require AST parsing.
-2. **Regex pre-check:** tests for patterns such as `env.DB` and `env.KV` so files without bindings can be skipped early.
-3. **AST confirmation:** when the regex matches, parses the full AST to confirm `c.env.DB` or `env.DB` member expressions.
-
-This runs once before plugins initialize, so the results are available to configure the Cloudflare Vite plugin.
-
 ## Detected Bindings
 
 | Binding          | Type                       | Detected by import                                                                                                                                               | Detected by env access                                                         |
@@ -31,7 +21,7 @@ This runs once before plugins initialize, so the results are available to config
 
 Auth detection also triggers when importing the `auth` specifier from `void/client` or a framework-specific client subpath such as `void/client/react` (but not when importing only `fetch`).
 
-Durable state is inferred from files in `durable-objects/`. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and adds a `new_sqlite_classes` migration. See [Durable State](../guide/durable-state.md).
+Durable state is inferred from files in `durable-objects/`. For example, `durable-objects/shopping-cart.ts` creates the `SHOPPING_CART` binding, exports `ShoppingCartDurableObject`, and records its migration. See [Durable State](../guide/durable-state.md).
 
 ## Scanned Directories
 
@@ -86,7 +76,7 @@ Paths are relative to the project root. When `inference.scanDirs` is set, it rep
 
 ## Explicit Binding Overrides
 
-If inference doesn't match your setup, you can skip it entirely and declare bindings explicitly:
+Override individual bindings when inference does not match your setup:
 
 ```json
 {
@@ -101,53 +91,8 @@ If inference doesn't match your setup, you can skip it entirely and declare bind
 }
 ```
 
-When `inference.bindings` is set, explicit values take full precedence and inference is skipped entirely.
+Explicit values override only their named bindings. Omitted bindings continue to be inferred, so setting `kv` does not disable storage, auth, or other features. Auth and checked-in migrations still require a database even when `db` is `false`.
 
 ## File Types
 
 Inference scans files matching `**/*.{ts,tsx,mts,js,jsx,mjs}` within each directory. Non-JS files (CSS, HTML, images) are ignored.
-
-## Common Patterns
-
-### Pages mode with D1
-
-A page companion file in `pages/` triggers D1 inference:
-
-```ts
-// pages/users.server.ts
-import { db } from 'void/db';
-
-export function loader() {
-  return db.select().from(users);
-}
-```
-
-### Cron job with KV
-
-A scheduled handler in `crons/` triggers KV inference:
-
-```ts
-// crons/cleanup.ts
-import { defineScheduled } from 'void';
-import { kv } from 'void/kv';
-
-export default defineScheduled(async () => {
-  await kv.delete('temp-cache');
-});
-```
-
-### Route handler with R2
-
-A route handler in `routes/` triggers R2 inference:
-
-```ts
-// routes/api/upload.ts
-import { defineHandler } from 'void';
-import { storage } from 'void/storage';
-
-export const POST = defineHandler(async (c) => {
-  const file = await c.req.blob();
-  await storage.put('uploads/file.bin', file);
-  return c.json({ ok: true });
-});
-```

@@ -55,13 +55,7 @@ Islands mode builds on top of [Pages Routing](./overview). You need a working Pa
 
 ## When to Use Islands
 
-Islands mode is a good fit when:
-
-- **Most of your page is static content:** blog posts, marketing pages, or documentation
-- **Only a few components need interactivity:** a counter, a form, or a live widget
-- **Performance is critical:** you want near-zero JavaScript for static content
-
-If your entire page is interactive (dashboards, apps with lots of client state), stick with regular [Pages Routing](./overview).
+Use islands for blogs, marketing pages, or documentation with a few interactive components. For dashboards and apps with shared client state, use regular [Pages Routing](./overview).
 
 ## Creating an Island Page
 
@@ -69,12 +63,9 @@ Name your page file with the `.island` suffix:
 
 <FileTree :items="islandItems" adapter-tabs default-expanded />
 
-The `.island` suffix tells Void to:
+Island pages render as HTML and hydrate only the components you mark as islands. Navigation uses full page loads.
 
-1. **Server-render the full page** as static HTML (no `data-page` attribute, no Void Router)
-2. **Only hydrate** the components you explicitly mark as islands
-3. **Skip the Inertia protocol:** navigation between island pages uses full page loads
-4. **Auto-prerender:** island pages with no `loader` and no dynamic params are automatically [prerendered](/guide/edge/prerendering) at deploy time. Opt out with `export const prerender = false` in the companion `.server.ts` file.
+Pages without a loader or dynamic parameters are automatically [prerendered](/guide/edge/prerendering). Opt out with `export const prerender = false` in the companion `.server.ts` file.
 
 ## Marking Components as Islands
 
@@ -353,30 +344,9 @@ export default function PostForm() {
 
 :::
 
-`useIslandForm` returns the same shape as `useForm`:
+`useIslandForm` provides the same state and methods as [`useForm`](./actions-and-forms#useform). Use `post`, `put`, `patch`, or `delete` with the action URL to submit.
 
-| Property                  | Type                      | Description                                |
-| ------------------------- | ------------------------- | ------------------------------------------ |
-| `data`                    | `T`                       | Reactive form state                        |
-| `setData(field, value)`   | Function                  | Update a field                             |
-| `errors`                  | `Record<string, string>`  | Validation errors from 422 responses       |
-| `error`                   | `VoidActionError \| null` | Non-validation call-site action error      |
-| `pending`                 | `boolean`                 | Submission in progress                     |
-| `hasChanges`              | `boolean`                 | Form has unsaved changes                   |
-| `wasSuccessful`           | `boolean`                 | Last submission succeeded                  |
-| `recentlySuccessful`      | `boolean`                 | Success within last 2 seconds              |
-| `reset(...fields?)`       | Function                  | Reset to defaults (all or specific fields) |
-| `clearErrors(...fields?)` | Function                  | Clear errors (all or specific fields)      |
-| `clearError()`            | Function                  | Clear the non-validation call-site error   |
-| `post(url)`               | Function                  | Submit via POST                            |
-| `put(url)`                | Function                  | Submit via PUT                             |
-| `patch(url)`              | Function                  | Submit via PATCH                           |
-| `delete(url)`             | Function                  | Submit via DELETE                          |
-
-The submit helpers return `Promise<void>` so callers and framework event
-handlers can observe boundary-class failures. On success (200), the page reloads.
-On validation error (422), `errors` is populated from the response
-`{ errors: { field: "message" } }`. On redirect, the browser follows it.
+Successful submissions reload the page; redirects navigate to their destination. A `422` response populates `errors` from `{ errors: { field: "message" } }`. Submit helpers return `Promise<void>`.
 
 ## Navigation
 

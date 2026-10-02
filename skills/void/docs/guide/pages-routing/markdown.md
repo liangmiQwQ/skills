@@ -33,9 +33,7 @@ function mdFileItems(ext) {
 
 # Markdown
 
-Markdown pages let you use `.md` files as first-class pages in Void's file-based routing. They compile to static HTML at build time with zero client JavaScript, integrate with the layout chain, and can embed interactive framework components as [islands](./islands).
-
-The `@void/md` package is opt-in as it contains markdown processing and syntax highlighting dependencies that are not necessarily needed in every app.
+Add `.md` files to `pages/` for Markdown routes. Pages inherit layouts and render as HTML, with JavaScript only for [islands](./islands), client scripts, and code-copy buttons.
 
 ## Setup
 
@@ -115,8 +113,6 @@ export default defineConfig({
 
 :::
 
-That's it. Any `.md` file in `pages/` is now a routable page.
-
 ## Page Anatomy
 
 A markdown page has three optional parts: a script block, frontmatter, and the body.
@@ -146,7 +142,7 @@ Welcome to Void. Here's an interactive demo:
 
 ## Client Scripts
 
-The `<script>` block can contain both island imports and regular JavaScript. Island imports (with `{ island }`) go through the SSR + hydration pipeline as usual. Everything else is bundled as a client module and executed when the page loads.
+Use the `<script>` block for island imports and JavaScript that runs when the page loads:
 
 ```md
 <script>
@@ -163,14 +159,7 @@ document.querySelector('.date').textContent = format(new Date(), 'PPP')
 Published: <span class="date"></span>
 ```
 
-In this example:
-
-- `Counter` is an island, so it is SSR'd and hydrated on the client
-- `date-fns` and the `querySelector` call are client code, so they are bundled and run on page load
-
-Each page's client script is code-split into its own chunk via dynamic import, so only the current page's script is loaded. Pages without client code ship zero extra JS.
-
-Client scripts work in both dev (served on-demand, HMR support) and production builds.
+Only the current page's client script loads. Pages without client code need no additional script.
 
 ## File Structure
 
@@ -329,7 +318,7 @@ Users who want full control can skip the import and write their own CSS.
 
 ## Markdown Features
 
-All features produce static HTML at build time with zero client JS (except the copy button).
+Markdown features render as static HTML. Code-copy buttons add a small client script.
 
 ### Containers
 
@@ -378,7 +367,7 @@ Custom titles work too: `::: tip Pro Tip`.
 
 ### Syntax Highlighting
 
-Code blocks are highlighted at build time with [Shiki](https://shiki.style) using dual light and dark themes by default: `github-light` and `github-dark`. No client-side JavaScript is needed because theme switching is pure CSS.
+Code blocks use [Shiki](https://shiki.style) with `github-light` and `github-dark` themes by default.
 
 ### Line Highlighting
 
@@ -408,9 +397,7 @@ export function hello() {
 }
 ```
 
-### Copy Button
-
-Code blocks include a copy button. That is the only feature here that needs client-side JS, and it only adds a roughly 200 byte inline script for the clipboard API. The script is injected only when code blocks are present.
+Code blocks include a copy button.
 
 ### Line Numbers
 
@@ -459,21 +446,9 @@ Add classes, IDs, or attributes to any element:
 Paragraph with attributes. {.note}
 ```
 
-### Heading Anchors
+### Navigation and Media
 
-All headings get permalink anchors automatically, enabling direct linking to any section.
-
-### Table of Contents
-
-Use the `[[toc]]` directive to render an inline table of contents from the page's headings.
-
-### Images
-
-Image paths are normalized automatically. Images are lazy-loaded by default.
-
-### Links
-
-External links automatically get `target="_blank" rel="noreferrer"`. Internal `.md` references resolve to their route paths.
+Headings include permalink anchors. Use `[[toc]]` for a table of contents. Images are lazy-loaded, and `.md` links resolve to page routes.
 
 ## Plugin Options
 
@@ -491,147 +466,14 @@ voidMarkdown({
 | `shiki.themes` | `{ light: string; dark: string}` | `{ light: "github-light", dark: "github-dark" }` | Shiki color themes           |
 | `shiki.langs`  | `string[]`                       | Common web languages                             | Additional languages to load |
 
-## Example: Docs Layout with Sidebar
+## Building a Sidebar
 
-Here's a full example of a docs layout using `useFrontmatter()` and `@void/md/pages` to build a sidebar:
+Use `@void/md/pages` to select the pages for your sidebar:
 
-::: code-group
-
-```tsx [React]
-// pages/docs/layout.island.tsx
-import '@void/md/theme-content.css';
-import { useFrontmatter } from '@void/md';
+```ts
 import pages from '@void/md/pages';
-import { useRouter } from '@void/react';
 
-const docPages = pages.filter((p) => p.path.startsWith('/docs/'));
-
-export default function DocsLayout({ children }) {
-  const fm = useFrontmatter();
-  const { path } = useRouter();
-
-  return (
-    <div className="docs-layout">
-      <aside>
-        <nav>
-          {docPages.map((page) => (
-            <a key={page.path} href={page.path} className={page.path === path ? 'active' : ''}>
-              {page.title}
-            </a>
-          ))}
-        </nav>
-      </aside>
-      <main className="void-md">
-        <h1>{fm.title}</h1>
-        {children}
-      </main>
-    </div>
-  );
-}
+const docPages = pages.filter((page) => page.path.startsWith('/docs/'));
 ```
 
-```vue [Vue]
-<!-- pages/docs/layout.island.vue -->
-<script setup>
-import { useFrontmatter } from '@void/md';
-import pages from '@void/md/pages';
-import { useRouter } from '@void/vue';
-
-const fm = useFrontmatter();
-const { path } = useRouter();
-const docPages = pages.filter((p) => p.path.startsWith('/docs/'));
-</script>
-
-<style>
-@import '@void/md/theme-content.css';
-</style>
-
-<template>
-  <div class="docs-layout">
-    <aside>
-      <nav>
-        <a
-          v-for="page in docPages"
-          :key="page.path"
-          :href="page.path"
-          :class="{ active: page.path === path }"
-        >
-          {{ page.title }}
-        </a>
-      </nav>
-    </aside>
-    <main class="void-md">
-      <h1>{{ fm.title }}</h1>
-      <slot />
-    </main>
-  </div>
-</template>
-```
-
-```svelte [Svelte]
-<!-- pages/docs/layout.island.svelte -->
-<script>
-import "@void/md/theme-content.css";
-import { useFrontmatter } from "@void/md";
-import pages from "@void/md/pages";
-import { useRouter } from "@void/svelte";
-
-const fm = useFrontmatter();
-const { path } = useRouter();
-const docPages = pages.filter((p) => p.path.startsWith("/docs/"));
-</script>
-
-<div class="docs-layout">
-  <aside>
-    <nav>
-      {#each docPages as page}
-        <a href={page.path} class:active={page.path === path}>
-          {page.title}
-        </a>
-      {/each}
-    </nav>
-  </aside>
-  <main class="void-md">
-    <h1>{fm.title}</h1>
-    <slot />
-  </main>
-</div>
-```
-
-```tsx [Solid]
-// pages/docs/layout.island.tsx
-import '@void/md/theme-content.css';
-import { useFrontmatter } from '@void/md';
-import pages from '@void/md/pages';
-import { useRouter } from '@void/solid';
-import { For } from 'solid-js';
-
-const docPages = pages.filter((p) => p.path.startsWith('/docs/'));
-
-export default function DocsLayout(props) {
-  const fm = useFrontmatter();
-  const { path } = useRouter();
-
-  return (
-    <div class="docs-layout">
-      <aside>
-        <nav>
-          <For each={docPages}>
-            {(page) => (
-              <a href={page.path} classList={{ active: page.path === path() }}>
-                {page.title}
-              </a>
-            )}
-          </For>
-        </nav>
-      </aside>
-      <main class="void-md">
-        <h1>{fm.title}</h1>
-        {props.children}
-      </main>
-    </div>
-  );
-}
-```
-
-:::
+Render a link with `page.path` and `page.title` for each entry. Use `useFrontmatter()` in the layout to display the current page's metadata, and wrap its content in `.void-md` when using the provided theme.

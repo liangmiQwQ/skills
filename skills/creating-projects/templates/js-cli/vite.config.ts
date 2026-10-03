@@ -1,10 +1,10 @@
-import { cli } from "@liangmi/vp-config";
+import { cli } from '@liangmi/vp-config'
 
 export default cli({
   pack: {
-    entry: ["./src/index.ts"],
+    entry: ['./src/index.ts'],
     deps: {
-      onlyBundle: ["cac", "picocolors"],
-    },
-  },
-});
+      onlyBundle: ['cac', 'picocolors']
+    }
+  }
+})

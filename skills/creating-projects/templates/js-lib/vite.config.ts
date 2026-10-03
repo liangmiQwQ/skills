@@ -1,7 +1,7 @@
-import { lib } from "@liangmi/vp-config";
+import { lib } from '@liangmi/vp-config'
 
 export default lib({
   pack: {
-    entry: ["./src/index.ts"],
-  },
-});
+    entry: ['./src/index.ts']
+  }
+})

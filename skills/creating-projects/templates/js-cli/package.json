@@ -15,10 +15,7 @@
   "bin": {
     "{{repo}}": "./bin/{{repo}}.mjs"
   },
-  "files": [
-    "dist",
-    "bin"
-  ],
+  "files": ["dist", "bin"],
   "type": "module",
   "publishConfig": {
     "access": "public"

@@ -36,7 +36,8 @@ const onlyIds = new Set(flagValues("only").map(normalizeId));
 const skipIds = new Set(flagValues("skip").map(normalizeId));
 const excludes = flagValues("exclude");
 const rulesFiles = flagValues("rules");
-const useColor = !args.includes("--no-color") && process.stdout.isTTY && !asJson;
+const useColor =
+  !args.includes("--no-color") && process.stdout.isTTY && !asJson;
 // realpath both roots so the "skip the skill's own files" check still works
 // when one path arrives through a symlink (macOS /var/folders vs /private/var).
 const realpathOr = (p) => {
@@ -48,113 +49,56 @@ const realpathOr = (p) => {
 };
 const resolvedRoot = realpathOr(resolve(root));
 const skillRoot = realpathOr(resolve(dirname(fileURLToPath(import.meta.url)), ".."));
-const escapeTerminal = (text) =>
-  text.replace(
-    /[\0-\x1f\x7f-\x9f]/g,
-    (char) => `\\x${char.codePointAt(0).toString(16).padStart(2, "0")}`,
-  );
+const escapeTerminal = (text) => text.replace(/[\0-\x1f\x7f-\x9f]/g, (char) =>
+  `\\x${char.codePointAt(0).toString(16).padStart(2, "0")}`,
+);
 
 const SKIP_DIRS = new Set([
-  "node_modules",
-  ".git",
-  "dist",
-  "build",
-  "out",
-  ".next",
-  ".astro",
-  ".output",
-  ".svelte-kit",
-  ".nuxt",
-  "coverage",
-  "vendor",
-  ".cache",
-  ".vercel",
-  ".turbo",
+  "node_modules", ".git", "dist", "build", "out", ".next", ".astro",
+  ".output", ".svelte-kit", ".nuxt", "coverage", "vendor", ".cache",
+  ".vercel", ".turbo",
 ]);
 const EXTS = new Set([
-  ".html",
-  ".css",
-  ".scss",
-  ".sass",
-  ".less",
-  ".tsx",
-  ".jsx",
-  ".ts",
-  ".js",
-  ".mjs",
-  ".cjs",
-  ".vue",
-  ".svelte",
-  ".astro",
-  ".md",
-  ".mdx",
-  ".php",
-  ".twig",
+  ".html", ".css", ".scss", ".sass", ".less",
+  ".tsx", ".jsx", ".ts", ".js", ".mjs", ".cjs",
+  ".vue", ".svelte", ".astro", ".md", ".mdx",
+  ".php", ".twig",
 ]);
 
 // A tell: id, human name, one-line fix, and the line patterns that flag it.
 // `code` tells only look at code/style files; `copy` tells also read prose.
 const TELLS = [
-  {
-    id: "01",
-    group: "color",
-    name: "indigo→violet gradient",
-    fix: "one solid, chosen accent",
+  { id: "01", group: "color", name: "indigo→violet gradient", fix: "one solid, chosen accent",
     patterns: [
       /from-(indigo|violet|purple|fuchsia)-\d+[\s\S]{0,60}?to-(purple|violet|fuchsia|pink)-\d+/i,
       /(linear-gradient|bg-gradient)[^;"'`]*(#6366f1|#8b5cf6|#a855f7|#7c3aed)/i,
       /shadow-(purple|violet|indigo)-\d+\/\d+/i,
-    ],
-  },
-  {
-    id: "02",
-    group: "color",
-    name: "gradient-clip headline",
-    fix: "solid ink, scale up",
+    ] },
+  { id: "02", group: "color", name: "gradient-clip headline", fix: "solid ink, scale up",
     patterns: [
       /bg-clip-text[\s\S]{0,40}?text-transparent|text-transparent[\s\S]{0,40}?bg-clip-text/,
       /(?:-webkit-)?background-clip:\s*text/i,
       /-webkit-text-fill-color:\s*transparent/i,
-    ],
-  },
-  {
-    id: "03",
-    group: "color",
-    name: "warm ‘cozy’ palette",
-    fix: "neutral base + one warm accent",
+    ] },
+  { id: "03", group: "color", name: "warm ‘cozy’ palette", fix: "neutral base + one warm accent",
     patterns: [
       /\b(amber|orange|stone)-(50|100|200|300)\b/i,
       /bg-\[#(?:fdf6ec|fef3e2|faf3e8|fff7ed|fdf4e3)\]/i,
       /(text|border)-amber-\d+/i,
       /text-(?:gray|slate|zinc|neutral)-(?:400|500)[^"'\n]{0,60}bg-(?:amber|stone|orange|rose|blue|indigo|green)-/i,
-    ],
-  },
-  {
-    id: "04",
-    group: "color",
-    name: "default semantic palette",
-    fix: "one palette: neutrals + a couple of chosen states",
+    ] },
+  { id: "04", group: "color", name: "default semantic palette", fix: "one palette: neutrals + a couple of chosen states",
     patterns: [
       /bg-(?:blue|indigo)-50|bg-amber-50|bg-(?:green|emerald)-50|bg-red-50/i,
       /(?:info|success|warning|error)[^\n]{0,30}(?:blue|green|amber|red)-(?:50|100|500|600|700)/i,
-    ],
-  },
-  {
-    id: "05",
-    group: "color",
-    name: "one-hue status box",
-    fix: "state in words; one muted accent on neutral",
+    ] },
+  { id: "05", group: "color", name: "one-hue status box", fix: "state in words; one muted accent on neutral",
     patterns: [
       /border-(red|amber|yellow|green|blue)-\d+[\s\S]{0,60}?text-\1-\d+/i,
       /bg-(?:red|amber|yellow|green)-\d+\/(?:5|10|15|20)\b/i,
       /(?:error|warning|success)[^\n]{0,40}(?:red|amber|yellow|green)-\d+/i,
-    ],
-  },
-  {
-    id: "06",
-    group: "color",
-    name: "gradients as atmosphere",
-    fix: "one flat bg; depth from a hairline",
+    ] },
+  { id: "06", group: "color", name: "gradients as atmosphere", fix: "one flat bg; depth from a hairline",
     patterns: [
       /radial-gradient/i,
       /linear-gradient[^;)]*(?:to bottom|180deg|to top)/i,
@@ -162,308 +106,182 @@ const TELLS = [
       /repeating-(?:linear|radial)-gradient/i,
       /bg-gradient-to-(?:br|tr|bl|tl)\b[\s\S]{0,40}?from-(?:emerald|green|teal|cyan|purple|violet|fuchsia)-\d+\/(?:5|10|15|20|25)/i,
       /box-shadow:[^;{}]*(?:#(?:6366f1|8b5cf6|a855f7|22d3ee|06b6d4)|rgba?\(\s*(?:139|168))/i,
-    ],
-  },
-  {
-    id: "07",
-    group: "type",
-    name: "serif-italic emphasis",
-    fix: "emphasise by weight, one voice",
-    patterns: [/font-serif\b/i, /font-family:\s*(?:georgia|"?playfair|"?lora|"?cormorant)/i],
-  },
-  {
-    id: "08",
-    group: "type",
-    name: "serif where sans belongs",
-    fix: "one legible UI sans",
+    ] },
+  { id: "07", group: "type", name: "serif-italic emphasis", fix: "emphasise by weight, one voice",
+    patterns: [
+      /font-serif\b/i,
+      /font-family:\s*(?:georgia|"?playfair|"?lora|"?cormorant)/i,
+    ] },
+  { id: "08", group: "type", name: "serif where sans belongs", fix: "one legible UI sans",
     patterns: [
       /font-family:\s*[^;]*(playfair|cormorant|lora|dm serif|libre baskerville)/i,
       /fontFamily[^;\n]*(Playfair|Cormorant|Lora)/,
       /font-serif[^"'\n]{0,60}(?:italic|text-[4-9]xl)|(?:\bitalic\b|text-[4-9]xl)[^"'\n]{0,60}font-serif/i,
-    ],
-  },
-  {
-    id: "09",
-    group: "type",
-    name: "decorative strikes & highlights",
-    fix: "strike for edits, underline for links",
+    ] },
+  { id: "09", group: "type", name: "decorative strikes & highlights", fix: "strike for edits, underline for links",
     patterns: [
       /\bline-through\b/i,
       /<(?:mark|s|u|del|strike)[\s>]/i,
       /text-decoration:\s*(?:line-through|underline)/i,
-    ],
-  },
-  {
-    id: "10",
-    group: "type",
-    name: "kicker above every heading",
-    fix: "delete kickers that restate the heading",
+    ] },
+  { id: "10", group: "type", name: "kicker above every heading", fix: "delete kickers that restate the heading",
     patterns: [
       /\buppercase\b[\s\S]{0,40}?tracking-(?:wide|wider|widest)\b|tracking-(?:wide|wider|widest)\b[\s\S]{0,40}?\buppercase\b/i,
       /\b(?:eyebrow|kicker|overline)\b/i,
       /text-transform:\s*uppercase[\s\S]{0,80}?letter-spacing:\s*0?\.\d+em/i,
-    ],
-  },
-  {
-    id: "11",
-    group: "type",
-    name: "full-sentence display headline",
-    fix: "few words big; specifics in a subline",
+    ] },
+  { id: "11", group: "type", name: "full-sentence display headline", fix: "few words big; specifics in a subline",
     patterns: [
       /\btext-(?:5|6|7|8|9)xl\b/,
       /tracking-tighter?\b[\s\S]{0,40}?font-(?:extrabold|black)|font-(?:extrabold|black)[\s\S]{0,40}?tracking-tighter?\b/i,
       /font-size:\s*(?:[5-9]\d(?:\.\d+)?px|[4-9](?:\.\d+)?rem)/i,
       /letter-spacing:\s*-0?\.0[5-9]/i,
-    ],
-  },
-  {
-    id: "12",
-    group: "type",
-    name: "flat type hierarchy",
-    fix: "few steps, ≥1.25× between them",
-    patterns: [/<h[12][^>]*text-(?:sm|base|lg)\b/i],
-  },
-  {
-    id: "13",
-    group: "copy",
-    name: "highlighted keywords",
-    fix: "let structure carry emphasis",
+    ] },
+  { id: "12", group: "type", name: "flat type hierarchy", fix: "few steps, ≥1.25× between them",
+    patterns: [
+      /<h[12][^>]*text-(?:sm|base|lg)\b/i,
+    ] },
+  { id: "13", group: "copy", name: "highlighted keywords", fix: "let structure carry emphasis",
     copy: true,
-    patterns: [/<mark[\s>]/i, /text-(primary|indigo|purple|violet)-\d+/],
-  },
-  {
-    id: "14",
-    group: "copy",
-    name: "AI copywriting voice",
-    fix: "say the specific thing",
+    patterns: [
+      /<mark[\s>]/i,
+      /text-(primary|indigo|purple|violet)-\d+/,
+    ] },
+  { id: "14", group: "copy", name: "AI copywriting voice", fix: "say the specific thing",
     copy: true,
     patterns: [
       /not just .{1,40}\bit(?:['’])?s\b/i,
       /\b(say goodbye to|meet your new|supercharge|unlock the power of|in seconds,? not)\b/i,
       /\b(blazing[- ]fast|effortless(?:ly)?|seamless(?:ly)?|game[- ]?changer|next[- ]level)\b/i,
       /\b(?:growth|security|process|privacy|productivity|compliance|feature|innovation) theater\b/i,
-    ],
-  },
-  {
-    id: "15",
-    group: "copy",
-    name: "emoji everywhere",
-    fix: "cut emoji from product copy",
+    ] },
+  { id: "15", group: "copy", name: "emoji everywhere", fix: "cut emoji from product copy",
     copy: true,
-    patterns: [/\p{Extended_Pictographic}/u],
-  },
-  {
-    id: "16",
-    group: "component",
-    name: "glowing status dot",
-    fix: "flat dot + a word; no halo",
+    patterns: [
+      /\p{Extended_Pictographic}/u,
+    ] },
+  { id: "16", group: "component", name: "glowing status dot", fix: "flat dot + a word; no halo",
     patterns: [
       /\banimate-(?:ping|pulse)\b/i,
       /shadow-(?:green|emerald|lime)-\d+\/\d+/i,
       /(?:ready|online|live)[\s\S]{0,40}?(?:●|rounded-full)/i,
-    ],
-  },
-  {
-    id: "17",
-    group: "component",
-    name: "left-border callout",
-    fix: "one aside, rest is body",
+    ] },
+  { id: "17", group: "component", name: "left-border callout", fix: "one aside, rest is body",
     patterns: [
       /border-l-4[\s\S]{0,40}?rounded|rounded[\s\S]{0,40}?border-l-4/i,
       /\b(admonition|callout|note-box)\b/i,
       /\bborder-2\b[\s\S]{0,40}?border-(indigo|purple|violet|blue|pink|green)-\d+/i,
-    ],
-  },
-  {
-    id: "18",
-    group: "component",
-    name: "pastel icon tiles",
-    fix: "labelled list with specifics",
+    ] },
+  { id: "18", group: "component", name: "pastel icon tiles", fix: "labelled list with specifics",
     patterns: [
       /rounded-(lg|xl|2xl)\s+bg-(indigo|purple|blue|green|amber|pink)-(50|100)/i,
       /<svg[^>]*(?:width|height)="(?:9[6-9]|[1-9]\d{2})"/i,
-    ],
-  },
-  {
-    id: "19",
-    group: "component",
-    name: "max-radius / glassmorphism",
-    fix: "one small radius, solid surfaces",
+    ] },
+  { id: "19", group: "component", name: "max-radius / glassmorphism", fix: "one small radius, solid surfaces",
     patterns: [
       /\brounded-full\b/,
       /backdrop-blur|backdrop-filter:\s*blur|bg-(?:white|black)\/(?:5|10|20|30)/i,
       /border-radius:\s*(?:9999px|50%|2rem|24px)/i,
-    ],
-  },
-  {
-    id: "20",
-    group: "component",
-    name: "oversized drop shadow",
-    fix: "tight elevation, never bigger than the element",
+    ] },
+  { id: "20", group: "component", name: "oversized drop shadow", fix: "tight elevation, never bigger than the element",
     patterns: [
       /box-shadow:[^;{}]*\b(?:[6-9]\d|\d{3,})px/i,
       /shadow-\[[^\]]*\b(?:[6-9]\d|\d{3,})px/i,
       /filter:[^;{}]*drop-shadow\([^)]*\b(?:[6-9]\d|\d{3,})px/i,
       /\bborder\b[\s\S]{0,40}?shadow-(?:xl|2xl)\b|shadow-(?:xl|2xl)\b[\s\S]{0,40}?\bborder\b/,
-    ],
-  },
-  {
-    id: "21",
-    group: "component",
-    name: "corners that don't nest",
-    fix: "inner = outer − padding",
-    patterns: [/\brounded-(?:xl|2xl|3xl)\b/i, /border-radius:\s*(?:1rem|1\.5rem|24px|32px)/i],
-  },
-  {
-    id: "22",
-    group: "component",
-    name: "border dies at the corner",
-    fix: "radius and border on the same box",
+    ] },
+  { id: "21", group: "component", name: "corners that don't nest", fix: "inner = outer − padding",
+    patterns: [
+      /\brounded-(?:xl|2xl|3xl)\b/i,
+      /border-radius:\s*(?:1rem|1\.5rem|24px|32px)/i,
+    ] },
+  { id: "22", group: "component", name: "border dies at the corner", fix: "radius and border on the same box",
     patterns: [
       /rounded-(?:lg|xl|2xl|3xl)[^"'\n]{0,60}overflow-(?:hidden|clip)|overflow-(?:hidden|clip)[^"'\n]{0,60}rounded-(?:lg|xl|2xl|3xl)/i,
       /clip-path:\s*inset\([^)]*round/i,
       /\bborder-[trbl]\b[^"'\n]{0,60}rounded-(?:lg|xl|2xl|3xl)|rounded-(?:lg|xl|2xl|3xl)[^"'\n]{0,60}\bborder-[trbl]\b/i,
-    ],
-  },
-  {
-    id: "23",
-    group: "component",
-    name: "badge / pill spam",
-    fix: "badges only for real status",
+    ] },
+  { id: "23", group: "component", name: "badge / pill spam", fix: "badges only for real status",
     patterns: [
       /rounded-full[\s\S]{0,40}?bg-(indigo|purple|green|amber|pink)-(50|100|200)/i,
       />\s*(?:[✨🔥🎉🚀]\s*)?(new|beta|hot|popular|pro|coming soon)\s*</i,
-    ],
-  },
-  {
-    id: "24",
-    group: "component",
-    name: "AI-drawn SVG icon",
-    fix: "a real, high-quality icon (a designer, or a strong image model)",
-    patterns: [/<circle[^>]*\br="[1-9]/i, /(?:mascot|blob)\.svg/i],
-  },
-  {
-    id: "25",
-    group: "component",
-    name: "icon in a tint of itself",
-    fix: "no tinted tile; inherit text color",
+    ] },
+  { id: "24", group: "component", name: "AI-drawn SVG icon", fix: "a real, high-quality icon (a designer, or a strong image model)",
+    patterns: [
+      /<circle[^>]*\br="[1-9]/i,
+      /(?:mascot|blob)\.svg/i,
+    ] },
+  { id: "25", group: "component", name: "icon in a tint of itself", fix: "no tinted tile; inherit text color",
     patterns: [
       /bg-(indigo|blue|green|amber|red|purple|pink)-\d+\/(?:5|10|15|20)[\s\S]{0,60}?text-\1-/i,
       /text-(indigo|blue|green|amber|red|purple|pink)-\d+[\s\S]{0,60}?bg-\1-\d+\/(?:5|10|15|20)/i,
-    ],
-  },
-  {
-    id: "26",
-    group: "motion",
-    name: "springy hover",
-    fix: "transition what changes, 120–200ms, standard ease",
+    ] },
+  { id: "26", group: "motion", name: "springy hover", fix: "transition what changes, 120–200ms, standard ease",
     patterns: [
       /hover:(?:scale-1[01]\d|-translate-y-)/i,
       /\btransition-all\b/,
       /cubic-bezier\([^)]*,\s*1\.[2-9]/,
       /\banimate-bounce\b/,
       /transition:[^;{}]*\b(?:width|height|margin|padding)\b/i,
-    ],
-  },
+    ] },
   // Leads only — the wobble itself is visual. A centering translate near a spin
   // keyframe is the classic clobber; an off-centre transform-origin near a spin
   // animation is the other spelling of the same bug.
-  {
-    id: "27",
-    group: "motion",
-    name: "wobbly spinner",
-    fix: "fixed rotation centre; keep centering out of the animated transform",
+  { id: "27", group: "motion", name: "wobbly spinner", fix: "fixed rotation centre; keep centering out of the animated transform",
     patterns: [
       /translate\(-50%,\s*-50%\)[\s\S]{0,600}?@keyframes\s+[\w-]*(?:spin|rotate|load)/i,
       /@keyframes\s+[\w-]*(?:spin|rotate|load)[\w-]*\s*\{[\s\S]{0,160}?transform:\s*rotate\([^)]*\)\s*;?\s*\}[\s\S]{0,600}?translate\(-50%,\s*-50%\)/i,
       /(?:\banimate-spin\b|animation:[^;{}]*\b[\w-]*spin)[\s\S]{0,200}?transform-origin:\s*(?!center\b|50%\s*50%)[\w.% -]/i,
       /transform-origin:\s*(?!center\b|50%\s*50%)[\w.% -]+;[\s\S]{0,200}?(?:\banimate-spin\b|animation:[^;{}]*\b[\w-]*spin)/i,
-    ],
-  },
-  {
-    id: "28",
-    group: "layout",
-    name: "all-caps card grid",
-    fix: "show the one key thing fully",
+    ] },
+  { id: "28", group: "layout", name: "all-caps card grid", fix: "show the one key thing fully",
     patterns: [
       /\bgrid-cols-3\b/,
       /\buppercase\b[\s\S]{0,30}?(?:text-xs|tracking-wide)/i,
       /\b(everything you need|why (?:you.?ll love|choose|teams))\b/i,
-    ],
-  },
-  {
-    id: "29",
-    group: "layout",
-    name: "invented stat row",
-    fix: "only measured, sourced numbers",
+    ] },
+  { id: "29", group: "layout", name: "invented stat row", fix: "only measured, sourced numbers",
     copy: true,
     patterns: [
       /\b\d+[km]\+[\s\S]{0,30}?(?:developers|users|teams|customers|downloads|stars)/i,
       /99\.9+%/,
       /\b24\/7\b/,
-    ],
-  },
-  {
-    id: "30",
-    group: "layout",
-    name: "01/02/03 section markers",
-    fix: "number only real sequences",
+    ] },
+  { id: "30", group: "layout", name: "01/02/03 section markers", fix: "number only real sequences",
     patterns: [
       /['"`>]0[1-9]['"`<]/,
       /text-[789]xl[\s\S]{0,50}?(?:text-(?:gray|slate|zinc|neutral)-(?:100|200)|opacity-(?:5|10|20))/i,
       /\bstep[- ](?:one|two|three)\b/i,
-    ],
-  },
-  {
-    id: "31",
-    group: "layout",
-    name: "cards inside cards",
-    fix: "one surface per region; hairlines inside",
-    patterns: [/<(Card|Panel|Box)[^>]*>\s*<\1\b/],
-  },
-  {
-    id: "32",
-    group: "layout",
-    name: "one gap everywhere",
-    fix: "space by relationship, not by token",
-    patterns: [/(space-y-4|gap-4)\b[\s\S]{0,120}?\b(space-y-4|gap-4)\b/],
-  },
-  {
-    id: "33",
-    group: "evolved",
-    name: "Inter everywhere",
-    fix: "compare faces; be able to say why this one",
+    ] },
+  { id: "31", group: "layout", name: "cards inside cards", fix: "one surface per region; hairlines inside",
+    patterns: [
+      /<(Card|Panel|Box)[^>]*>\s*<\1\b/,
+    ] },
+  { id: "32", group: "layout", name: "one gap everywhere", fix: "space by relationship, not by token",
+    patterns: [
+      /(space-y-4|gap-4)\b[\s\S]{0,120}?\b(space-y-4|gap-4)\b/,
+    ] },
+  { id: "33", group: "evolved", name: "Inter everywhere", fix: "compare faces; be able to say why this one",
     patterns: [
       /fonts\.googleapis\.com\/css2\?family=(?:Inter|Space\+Grotesk|Manrope|Plus\+Jakarta)/i,
       /font-family:\s*[^;]*(?:\bInter\b|Space Grotesk|Manrope|Plus Jakarta Sans|\bGeist\b)/,
       /\b(?:Inter|Space_Grotesk|Manrope|Plus_Jakarta_Sans)\b[\s\S]{0,60}?next\/font\/google|next\/font\/google[\s\S]{0,60}?\b(?:Inter|Space_Grotesk|Manrope|Plus_Jakarta_Sans)\b/,
-    ],
-  },
-  {
-    id: "34",
-    group: "evolved",
-    name: "tasteful-terminal",
-    fix: "mono for code only",
+    ] },
+  { id: "34", group: "evolved", name: "tasteful-terminal", fix: "mono for code only",
     patterns: [
       /\bfont-mono\b/,
       /font-family:\s*[^;]*(?:mono|jetbrains|fira code|ibm plex mono|geist mono)/i,
       /[╔╗╚╝║═▓▒░]/,
-    ],
-  },
+    ] },
   // Editorial serif faces beyond tell 08's list, the greeting-as-headline, and
   // opt-in oldstyle figures — the "magazine dashboard" kit. Serif on genuinely
   // editorial surfaces (docs, essays) is not this tell; confirm before fixing.
-  {
-    id: "35",
-    group: "evolved",
-    name: "editorial-dashboard",
-    fix: "sans + tabular numerals for scanned UI",
+  { id: "35", group: "evolved", name: "editorial-dashboard", fix: "sans + tabular numerals for scanned UI",
     patterns: [
       />\s*Good (?:morning|afternoon|evening),/i,
       /font-family:\s*[^;]*(?:fraunces|canela|tiempos|didot|freight|reckless|newsreader)/i,
       /oldstyle-nums|font-variant-numeric:\s*oldstyle/i,
-    ],
-  },
+    ] },
 ];
 
 // Extra rule modules (--rules=file.mjs): each exports an array of tells shaped
@@ -483,16 +301,9 @@ for (const rulesPath of rulesFiles) {
     process.exit(1);
   }
   for (const tell of extra) {
-    if (
-      !tell ||
-      typeof tell.id !== "string" ||
-      typeof tell.name !== "string" ||
-      !Array.isArray(tell.patterns) ||
-      tell.patterns.length === 0
-    ) {
-      console.error(
-        `Rules file ${escapeTerminal(rulesPath)}: each tell needs a string id, a name, and a non-empty patterns array`,
-      );
+    if (!tell || typeof tell.id !== "string" || typeof tell.name !== "string" ||
+        !Array.isArray(tell.patterns) || tell.patterns.length === 0) {
+      console.error(`Rules file ${escapeTerminal(rulesPath)}: each tell needs a string id, a name, and a non-empty patterns array`);
       process.exit(1);
     }
     TELLS.push({
@@ -638,9 +449,7 @@ const byTell = new Map(); // id -> { tell, hits: [{file,line,text}] }
 for (const f of files) {
   for (const h of scanFile(f)) {
     if (!byTell.has(h.tell.id)) byTell.set(h.tell.id, { tell: h.tell, hits: [] });
-    byTell
-      .get(h.tell.id)
-      .hits.push({ file: relative(resolvedRoot, f) || f, line: h.line, text: h.text });
+    byTell.get(h.tell.id).hits.push({ file: relative(resolvedRoot, f) || f, line: h.line, text: h.text });
   }
 }
 
@@ -675,9 +484,7 @@ const red = (s) => c("31", s);
 const dim = (s) => c("2", s);
 const bold = (s) => c("1", s);
 
-console.log(
-  `\n${bold("kill-ai-slop")} — scanned ${files.length} files under ${escapeTerminal(root)}\n`,
-);
+console.log(`\n${bold("kill-ai-slop")} — scanned ${files.length} files under ${escapeTerminal(root)}\n`);
 if (groups.length === 0) {
   console.log("No slop signals found. (Still trust your eyes — open the pages.)\n");
   process.exit(0);

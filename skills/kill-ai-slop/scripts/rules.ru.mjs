@@ -10,11 +10,7 @@
 // Note: JavaScript's \b is ASCII-only and never matches next to Cyrillic
 // letters — write plain substrings or explicit boundaries instead.
 export default [
-  {
-    id: "ru-14",
-    group: "copy",
-    name: "русский AI-слог",
-    fix: "скажите конкретную вещь",
+  { id: "ru-14", group: "copy", name: "русский AI-слог", fix: "скажите конкретную вещь",
     copy: true,
     patterns: [
       /не просто .{1,40}?[—–-]\s*это/iu,
@@ -23,6 +19,5 @@ export default [
       /раскройте (?:весь )?потенциал/iu,
       /выведите .{1,30} на новый уровень/iu,
       /в считанные секунды/iu,
-    ],
-  },
+    ] },
 ];

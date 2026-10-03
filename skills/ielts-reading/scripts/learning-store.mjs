@@ -65,13 +65,7 @@ function createJson(path, data) {
 
 // Normalize passage content, excluding titles, questions and layout before calling this helper.
 function normalize(text) {
-  return (
-    text
-      .normalize("NFKC")
-      .toLowerCase()
-      .match(/[\p{L}\p{N}]+/gu)
-      ?.join(" ") ?? ""
-  );
+  return text.normalize("NFKC").toLowerCase().match(/[\p{L}\p{N}]+/gu)?.join(" ") ?? "";
 }
 
 function materials(directory) {
@@ -83,17 +77,15 @@ function materials(directory) {
 
 function compare(details, directory) {
   assert(object(details), "Material details must be an object");
-  assert(
-    typeof details.passage === "string" && normalize(details.passage),
-    "Save the full passage text",
-  );
+  assert(typeof details.passage === "string" && normalize(details.passage), "Save the full passage text");
   const normalized = normalize(details.passage);
   const fingerprint = createHash("sha256").update(normalized).digest("hex");
   // Five-word overlap catches lightly edited passages; an agent still reviews semantic repetition.
   const shingles = (value) => {
     const words = value.split(" ");
     return new Set(
-      words.slice(0, Math.max(1, words.length - 4)).map((_, i) => words.slice(i, i + 5).join(" ")),
+      words.slice(0, Math.max(1, words.length - 4))
+        .map((_, i) => words.slice(i, i + 5).join(" ")),
     );
   };
   const left = shingles(normalized);
@@ -106,24 +98,12 @@ function compare(details, directory) {
     const right = shingles(text);
     const common = [...left].filter((value) => right.has(value)).length;
     const similarity = common / (left.size + right.size - common);
-    const sameTitle =
-      typeof details.title === "string" && normalize(details.title) === normalize(previous.title);
+    const sameTitle = typeof details.title === "string" && normalize(details.title) === normalize(previous.title);
     if (exact || sameSource || sameTitle || similarity >= 0.6) {
-      matches.push({
-        material_id: previous.material_id,
-        title: previous.title,
-        exact,
-        same_source: sameSource,
-        same_title: sameTitle,
-        similarity,
-      });
+      matches.push({ material_id: previous.material_id, title: previous.title, exact, same_source: sameSource, same_title: sameTitle, similarity });
     }
   }
-  return {
-    fingerprint,
-    matches,
-    duplicate: matches.some((match) => match.exact || match.same_source),
-  };
+  return { fingerprint, matches, duplicate: matches.some((match) => match.exact || match.same_source) };
 }
 
 function validate(event, directory) {
@@ -152,47 +132,22 @@ function validate(event, directory) {
   if (event.type === "material_created") {
     slug(details.material_id);
     assert(typeof details.title === "string" && details.title.trim(), "A material needs a title");
-    assert(
-      Number.isSafeInteger(details.sequence) && details.sequence > 0,
-      "Use a positive sequence number",
-    );
+    assert(Number.isSafeInteger(details.sequence) && details.sequence > 0, "Use a positive sequence number");
     assert(Array.isArray(details.questions) && details.questions.length, "Save the question set");
-    assert(
-      object(details.source) &&
-        ["official_sample", "published_practice", "past_paper", "original"].includes(
-          details.source.kind,
-        ),
-      "Identify material provenance",
-    );
+    assert(object(details.source) && ["official_sample", "published_practice", "past_paper", "original"].includes(details.source.kind), "Identify material provenance");
     const previous = materials(directory);
-    assert(
-      !previous.some(
-        (entry) =>
-          entry.details.material_id === details.material_id ||
-          entry.details.sequence === details.sequence,
-      ),
-      "Material ID and sequence must be unique",
-    );
+    assert(!previous.some((entry) => entry.details.material_id === details.material_id || entry.details.sequence === details.sequence), "Material ID and sequence must be unique");
     const checked = compare(details, directory);
     assert(!checked.duplicate, `Duplicate passage: ${JSON.stringify(checked.matches)}`);
     if (checked.matches.length) {
-      assert(
-        typeof details.novelty_review === "string" && details.novelty_review.trim(),
-        "Similar material needs a written novelty review; prefer another passage",
-      );
+      assert(typeof details.novelty_review === "string" && details.novelty_review.trim(), "Similar material needs a written novelty review; prefer another passage");
     }
     details.passage_sha256 = checked.fingerprint;
   }
   if (event.type === "exercise_attempt") {
     slug(details.material_id);
-    assert(
-      materials(directory).some((entry) => entry.details.material_id === details.material_id),
-      "Attempt must reference a saved material",
-    );
-    assert(
-      ["first_attempt", "after_hints", "review"].includes(details.stage),
-      "Keep first attempts, hint revisions and reviews separate",
-    );
+    assert(materials(directory).some((entry) => entry.details.material_id === details.material_id), "Attempt must reference a saved material");
+    assert(["first_attempt", "after_hints", "review"].includes(details.stage), "Keep first attempts, hint revisions and reviews separate");
     const { answers } = details;
     assert(
       Array.isArray(answers) && answers.length,
@@ -313,23 +268,7 @@ function main() {
       [...types].sort().map((type) => [type, events.filter((event) => event.type === type).length]),
     );
     console.log(
-      JSON.stringify(
-        {
-          path: directory,
-          profile,
-          next_sequence:
-            Math.max(
-              0,
-              ...events
-                .filter((event) => event.type === "material_created")
-                .map((event) => event.details.sequence),
-            ) + 1,
-          event_counts: counts,
-          events,
-        },
-        null,
-        2,
-      ),
+      JSON.stringify({ path: directory, profile, next_sequence: Math.max(0, ...events.filter((event) => event.type === "material_created").map((event) => event.details.sequence)) + 1, event_counts: counts, events }, null, 2),
     );
   } else if (command === "check") {
     const checked = compare(readJson(expand(values.file)), directory);

@@ -147,25 +147,16 @@ test("--only, --skip and --exclude narrow the scan", () => {
       `.x { background: radial-gradient(red, blue); backdrop-filter: blur(4px); }\n`,
     );
     mkdirSync(join(project, "legacy"));
-    writeFileSync(
-      join(project, "legacy", "b.css"),
-      `.y { background: radial-gradient(red, blue); }\n`,
-    );
+    writeFileSync(join(project, "legacy", "b.css"), `.y { background: radial-gradient(red, blue); }\n`);
 
     const only = scan(project, "--json", "--only=6");
     assert.equal(only.status, 0, only.stderr);
-    assert.deepEqual(
-      JSON.parse(only.stdout).findings.map((f) => f.id),
-      ["06"],
-    );
+    assert.deepEqual(JSON.parse(only.stdout).findings.map((f) => f.id), ["06"]);
 
     const skip = scan(project, "--json", "--skip=06");
     assert.equal(skip.status, 0, skip.stderr);
     const skipReport = JSON.parse(skip.stdout);
-    assert.equal(
-      skipReport.findings.some((f) => f.id === "06"),
-      false,
-    );
+    assert.equal(skipReport.findings.some((f) => f.id === "06"), false);
     assert.ok(skipReport.findings.some((f) => f.id === "19"));
 
     const excluded = scan(project, "--json", "--exclude=legacy");

@@ -19,6 +19,7 @@ ska vuejs-ai/skills
 ska slidevjs/slidev
 ska antfu/skills
 ska liangmiQwQ/mo --skill global-projects
+ska liangmiQwQ/new
 ska liangmiQwQ/vp-config
 ska liangmiQwQ/language-learning
 ska yetone/kill-ai-slop

@@ -14,7 +14,7 @@ description: Tool choices for JS/TS CLI projects (command-line tools, scripts)
 
 ## Build & Toolchain
 
-- **vite-plus** + **@liangmi/vp-config** — bundler + fmt + lint + staged + typecheck in one
+- **vite-plus** (tsdown based) + **@liangmi/vp-config** — bundler + fmt + lint + staged + typecheck in one
 - **Node.js** — run TypeScript files directly for scripts and development
 - **bumpp** — version bumping + git tag + release
 - **changelogen** / **changelogithub** — changelog generation

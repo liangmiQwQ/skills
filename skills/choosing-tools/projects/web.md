@@ -8,6 +8,7 @@ description: Tool choices for web projects (Vue apps, Nuxt sites, browser UIs)
 
 - **Vue 3 + TypeScript + Vite** for most web apps
 - **Nuxt 4** when SSR is needed, or for complex apps that also need a backend — Nuxt handles server routes via Nitro
+- **React** Seldom
 - **Void** For big application or experimental websites, this is a new kind of framework and just a private preview. (Read https://void.cloud/)
 
 ## Styling
@@ -34,7 +35,7 @@ description: Tool choices for web projects (Vue apps, Nuxt sites, browser UIs)
 - **simple-git-hooks** + **lint-staged** for pre-commit hooks
 - **vue-tsc** for type checking
 
-I use them most of the time, but sometimes I use **vite-plus** and **@liangmi/vp-config** for websites.
+**vite-plus** and **@liangmi/vp-config** can replace all of them, but I rarely use it in website projects.
 
 ## Package Manager
 

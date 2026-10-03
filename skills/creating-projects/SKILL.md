@@ -27,11 +27,7 @@ Do not use plain `git init` as a substitute for `moi init` or `mo init`. Do not 
 
 ## Templates
 
-Templates live in `templates/` next to this file. Load `$choosing-tools` to pick the stack, then scaffold with the script next to this file:
-
-```bash
-scripts/scaffold.sh <stack> <root>/<owner>/<repo> <owner> <repo> "<description>"
-```
+Templates live in `templates/` next to this file. Load `$choosing-tools` to pick the stack, then copy its layers in order into `<root>/<owner>/<repo>`:
 
 | Stack    | Layers                     | Use for                    |
 | -------- | -------------------------- | -------------------------- |
@@ -41,13 +37,32 @@ scripts/scaffold.sh <stack> <root>/<owner>/<repo> <owner> <repo> "<description>"
 
 Websites and napi-rs projects have no template yet. Build them by hand, still following `common` and the aspects below.
 
-The script copies the layers in order, renames `_name` paths to `.name` and `__repo__` paths to the repo name, fills the mechanical placeholders, and runs each layer's `setup.sh` to add dependencies with their latest versions. Never copy pinned dependency versions from other projects into a new one.
+While copying:
+
+1. Rename `_name` paths to `.name`, and `__repo__` paths to the repo name.
+2. Don't copy `AGENTS.part.md` and `CONTRIBUTING.part.md`. Merge every layer's part, in layer order, into the `{{toolchain}}` line of `AGENTS.md` and the `{{setup}}` line of `CONTRIBUTING.md`.
+3. Fill `{{owner}}`, `{{repo}}`, `{{repo_ident}}` (the repo name with `-` replaced by `_`), `{{description}}`, `{{year}}` and `{{rust_version}}` (from `rustc --version`).
+4. Add `.github/FUNDING.yml` with `github: [<owner>]` when the owner has a GitHub Sponsors profile.
+
+Templates don't pin dependency versions. Add them at their latest versions inside the new project instead, and never copy pinned versions from other projects:
+
+- `js`: Pin Vite+ to the version `@liangmi/vp-config` supports (`npm view @liangmi/vp-config peerDependencies.vite-plus`) in the `pnpm-workspace.yaml` catalog, aliasing `vite` to `npm:@voidzero-dev/vite-plus-core@<version>` overriding `vite@*` to `catalog:`, and allowing any `vite` version in `peerDependencyRules`. Write the current Node major version to `.node-version`. Then run `vp install -D vite@catalog: vite-plus@catalog: @liangmi/vp-config typescript @typescript/native-preview @types/node bumpp`.
+- `js-cli`: `vp install -D cac picocolors` (CLI dependencies are bundled).
+- `rust`: `cargo add insta --dev -p <repo>`, `cargo add criterion --dev -p benchmark`, `cargo add <repo> --path crates/<repo> --dev -p benchmark`, then `dprint config update --yes`.
 
 After scaffolding:
 
-1. Write every `{{TODO: ...}}` placeholder the script prints, mostly in `AGENTS.md`. Delete a section instead of leaving it empty. Keep a new project's `AGENTS.md` short (around 40 lines), it should only hold non-obvious rules and gotchas.
+1. Write every `{{TODO: ...}}` placeholder, mostly in `AGENTS.md`. Config owned by a fast-moving tool, like `vite.config.ts` for `@liangmi/vp-config`, is left as a placeholder; write it by following that tool's skill. Delete a section instead of leaving it empty. Keep a new project's `AGENTS.md` short (around 40 lines), it should only hold non-obvious rules and gotchas.
 2. Adjust the scaffold to the project: the package name (for example a scoped npm name), extra crates or packages, CLI binaries, and the CI matrix.
-3. Run the stack's checks before finishing: `just ready` for Rust, `vp run check && vp run build && vp run test` for JavaScript.
+3. Set the GitHub repo settings (squash merge only, PR title and description as the commit message, auto delete branches, a description):
+
+   ```bash
+   gh repo edit <owner>/<repo> --description "<description>" --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false --delete-branch-on-merge
+   gh api -X PATCH repos/<owner>/<repo> -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
+   ```
+
+4. Run the stack's checks: `just ready` for Rust, `vp run check && vp run build && vp run test` for JavaScript. They must not leave formatting changes behind.
+5. Search for `{{` to make sure no placeholder is left.
 
 If a template itself is wrong or outdated, fix it in the `liangmiQwQ/new` repository instead of only patching the generated project.
 
@@ -57,7 +72,7 @@ When you are initializing a project, like handling infrastructure and related da
 
 ## Aspects of a project
 
-When you are initializing a project, you should care about these aspect:
+When you are initializing a project, you should care about these aspects:
 
 1. Project layout (single-package, or a workspace, one language or multiple-languages mixed)
 2. Basic toolchain (Do not only care about build, care about linting, formatting, testing, git hooks, staging)
@@ -70,5 +85,6 @@ When you are initializing a project, you should care about these aspect:
 9. Tools version (Node version, Rust version)
 10. GitHub repo description, PR merge setting (Squash, Description as message, Auto delete branch)
 11. AGENTS.md document
+12. `.github/FUNDING.yml`, and Sponsorships button enable settings (only when users has public sponsor profile)
 
 You should prepare them in detail but should not make them too complex, for example, linting CI shouldn't be run on all macOS, Linux and Windows, a small library also doesn't need a VitePress website for docs, `.editorconfig` shouldn't be provided most of the time.

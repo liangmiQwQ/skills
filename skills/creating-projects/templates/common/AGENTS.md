@@ -8,9 +8,13 @@
 
 {{toolchain}}
 
+## Project Layout
+
+{{TODO: for complicated project, you need to describe where the submodules are placed. For small project, or common projects, this part can be omitted.}}
+
 ## Rules
 
-Keep AGENTS.md updated with the project codebase. Consider if there is need to modify AGENTS.md after your changes. Only record non-obvious rules and gotchas in AGENTS.md. Don't store things that can be read from files, like project structure or project status.
+If you find AGENTS.md is outdated, please notice users to change in response.
 
 Keep code functional. Write simple code that junior developers can understand, and make functions reusable if possible. Use Unix philosophy to design your code (Every function should only do one thing and should not be too long or complex).
 

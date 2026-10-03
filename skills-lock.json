@@ -23,7 +23,7 @@
       "source": "liangmiQwQ/new",
       "sourceType": "github",
       "skillPath": "skills/choosing-tools/SKILL.md",
-      "computedHash": "b5db8b8fa5fe2200bc31bc2f15f106cd7430caa33811341cb419a695eca350fa"
+      "computedHash": "4294b888c3e4df0ebc31ea56dda0767832b5884f266e520cee380f36ebe7d6d1"
     },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
@@ -35,7 +35,7 @@
       "source": "liangmiQwQ/new",
       "sourceType": "github",
       "skillPath": "skills/creating-projects/SKILL.md",
-      "computedHash": "1ed2ff69b65c793b48116d3cdf6965d1a71bf8462461b568b6e6921f6a874928"
+      "computedHash": "5e46f6b4f5efb1e541c2ff821f3f2ae5a64348f93b69bd2484b78a8ab8f69085"
     },
     "find-skills": {
       "source": "vercel-labs/skills",

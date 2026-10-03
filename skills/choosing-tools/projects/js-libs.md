@@ -6,7 +6,7 @@ description: Tool choices for JS/TS library projects (npm packages, shared utili
 
 ## Build & Bundling
 
-- **vite-plus** + **@liangmi/vp-config**
+- **vite-plus** (tsdown based) + **@liangmi/vp-config**
 
 ## Scripts & Tooling
 

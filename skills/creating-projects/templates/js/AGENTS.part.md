@@ -1,5 +1,9 @@
 ## Toolchain
 
-Vite+ is used as the project manager, together with the `@liangmi/vp-config` preset. Use `vp install` to install dependencies, use `vp install -D` if the added dependency can be bundled. Use `vp run` command to run commands in `package.json`. Do not use `pnpm` or `npm` directly. Docs are local at `node_modules/vite-plus/docs`.
+Vite+ is used as the project manager and dev toolchain for JavaScript part. Check `node_modules/vite-plus/docs` if you don't know how to use Vite+ features. When you find yourself needing a dev tool a tool is missing, you can check Vite+'s document first.
 
-Run `vp check` (lint and format) after you make changes. Type checking is part of linting, do not add a separate `tsc` check.
+## Rules
+
+Keep JavaScript dependency versions in the default catalog in `pnpm-workspace.yaml`, and reference them with `catalog:` in package manifests.
+
+As a opensource project, not all contributors are required to install Vite+ as `vp` globally, so when you are adding a script / task, using `package.json#scripts` to ensure the accessiblility for external contributors.

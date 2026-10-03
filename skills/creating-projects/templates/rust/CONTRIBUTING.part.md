@@ -1,9 +1,12 @@
 This project is built with [Rust](https://rust-lang.org/), if you aren't familiar with it, please read the [official book](https://doc.rust-lang.org/book/) to install basic Rust environment and learn the basic concepts.
 
-We use [just](https://just.systems/) as a task runner. You can install it and easily setup project environment by running:
+We use [just](https://just.systems/) as the task runner. You can install it and easily setup project environment by running:
 
 ```bash
 cargo install just
+```
+
+```bash
 just init
 ```
 

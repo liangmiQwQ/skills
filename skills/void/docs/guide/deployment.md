@@ -55,6 +55,23 @@ To set up deployment later, use `void connect --platform cloudflare` or `void co
 
 Owners can [share a platform project](./project-collaboration.md) with readers, collaborators, and project administrators. This does not apply to direct Cloudflare deployments.
 
+### Deploy to another Void platform
+
+Connect to the additional platform once, then select it for the deployment:
+
+```sh
+void connect https://second.example.com
+VOID_API_URL=https://second.example.com void deploy --platform void --project my-app
+```
+
+Void uses `my-app` on that platform and offers to create it if needed. Your saved
+destination stays unchanged, including when a new project is created or deployment
+fails. The next plain `void deploy` still uses your original destination.
+
+Pass `--project` or `VOID_PROJECT` when selecting a different platform; project links
+belong to their original platform. Each platform has its own projects, secrets, and
+data. For an app without a saved destination, its first deployment still saves a link.
+
 ### Migrations
 
 Deploy applies pending SQL migrations from `db/migrations/`. If your schema has changes without a migration, deploy stops. Run `void db generate`, review and commit the SQL, then deploy again. See the [Database guide](./database.md).
@@ -83,6 +100,11 @@ For a Void platform deploy, the CLI chooses the project in this order:
 If none is set, Void asks you to choose a project. Direct Cloudflare deploys use the Worker and account saved in your Cloudflare config.
 
 ### CI preparation
+
+For a Void platform, run `void connect "$VOID_API_URL" --no-login` in each fresh
+CI environment before deployment. Set `VOID_API_URL` to the platform you selected;
+there is no default hosted platform. The generated GitHub Actions workflow
+includes this connection step.
 
 If your CI pipeline runs typechecking or other static analysis before deploy, run `void prepare` after install to generate the `.void/` artifacts without booting Vite.
 

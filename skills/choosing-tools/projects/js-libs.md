@@ -21,3 +21,5 @@ description: Tool choices for JS/TS library projects (npm packages, shared utili
 ## Package Manager
 
 - **pnpm**
+
+When creating a project, use the `js-lib` template of the `$creating-projects` skill.

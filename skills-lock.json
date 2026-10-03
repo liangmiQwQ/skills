@@ -19,11 +19,23 @@
       "skillPath": "skills/antfu-design/SKILL.md",
       "computedHash": "597125f7a45ba7328cd877a68b525611862bd230cf542ab3c343ace8fde3f30a"
     },
+    "choosing-tools": {
+      "source": "liangmiQwQ/new",
+      "sourceType": "github",
+      "skillPath": "skills/choosing-tools/SKILL.md",
+      "computedHash": "b5db8b8fa5fe2200bc31bc2f15f106cd7430caa33811341cb419a695eca350fa"
+    },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/create-adaptable-composable/SKILL.md",
       "computedHash": "2f215126499d29a733be980ef9ce8f4ffb5f25a8831aec965d86c0cd21b2c5d2"
+    },
+    "creating-projects": {
+      "source": "liangmiQwQ/new",
+      "sourceType": "github",
+      "skillPath": "skills/creating-projects/SKILL.md",
+      "computedHash": "1ed2ff69b65c793b48116d3cdf6965d1a71bf8462461b568b6e6921f6a874928"
     },
     "find-skills": {
       "source": "vercel-labs/skills",

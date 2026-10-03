@@ -49,7 +49,7 @@ AI requests use your platform’s account and allowance in both local and remote
 When the dev server starts with remote mode active, it prints:
 
 ```
-⚡ Remote bindings active (my-project.void.app)
+⚡ Remote bindings active (my-project.apps.example.com)
    DB      → remote D1
    KV      → remote KV
    STORAGE → remote R2

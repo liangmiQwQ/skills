@@ -156,7 +156,7 @@ Configuration for the [email integration](../guide/email.md).
 
 During development, `email.from` is the default sender in the local inbox. On a Void platform, use your project's shared sender or registered domain.
 
-For direct Cloudflare deployment, this address selects the mail domain and default sender. Use a zone or subdomain in your account; an existing mail provider's MX records are preserved. See [Email setup](../guide/email/domains.md#your-own-cloudflare-account).
+For direct Cloudflare deployment, this address selects the mail domain and default sender. Use a zone or subdomain in your account; an existing mail provider's MX records are preserved. Without `email.from`, Void skips automatic setup and preserves authored `cloudflare.send_email` bindings and `cloudflare.addresses`; check their readiness yourself. `--require-email` still refuses deployment when automatic setup cannot be verified. See [Email setup](../guide/email/domains.md#your-own-cloudflare-account).
 
 ### `head`
 

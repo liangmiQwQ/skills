@@ -1,0 +1,25 @@
+[workspace]
+resolver = "3"
+members = ["benchmark", "crates/*"]
+
+[workspace.package]
+version = "0.0.0-alpha.0"
+authors = ["Liang Mi <https://github.com/liangmiQwQ>", "contributors"]
+categories = []
+keywords = []
+license = "MIT"
+repository = "https://github.com/{{owner}}/{{repo}}"
+description = "{{description}}"
+
+edition = "2024"
+rust-version = "{{rust_version}}"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }

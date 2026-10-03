@@ -35,7 +35,7 @@ Header rules do not apply to ISR cache responses.
 
 ### Blocked headers
 
-`Set-Cookie` and `Clear-Site-Data` are ignored in header rules. On a shared domain such as `*.void.app`, a rule could otherwise affect cookies or data belonging to another project's subdomain.
+`Set-Cookie` and `Clear-Site-Data` are ignored in header rules. On a shared domain such as `*.apps.example.com`, a rule could otherwise affect cookies or data belonging to another project's subdomain.
 
 ## Framework `_headers` files
 

@@ -8,15 +8,20 @@ Keep one password-manager entry for this platform. Paste the saved values into t
 
 ## Cloudflare API Tokens {#runtime-token-permissions}
 
-For a domain installation, create two custom tokens using Cloudflare's [API token setup](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/). Name them **Void Platform Management** and **Void Platform Runtime**. Scope them to your selected account and application zone.
+For a domain installation or Cloudflare Access setup, the installer guides you through creating separate management and runtime tokens using Cloudflare's [API token setup](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/). Its links preselect the permissions and suggest names based on your platform's display name. Scope the tokens to your selected account and, when using a domain, its zone, save them in your password manager, and paste them into the masked CLI prompts.
 
-For workers.dev testing with the default API hostname, browser login can authorize installation: you only need to create the runtime token and R2 credentials below. Skip the zone permissions until you add a domain.
+For workers.dev testing with the default API hostname, browser login can authorize
+infrastructure setup. Void also checks account-wide Access requirements; if the
+current credential cannot read them, the installer asks for a scoped Access token.
+Protected apps and public apps under Default-Deny need an ongoing app-management
+token, stored encrypted. Access setup requires a management token even on
+workers.dev. Skip zone permissions until you add a domain.
 
 Browser login does not grant AI Gateway access. Include **Account → AI Gateway → Edit** on the runtime token so Void can verify and create that resource.
 
 The management token lets your CLI install and maintain the platform. The runtime token is stored as a Worker secret so the platform can deploy apps after you close your terminal. They are separate credentials.
 
-The installer’s runtime-token link preselects required account permissions. Compare the form with the checklist shown beside the link, and select the indicated zone for a domain installation.
+Compare each token's form with the permission checklist below, and select the indicated account and zone for a domain installation. The installer saves a management token entered at the prompt in this installation’s encrypted local checkpoint and reuses it on resume. Upgrades, repairs, and other lifecycle maintenance also use that saved management token. During installation, a rejected token can be replaced at the prompt. An explicit `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN` takes precedence. Keep your password-manager copy for maintenance or another machine; scripts supply it through `CLOUDFLARE_API_TOKEN`.
 
 ::: details Permissions to select for each token
 
@@ -38,6 +43,8 @@ Use the following permissions for the core platform. Cloudflare may label write 
 | Zone    | DNS                | Edit       | —                                       |
 | Zone    | Workers Routes     | Edit       | —                                       |
 | Zone    | Cache Purge        | —          | Purge                                   |
+
+When Void configures Access in the installation account, the initial management-token link also selects **Account → Access: Apps and Policies → Edit** and **Account → Access: Organizations, Identity Providers, and Groups → Read**. Protection adds **Account → Access: Service Tokens → Edit**. When the authentication configuration or saved setup selects existing applications, the link requests Read access instead of Edit. These permissions belong to the management token; the runtime token does not need them.
 
 The management token also needs **Zone Edit** with authority to create zones if you ask Void to create the zone. If it already exists, use the selected zone with Zone Read and DNS Edit. Nested application domains additionally need **SSL and Certificates: Read** on the management token. A custom runtime that enables custom project domains needs **SSL and Certificates: Edit** on the runtime token; the core runtime does not enable that feature.
 

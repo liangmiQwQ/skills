@@ -30,3 +30,5 @@ description: Tool choices for JS/TS CLI projects (command-line tools, scripts)
 ## Package Manager
 
 - **pnpm**
+
+When creating a project, use the `js-cli` template of the `$creating-projects` skill.

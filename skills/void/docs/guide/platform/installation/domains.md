@@ -66,9 +66,14 @@ void platform repair <installation-id> --dashboard-url https://dash.example.com 
 
 The origin must contain no credentials, path, query, or fragment. Void saves it
 for login callbacks and keeps it across upgrades and repairs. The command does
-not create a dashboard Worker or DNS records; deploy that app separately. Omit
-the option to keep the saved origin. The dashboard provides sign-in, linked
-login methods, and sign-out; use the CLI for user project and team management.
+not create a dashboard Worker or DNS records. Follow the source app’s
+[standalone dashboard preparation](https://github.com/voidzero-dev/void/tree/main/platform/packages/dashboard#standalone-deployment)
+to deploy your own copy with an unused Worker name, your dashboard hostname,
+and the installed API Worker’s service binding. Set its `API_URL` to the public
+API origin, `DASHBOARD_URL` to the dashboard origin, and `SITE_DOMAIN` to the
+installation’s application domain. Omit the option to keep the saved origin.
+The dashboard provides sign-in, linked login methods, and sign-out; use the CLI
+for user project and team management.
 
 If Access protects the platform, its application must cover this dashboard
 origin too. Configure the origin when installing protection. To change it on an

@@ -8,6 +8,17 @@ Project Zero Trust puts Cloudflare Access in front of the hostnames of projects 
 
 This is separate from the Access login and protection for the platform API. Projects deployed directly to Cloudflare are not affected.
 
+New installations choose app access during `void platform install`. The installer
+reuses the platform policy or helps you select separate company rules, and finishes
+setup before opening traffic. Existing installations keep their settings when
+upgraded; use this page to configure app access if it has not been set up yet.
+
+If you choose public apps in an account with Default-Deny, Void manages scoped
+public rules instead. New projects and custom domains remain public automatically.
+Keep these rules enabled while Default-Deny is on; removing them can block traffic.
+Public-only installations need no identity providers or company policies until you
+choose to protect apps. To renew their token in Admin, leave the policy fields blank.
+
 ## Requirements
 
 - A Cloudflare Zero Trust organization in the account that hosts the platform, with the identity providers and reusable Access policies you want to use. Select at least one Allow policy that matches people by identity. Void rejects Bypass and Service Auth policies, and rules that allow Everyone or any service token.
@@ -116,22 +127,29 @@ If a project must accept such requests:
 
 Void creates and owns these self-hosted applications in your Zero Trust organization:
 
-| Application                | Covers                                                                    | Policy                                                           | Exists                                                             |
-| -------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Shared project application | `*.<your domain>` and this installation's `workers.dev` testing URLs      | Your selected policies and identity providers                    | Once, while Zero Trust is enabled                                  |
-| Public exception           | One public project's `<slug>.<your domain>` and `workers.dev` testing URL | A Bypass policy for Everyone, named `Void project is public`     | One for each public project                                        |
-| Custom domain application  | All custom domains of one protected project                               | Your selected policies and identity providers                    | One for each protected project that has custom domains             |
-| Health check exception     | `void-platform-health.<your domain>/health`                               | A Bypass policy for Everyone, named `Void platform health check` | Once, while Zero Trust is enabled on an installation with a domain |
+| Application                 | Covers                                                                    | Policy                                                                   | Exists                                                             |
+| --------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Shared project application  | `*.<your domain>` and this installation's `workers.dev` testing URLs      | Your selected policies and identity providers                            | Once for protected-app configurations                              |
+| Public app management check | A reserved, unused dispatch check path                                    | Deny Everyone; verifies management permissions without opening hostnames | Once, instead of the shared wildcard in public-only mode           |
+| Public exception            | One public project's `<slug>.<your domain>` and `workers.dev` testing URL | A Bypass policy for Everyone, named `Void project is public`             | One for each public project                                        |
+| Custom domain application   | All managed custom domains of one project                                 | Company policies for protected projects; Bypass for public ones          | One for each project with managed custom domains                   |
+| Health check exception      | `void-platform-health.<your domain>/health`                               | A Bypass policy for Everyone, named `Void platform health check`         | Once, while Zero Trust is enabled on an installation with a domain |
 
-Custom domains of a public project need no Access application.
+Installations configured through the installer also manage public custom-domain
+rules. Their custom-domain application changes policy when a project switches
+between public and protected access.
+
+If the installer already configured the same health-check exception, Zero Trust
+reuses it. Disabling project Zero Trust leaves that existing exception in place
+so platform health checks continue to work.
 
 The number of applications Void needs is:
 
 ```text
-2 + public projects + protected projects that have custom domains
+1 + health-check applications + public projects + projects with managed custom domains
 ```
 
-Use 1 instead of 2 on an installation without a domain. For example, 40 projects with 10 public and 5 protected projects that have custom domains need 2 + 10 + 5 = 17 applications. Void stops with an error when the account has more than 500 Access applications.
+The first application is the shared company policy or the public-app management check. Count a health exception once, including when it is shared with the installer. For example, 40 projects with one health exception, 10 public projects, and 5 projects with managed custom domains need 1 + 1 + 10 + 5 = 17 applications. Void stops with an error when the account has more than 500 Access applications.
 
 #### Recognizing Void's Applications
 

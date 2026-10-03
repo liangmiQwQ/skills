@@ -16,7 +16,12 @@ workflows. Mention Wrangler only when the user needs to recognize a literal
 configuration file or environment variable.
 
 Use `void` and `@void/*` in imports, examples, and package manifests. Follow the
-project's existing framework and deployment destination.
+project's existing framework and deployment destination. Deploying to a Void
+platform requires an explicit `void connect <url>` first; never infer a platform
+from old examples, tokens, or project IDs.
+For a one-time deployment elsewhere, connect to that platform, then set
+`VOID_API_URL` for the deploy command and pass `--project <slug>`. This preserves
+the app's existing saved destination, including when the target project is new.
 
 ## Task Routing
 

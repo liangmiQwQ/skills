@@ -41,11 +41,12 @@ are Void account operations. Prefer `void auth status`, `void account link`, and
 
 Browser login through one of the platform's currently enabled methods. The token is saved in the operating-system keychain, scoped to the platform origin. Login fails closed when no keychain is available instead of writing the token to a plaintext file; headless environments use `VOID_TOKEN` from their secret manager.
 
-If an older CLI login is no longer recognized after updating Void, run `void account login` again. Your saved platform and project links remain unchanged.
+Connect to a platform with `void connect <url>` before logging in. If an older project link has no platform URL, connect and run `void project link` to select its project again.
 
 Set `VOID_API_URL` alongside `VOID_TOKEN` to identify the platform that issued it.
-A token without an API URL is only used for Void Cloud's production API; a saved
-connection or project cannot forward it to another platform. To use a platform's
+Both the URL and token are required for environment-based authentication, and the
+URL must already be connected. In a fresh CI environment, run
+`void connect "$VOID_API_URL" --no-login` before deploying. To use a platform's
 saved login instead, unset `VOID_TOKEN`.
 
 This is optional if you already completed auth during `void connect` or the interactive `void init` flow.

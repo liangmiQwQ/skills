@@ -50,7 +50,9 @@ Use a mail subdomain to keep existing mail on `acme.com` with its current provid
 
 Sign in with `void cloudflare login`, or use a `CLOUDFLARE_API_TOKEN` with **Email Routing Edit** and **Email Sending Edit** in addition to deploy permissions. If your browser session lacks email permissions, log out and sign in again. Global API Keys aren't supported.
 
-Run `void deploy --platform cloudflare`. Void shows the domain, routing, sending, DNS, and handler addresses it would configure. Accept to set up email and deploy. Later deploys reuse the setup. Without `email.from`, or if you decline the initial setup, the app deploys without email.
+Run `void deploy --platform cloudflare`. Void shows the domain, routing, sending, DNS, and handler addresses it would configure. Accept to set up email and deploy. Later deploys reuse the setup. If you decline the initial setup, the app deploys without email.
+
+Without `email.from`, Void skips automatic setup and preserves authored `cloudflare.send_email` bindings and `cloudflare.addresses`; check their readiness yourself. `--require-email` still refuses deployment when automatic setup cannot be verified.
 
 If subdomain setup needs a dashboard step, follow the checklist under **Email → Settings → Subdomains**, then retry. After DNS changes, check readiness with:
 
@@ -77,6 +79,8 @@ Setup enables the zone's plus addressing so `support+T-42@mail.acme.com` reaches
 ### Sending {#sending}
 
 On Workers Free, `sendEmail()` can send to verified destinations listed under **Email Routing → Destination addresses** in Cloudflare.
+
+Configure your sender domain's SPF, DKIM, and DMARC records using [Cloudflare's email authentication guidance](https://developers.cloudflare.com/email-service/concepts/email-authentication/), then check the authentication results in a received message's original headers. A successful `sendEmail()` result confirms provider acceptance; it does not confirm delivery or authentication readiness.
 
 Sending to arbitrary recipients requires [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Email Sending onboarding. After upgrading, run `void email setup --platform cloudflare`. Void doesn't retry onboarding during ordinary deploys.
 

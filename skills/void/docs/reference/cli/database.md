@@ -52,7 +52,7 @@ Run ad-hoc SQL against the database. Provide SQL inline or from a file. SELECT q
 
 By default, targets the local database. Pass `--remote` to run against the deployed database selected in `.void/project.json`:
 
-- **Void platform D1 projects**: routes the query through the selected platform's registered proxy using your auth token. Void Cloud's proxy is `proxy.void.cloud`; a self-hosted platform uses its own proxy URL.
+- **Void platform D1 projects**: routes the query through the selected platform's registered proxy using your auth token.
 - **Direct Cloudflare D1 projects**: invokes Cloudflare against the pinned D1 binding from `void.config.ts` or `void.lock.json`.
 - **Hosted PostgreSQL and MySQL projects**: fetches the stored connection string from the platform and connects directly.
 - **Direct Cloudflare PostgreSQL and MySQL projects**: uses `DATABASE_URL` from the current shell; Cloudflare cannot return the password from Hyperdrive.

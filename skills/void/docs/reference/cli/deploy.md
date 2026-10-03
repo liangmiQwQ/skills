@@ -14,7 +14,13 @@ void deploy --platform cloudflare --atomic
 
 Auto-detects your project type and chooses the right pipeline. See [Supported App Types](../../guide/app-types.md) and [Deployment](../../guide/deployment.md) for details.
 
+Deploying to a Void platform requires an explicit connection with `void connect <url>`.
+A saved project URL or `VOID_API_URL` alone does not establish a connection.
+In fresh CI environments, run `void connect "$VOID_API_URL" --no-login` first.
+
 On an upgraded Void platform, an accepted deployment continues if the CLI disconnects. The CLI automatically reconnects to its progress. Pressing Ctrl+C stops observation; use `void project cancel` to request cancellation and `void project status` to inspect the result. If interrupted execution requires recovery, wait for its result before deploying again.
+
+The CLI reports stalled progress and automatic recovery, and waits up to 30 minutes after acceptance. If it times out, the deployment can continue; check `void project status` before trying another deployment.
 
 For an existing Void Worker, `void deploy` can link the Worker and migrate its root Cloudflare config. Keep the first deployment focused on the existing app. See [Deploy an existing Worker](../../integrations/cloudflare.md#deploy-an-existing-worker) for requirements and the ISR cache choice.
 
@@ -52,6 +58,20 @@ For the Void platform, project resolution precedence is:
 3. linked project in `.void/project.json`
 
 If no project is linked and no override is provided, CLI prompts to link or create one. In CI (non-TTY), `void deploy` errors out instead — set `VOID_PROJECT` or pass `--project <slug>`.
+
+To deploy to another connected Void platform for one invocation:
+
+```sh
+void connect https://second.example.com
+VOID_API_URL=https://second.example.com void deploy --platform void --project my-app
+```
+
+`VOID_API_URL` selects the platform and `--project` selects its project. You must
+name the project when overriding a different platform's saved link. Existing
+project links and deployment preferences remain unchanged, even when the target
+project is created. The same applies to `VOID_PROJECT` and to another project on
+the current platform. A first deployment still links the project when no destination
+is configured. See [Deploy to another Void platform](../../guide/deployment.md#deploy-to-another-void-platform).
 
 ## `void deploy --platform cloudflare` {#void-deploy-platform-cloudflare}
 

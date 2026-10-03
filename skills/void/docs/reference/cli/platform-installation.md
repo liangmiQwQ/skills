@@ -8,32 +8,33 @@ outline: deep
 void platform install [options] [--yes]
 ```
 
-| Option                            | Purpose                                                                              |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| `--name <slug>`                   | Installation name used in `void-<name>-<role>` resource names; choose an unused name |
-| `--display-name <name>`           | Human-readable platform name                                                         |
-| `--account <id>`                  | Cloudflare account id                                                                |
-| `--auth-config <path>`            | Login methods, signup policy, and environment references for provider secrets        |
-| `--login-methods <methods>`       | Comma-separated `github`, `google`, `oidc`, or `cloudflare-access` login methods     |
-| `--access-protection`             | Protect the platform UI and APIs with Cloudflare Access                              |
-| `--no-access-protection`          | Skip Cloudflare Access protection                                                    |
-| `--hyperdrive <create\|id>`       | Create Hyperdrive or use the specified existing configuration                        |
-| `--application-domain <domain>`   | Base domain for deployed apps                                                        |
-| `--workers-dev`                   | Explicit testing mode; add an application domain later                               |
-| `--zone <domain>`                 | Cloudflare zone containing the application domain                                    |
-| `--dedicated-zone`                | Add zone-wide catch-all routes; valid only when the app domain is the whole zone     |
-| `--no-dedicated-zone`             | Skip zone-wide application catch-all routes                                          |
-| `--control-plane-domain <domain>` | Optional API custom hostname; defaults to `workers.dev`                              |
-| `--no-control-plane-domain`       | Use the default `workers.dev` API hostname                                           |
-| `--dashboard-url <origin>`        | HTTPS origin of an optional dashboard deployed separately                            |
-| `--plan`                          | Resolve and print a read-only plan                                                   |
-| `--resume`                        | Continue the matching checkpointed installation                                      |
-| `--runtime <path>`                | Deploy a locally built, integrity-checked runtime directory                          |
-| `--yes`                           | Acknowledge Cloudflare changes in non-interactive use                                |
+| Option                                    | Purpose                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| `--name <slug>`                           | Installation name used in `void-<name>-<role>` resource names; choose an unused name |
+| `--display-name <name>`                   | Human-readable platform name                                                         |
+| `--account <id>`                          | Cloudflare account id                                                                |
+| `--auth-config <path>`                    | Login methods, signup policy, and environment references for provider secrets        |
+| `--login-methods <methods>`               | Comma-separated `github`, `google`, `oidc`, or `cloudflare-access` login methods     |
+| `--access-protection`                     | Protect the platform UI and APIs with Cloudflare Access                              |
+| `--no-access-protection`                  | Skip Cloudflare Access protection                                                    |
+| `--app-access <public\|platform\|custom>` | Public apps, the platform's Access policy, or separately selected app policies       |
+| `--hyperdrive <create\|id>`               | Create Hyperdrive or use the specified existing configuration                        |
+| `--application-domain <domain>`           | Base domain for deployed apps                                                        |
+| `--workers-dev`                           | Explicit testing mode; add an application domain later                               |
+| `--zone <domain>`                         | Cloudflare zone containing the application domain                                    |
+| `--dedicated-zone`                        | Add zone-wide catch-all routes; valid only when the app domain is the whole zone     |
+| `--no-dedicated-zone`                     | Skip zone-wide application catch-all routes                                          |
+| `--control-plane-domain <domain>`         | Optional API custom hostname; defaults to `workers.dev`                              |
+| `--no-control-plane-domain`               | Use the default `workers.dev` API hostname                                           |
+| `--dashboard-url <origin>`                | HTTPS origin of an optional dashboard deployed separately                            |
+| `--plan`                                  | Preview Cloudflare changes and save installation choices locally                     |
+| `--resume`                                | Continue the matching checkpointed installation                                      |
+| `--runtime <path>`                        | Deploy a locally built, integrity-checked runtime directory                          |
+| `--yes`                                   | Acknowledge Cloudflare changes in non-interactive use                                |
 
-For a first installation, follow [Install a Void Platform](../../guide/self-hosted-platform.md). The interactive installer recommends using a domain and offers **Use workers.dev for testing** as a visible alternative. Void creates the platform infrastructure and tables. External PostgreSQL and a configured login method are required in either mode; GitHub OAuth is the default login choice, not a requirement. `--workers-dev` skips zone/DNS/certificate operations and cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
+For a first installation, follow [Install a Void Platform](../../guide/self-hosted-platform.md). The interactive installer recommends using a domain and offers **Use workers.dev for testing** as a visible alternative. Void creates the platform infrastructure and tables. External PostgreSQL and a configured login method are required in either mode. Select all login methods you want to enable; none are selected initially. Non-interactive installation defaults to GitHub when no login configuration is supplied. `--workers-dev` skips zone/DNS/certificate operations and cannot be combined with `--application-domain`, `--zone`, or `--dedicated-zone`.
 
-Read-only plans, workers.dev installations with the default API hostname, and supported lifecycle operations can use Cloudflare browser login and the system keychain. Installation that writes DNS or creates a zone needs an explicit management token through `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN`.
+Read-only plans, workers.dev installations with the default API hostname, and supported lifecycle operations can use Cloudflare browser login and the system keychain. Installation that writes DNS or creates a zone needs a management API token. The interactive installer guides you to create one and paste it into a masked prompt; scripts use `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN`.
 
 The installed platform needs a separate runtime token to provision resources for apps. The interactive installer prompts for it and the other setup values. For non-interactive installs, inject the variables listed in [Install from CI](../../guide/platform/installation/ci.md).
 
@@ -45,9 +46,23 @@ path, query, or fragment. Void permits that origin's login callbacks and saves
 it for later maintenance; it does not deploy a dashboard Worker. Omission keeps
 an existing installation's saved dashboard origin.
 
-`--plan` previews resource names, login methods, callback URLs, and credential requirements. Run the install or resume command printed at the end to continue. For login configuration, use either `--auth-config` or `--login-methods` with the Access protection flags.
+`--plan` previews resource names, login methods, default app access, the login callback URL, database configuration, and credential requirements. An existing Hyperdrive shows its database and configuration name. Setup links are shown during guided credential setup. Completed previews save nonsecret installation choices locally. Rerun `void platform install` to choose a saved plan and review a fresh check of Cloudflare state, or run the install or resume command printed at the end. Started installations use their saved checkpoints; completed installations are excluded from the chooser. For login configuration, use either `--auth-config` or `--login-methods` with the Access protection flags.
+
+App access is configured before traffic opens. With platform protection enabled,
+the installer recommends reusing its company policy; otherwise it defaults to
+public apps. Use `--app-access custom` to select separate hosting-account policies.
+Public apps in a Default-Deny account receive scoped public Access rules. The
+installer explains and collects the encrypted management credential when needed;
+scripts supply `VOID_PLATFORM_APP_ACCESS_TOKEN` or `appAccess.tokenEnv` in the
+authentication file. Upgrades preserve administrator settings.
 
 New resources use `void-<name>-<role>` names; choose an unused installation name. The installer opens setup pages for missing credentials and reuses values already supplied.
+
+During Access setup, choose existing company policies or **Create new** for manual
+setup instructions and an account dashboard link. After you save the policy and
+confirm completion, Void reloads the list so you can select it and continue in the
+same run. **Refresh list** reloads policies created in another window. Your
+identity-provider choice and still-available policy selections are retained.
 
 Installation progress and partial credentials are saved encrypted locally. Rerun the installer to continue unfinished setup, or pass `--resume --name <id>`. Use lifecycle commands for completed installations.
 

@@ -8,7 +8,7 @@ To run a Void platform, you need:
 
 - A Cloudflare account with Workers for Platforms and R2 enabled.
 - An empty hosted PostgreSQL database.
-- An account with your chosen login provider. GitHub is the default; Google, OIDC, and Cloudflare Access are also supported.
+- An account with your chosen login provider: GitHub, Google, OIDC, or Cloudflare Access.
 - A domain for your apps, or `workers.dev` for testing. You can [add a domain later](/guide/platform/installation/domains#adding-a-domain).
 
 Void creates the Workers, storage, queues, routing, and database tables through the CLI.
@@ -19,9 +19,10 @@ Workers for Platforms requires a paid plan. Your database and Cloudflare usage a
 
 In the [Cloudflare dashboard](https://dash.cloudflare.com/), select the account where you want the platform to live:
 
-1. Open **Workers for Platforms** and enable its plan. Review [Workers for Platforms pricing](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/pricing/) before confirming.
-2. Open **R2 Object Storage** and complete its activation. Void creates the bucket later.
-3. For a domain installation, choose a domain you own, such as `example.app`. If you need one, register it with your preferred registrar. Use a spare domain's root: apps will be served at `my-app.example.app`. For workers.dev testing, skip this step and the DNS setup below.
+1. Open **Workers & Pages** once to let Cloudflare provision Workers for the account.
+2. Open **Workers for Platforms** and enable its plan. Review [Workers for Platforms pricing](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/pricing/) before confirming.
+3. Open **R2 Object Storage** and complete its activation. Void creates the bucket later.
+4. For a domain installation, choose a domain you own, such as `example.app`. If you need one, register it with your preferred registrar. Use a spare domain's root: apps will be served at `my-app.example.app`. For workers.dev testing, skip this step and the DNS setup below.
 
 If that domain is already in this Cloudflare account, use its existing zone. Otherwise, [add the domain to Cloudflare](https://developers.cloudflare.com/dns/zone-setups/full-setup/setup/) and follow the nameserver instructions until the zone is active. A zone is Cloudflare's DNS configuration for a domain; creating one does not buy the domain.
 
@@ -36,7 +37,7 @@ pnpm add --global void
 void platform install --plan
 ```
 
-Sign in to Cloudflare when prompted, then choose an installation name and account. `--plan` previews the resources without changing them or requiring runtime secrets.
+Sign in to Cloudflare when prompted, then choose an installation name and account. `--plan` previews the resources without changing them or requiring runtime secrets. Completed plans save your choices locally. Run `void platform install` again to select a saved plan; Void checks the current Cloudflare state before asking you to apply it.
 
 For a domain installation, use these answers. Testing mode skips the application domain, zone, and catch-all questions:
 
@@ -51,7 +52,7 @@ For a domain installation, use these answers. Testing mode skips the application
 
 Choose an unused installation name in your account. For example, `team` creates resources such as `void-team-api` and `void-team-proxy`.
 
-The preview includes your login callback URL and links for creating credentials. Keep it open while following [Credentials](/guide/platform/installation/credentials), then run the install command printed at the end.
+The preview lists the credentials you will need. Review [Credentials](/guide/platform/installation/credentials), then run the install command printed at the end. The guided installation provides setup links and the login callback when needed.
 
 You can select either path directly:
 
@@ -87,7 +88,7 @@ Once installation claims the database, continue using that same database for res
 The installer can create Hyperdrive for you or use one you manage separately. For an existing configuration:
 
 1. Point it at the dedicated platform database using a runtime user, and disable SQL result caching.
-2. Select it in the installer and confirm the database, host, port, and runtime user.
+2. Select it in the installer and review the database, host, port, and runtime user.
 3. Supply a database owner connection at the PostgreSQL URL prompt so Void can apply migrations.
 
 To create one first, choose **Set up a separately managed Hyperdrive** and follow the printed instructions or [Cloudflare’s setup guide](https://developers.cloudflare.com/hyperdrive/get-started/). Rerun the installer once it is ready. Void leaves its configuration under your control. For unattended setup, use the Hyperdrive variables in [Install from CI](/guide/platform/installation/ci).

@@ -26,6 +26,20 @@ void platform zero-trust project-public <project-id>
 void platform zero-trust project-reconcile <project-id>
 ```
 
+New installations configure app access in `void platform install`. Use these
+commands to inspect or change it later. To configure or renew public-only rules
+for a Default-Deny account, omit identity policies and use `--public-apps`:
+
+```sh
+printf '%s' "$ACCESS_API_TOKEN" | void platform zero-trust configure \
+  --public-apps --token-stdin --yes
+```
+
+Add `--existing-projects public` when enabling from a disabled configuration.
+Public-only rules cannot be combined with protected project choices. To switch an
+already protected configuration to public-only rules, first disable it; Access may
+block traffic during that transition in a Default-Deny account.
+
 Mutations support `--plan`, `--yes`, and `--timeout`; use `--plan` instead of
 `--yes` to inspect this change without applying it. The Access management token
 is accepted only on standard input. Zero Trust uses the Cloudflare account that

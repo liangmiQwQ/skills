@@ -49,7 +49,7 @@ void platform install \
   --yes
 ```
 
-Mutations require `--yes` in CI; a read-only `--plan` does not. Custom runtimes also require `--runtime <directory>`. For a new installation, run `--plan` with the same account, name, and domain options as the unattended install. If you use `--auth-config`, pass the same file to both commands. Register the printed callback when creating a login provider's OAuth or OIDC client manually; automatic Access setup manages its own application. A custom API hostname is optional.
+Mutations require `--yes` in CI; a read-only `--plan` does not. Custom runtimes also require `--runtime <directory>`. For a new installation, run `--plan` with the same account, name, and domain options as the unattended install. If you use `--auth-config`, pass the same file to both commands. Register `<platform-api-url>/auth/callback` when creating a login provider's OAuth or OIDC client manually; automatic Access setup manages its own application. A custom API hostname is optional.
 
 :::
 

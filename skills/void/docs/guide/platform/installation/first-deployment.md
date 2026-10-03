@@ -33,8 +33,8 @@ void project token create --name ci --expires-in 30
 ```
 
 Store the printed `VOID_TOKEN` and `VOID_API_URL` in the CI secret manager, then
-use `void connect <url> --no-login` in a fresh checkout if connection metadata
-is not committed. Rotate with `void project token renew <id>` and revoke with
+run `void connect "$VOID_API_URL" --no-login` before deploying in each fresh CI
+environment. Project files do not replace this connection step. Rotate with `void project token renew <id>` and revoke with
 `void project token revoke <id>`. A human login token is not a CI credential.
 
 If Cloudflare Access protects the platform, Access proof and the project

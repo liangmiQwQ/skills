@@ -17,7 +17,7 @@ For a completely new project, finish the managed project initialization before w
 2. Resolve the repository owner and name. If either is missing or ambiguous, ask the user before creating the project directory.
 3. Resolve whether the repository should be public or private. If the user did not specify visibility, ask before continuing.
 4. Run the selected CLI's `init` command with the explicit visibility option from `<root>/<owner>/<repo>`.
-5. Verify the local path and `origin` remote, then create the scaffold inside that initialized repository.
+5. Verify the local path and `origin` remote, then create the scaffold inside that initialized repository (see [Templates](#templates)).
 
 An explicit request to create or initialize a new project authorizes the managed initialization. Once the owner, name, and visibility are known, do not ask for a second confirmation before running `moi init --public`, `moi init --private`, or the paired `mo` command.
 
@@ -25,9 +25,35 @@ Do not create the project in the current task directory, `work/`, `outputs/`, or
 
 Do not use plain `git init` as a substitute for `moi init` or `mo init`. Do not silently skip managed initialization because a required choice is missing; ask the user for that choice instead.
 
+## Templates
+
+Templates live in `templates/` next to this file. Load `$choosing-tools` to pick the stack, then scaffold with the script next to this file:
+
+```bash
+scripts/scaffold.sh <stack> <root>/<owner>/<repo> <owner> <repo> "<description>"
+```
+
+| Stack    | Layers                     | Use for                    |
+| -------- | -------------------------- | -------------------------- |
+| `rust`   | `common` + `rust`          | Rust crates and CLIs       |
+| `js-lib` | `common` + `js` + `js-lib` | npm libraries              |
+| `js-cli` | `common` + `js` + `js-cli` | Node.js command line tools |
+
+Websites and napi-rs projects have no template yet. Build them by hand, still following `common` and the aspects below.
+
+The script copies the layers in order, renames `_name` paths to `.name` and `__repo__` paths to the repo name, fills the mechanical placeholders, and runs each layer's `setup.sh` to add dependencies with their latest versions. Never copy pinned dependency versions from other projects into a new one.
+
+After scaffolding:
+
+1. Write every `{{TODO: ...}}` placeholder the script prints, mostly in `AGENTS.md`. Delete a section instead of leaving it empty. Keep a new project's `AGENTS.md` short (around 40 lines), it should only hold non-obvious rules and gotchas.
+2. Adjust the scaffold to the project: the package name (for example a scoped npm name), extra crates or packages, CLI binaries, and the CI matrix.
+3. Run the stack's checks before finishing: `just ready` for Rust, `vp run check && vp run build && vp run test` for JavaScript.
+
+If a template itself is wrong or outdated, fix it in the `liangmiQwQ/new` repository instead of only patching the generated project.
+
 ## Related skills
 
-When you are initializing a project, like handling infrastructure and related data, you are supposed to load `$choosing-tools` skills. You can also use `$global-projects` to find how my other projects use CI and tools
+When you are initializing a project, like handling infrastructure and related data, you are supposed to load `$choosing-tools` skills. You can also use `$global-projects` to find how my other projects use CI and tools. Load `$use-vp-config` for details of the `@liangmi/vp-config` preset in JavaScript projects.
 
 ## Aspects of a project
 

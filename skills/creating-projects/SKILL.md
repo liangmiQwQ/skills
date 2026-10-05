@@ -9,17 +9,20 @@ When creating projects, what you should focus on is not the project code, but ev
 
 You can create a small placeholder like `todo!()` macro and `console.error()`. You can fill the code later if I required. If I don't require you implement any logic, just keep placeholders.
 
+**Read [guide.md](./guide.md) before writing any file.** It explains how to read the request, what you may change in a template and why, how to write the docs, and what to do when no template fits.
+
 ## Required initialization gate
 
 For a completely new project, finish the managed project initialization before writing any scaffold or project files:
 
 1. Load the `$global-projects` skill and use its paired resolver to find the configured project root and project CLI.
 2. Resolve the repository owner and name. If either is missing or ambiguous, ask the user before creating the project directory.
-3. Resolve whether the repository should be public or private. If the user did not specify visibility, ask before continuing.
-4. Run the selected CLI's `init` command with the explicit visibility option from `<root>/<owner>/<repo>`.
-5. Verify the local path and `origin` remote, then create the scaffold inside that initialized repository (see [Templates](#templates)).
+3. Resolve whether the repository should be public or private. If the user did not specify visibility, ask before continuing. "Private" only sets the GitHub repository visibility. It never makes a package `private: true` and never removes npm publishing from the release workflow.
+4. Resolve a one-sentence description of what the project does. If the request doesn't say, ask. Never describe the scaffold instead, like "Private TypeScript workspace for <repo>".
+5. Run the selected CLI's `init` command with the explicit visibility option from `<root>/<owner>/<repo>`.
+6. Verify the local path and `origin` remote, then create the scaffold inside that initialized repository (see [Templates](#templates)).
 
-An explicit request to create or initialize a new project authorizes the managed initialization. Once the owner, name, and visibility are known, do not ask for a second confirmation before running `moi init --public`, `moi init --private`, or the paired `mo` command.
+An explicit request to create or initialize a new project authorizes the managed initialization. Once the owner, name, visibility, and description are known, do not ask for a second confirmation before running `moi init --public`, `moi init --private`, or the paired `mo` command.
 
 Do not create the project in the current task directory, `work/`, `outputs/`, or another artifact directory unless the user explicitly chose that location. Generic artifact-output guidance does not override the managed project workflow.
 
@@ -37,6 +40,8 @@ Templates live in `templates/` next to this file. Load `$choosing-tools` to pick
 
 Websites and napi-rs projects have no template yet. Build them by hand, still following `common` and the aspects below.
 
+For a workspace (monorepo), apply the stack in two levels as described in [guide.md](./guide.md#workspaces).
+
 While copying:
 
 1. Rename `_name` paths to `.name`, and `__repo__` paths to the repo name.
@@ -46,13 +51,13 @@ While copying:
 
 Templates don't pin dependency versions. Add them at their latest versions inside the new project instead, and never copy pinned versions from other projects:
 
-- `js`: Pin Vite+ to the version `@liangmi/vp-config` supports (`npm view @liangmi/vp-config peerDependencies.vite-plus`) in the `pnpm-workspace.yaml` catalog, aliasing `vite` to `npm:@voidzero-dev/vite-plus-core@<version>` overriding `vite@*` to `catalog:`, and allowing any `vite` version in `peerDependencyRules`. Write the current Node major version to `.node-version`. Then run `vp install -D vite@catalog: vite-plus@catalog: @liangmi/vp-config typescript @typescript/native-preview @types/node bumpp`.
-- `js-cli`: `vp install -D cac picocolors` (CLI dependencies are bundled).
+- `js`: Write the current Node major version to `.node-version`. Add `vite` (aliased to `npm:@voidzero-dev/vite-plus-core@<version>`), `vite-plus` (pinned to the version `@liangmi/vp-config` supports), `@liangmi/vp-config`, `typescript`, `@typescript/native-preview`, `@types/node` and `bumpp` to the catalog and to `devDependencies` as `catalog:`, as described in [guide.md](./guide.md#dependencies). Override `vite@*` to `catalog:` and allow any `vite` version in `peerDependencyRules`, then run `vp install`.
+- `js-cli`: Add `cac` and `picocolors` the same way, as dev dependencies (CLI dependencies are bundled).
 - `rust`: `cargo add insta --dev -p <repo>`, `cargo add criterion --dev -p benchmark`, `cargo add <repo> --path crates/<repo> --dev -p benchmark`, then `dprint config update --yes`.
 
 After scaffolding:
 
-1. Write every `{{TODO: ...}}` placeholder, mostly in `AGENTS.md`. Config owned by a fast-moving tool, like `vite.config.ts` for `@liangmi/vp-config`, is left as a placeholder; write it by following that tool's skill. Delete a section instead of leaving it empty. Keep a new project's `AGENTS.md` short (around 40 lines), it should only hold non-obvious rules and gotchas.
+1. Write every `{{TODO: ...}}` placeholder, mostly in `AGENTS.md`. Config owned by a fast-moving tool, like `vite.config.ts` for `@liangmi/vp-config`, is left as a placeholder; write it by following that tool's skill. Delete a section instead of leaving it empty. Keep what you write into `AGENTS.md` short, so the file stays around 40 lines.
 2. Adjust the scaffold to the project: the package name (for example a scoped npm name), extra crates or packages, CLI binaries, and the CI matrix.
 3. Set the GitHub repo settings (squash merge only, PR title and description as the commit message, auto delete branches, a description):
 
@@ -63,6 +68,7 @@ After scaffolding:
 
 4. Run the stack's checks: `just ready` for Rust, `vp run check && vp run build && vp run test` for JavaScript. They must not leave formatting changes behind.
 5. Search for `{{` to make sure no placeholder is left.
+6. `diff` every generated file against its template, and check each difference as described in [guide.md](./guide.md#changing-a-template-file).
 
 If a template itself is wrong or outdated, fix it in the `liangmiQwQ/new` repository instead of only patching the generated project.
 

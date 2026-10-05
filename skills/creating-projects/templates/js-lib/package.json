@@ -12,7 +12,9 @@
     "type": "git",
     "url": "git+https://github.com/{{owner}}/{{repo}}.git"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",

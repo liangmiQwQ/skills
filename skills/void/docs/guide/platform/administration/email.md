@@ -144,5 +144,3 @@ Run recovery with the same platform version that created the persisted intent.
 `applied` continues without replaying the write; `not-applied` permits that exact
 step to retry. Secret rotation keeps its staged generation, and removal resumes
 from the unresolved cleanup step. Age alone never authorizes a retry.
-
-Register administrator domains only after a platform upgrade has completed, and remove them before rolling the platform back to a version that predates this feature: an earlier runtime cannot use the platform credential for them and does not distinguish administrator-registered domains from owner-registered ones.

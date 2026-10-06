@@ -155,5 +155,3 @@ void db generate
 ```
 
 Review and commit the SQL before deploying. Void includes your auth configuration and plugin tables; you don't need to duplicate them in `db/schema.ts` or run the Better Auth CLI.
-
-MySQL stores OAuth access, refresh, and ID tokens as unbounded text. Existing direct-deploy MySQL apps should run `void db generate` once after upgrading to widen earlier `varchar(255)` token columns. Void platform deployments apply the same safe widening automatically.

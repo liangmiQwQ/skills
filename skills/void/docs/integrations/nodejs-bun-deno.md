@@ -89,11 +89,16 @@ These Void features work identically across all targets:
 - [Typed fetch client](../guide/typed-fetch.md) (`void/client`)
 - [Custom headers](../guide/edge/headers.md) (`routing.headers`)
 - [Redirects](../guide/edge/redirects.md) (`routing.redirects`)
-- [Environment variables](../guide/env-vars.md) (`.env` files)
 - [Static site generation](../guide/ssg.md)
 - [Vite preview](https://vite.dev/guide/cli#vite-preview) for testing production builds locally
 
 ## What's Different
+
+### Environment variables
+
+Supply server values through your host's environment and read them with `process.env` in Node.js or Bun, or `Deno.env.get()` in Deno. The `void/env` schema and secret workflow requires Cloudflare.
+
+For browser code, use Vite's `import.meta.env.VITE_*` values. These are embedded at build time and must not contain secrets.
 
 ### No Cloudflare bindings
 
@@ -106,7 +111,7 @@ The following imports are **not available** with a non-CF target and produce a c
 | `void/storage` | R2 (blob storage)        |
 | `void/auth`    | Void-managed Better Auth |
 | `void/ai`      | Workers AI               |
-| `void/env`     | CF env type augmentation |
+| `void/env`     | Typed environment schema |
 
 If you need a database or storage, use an external provider and connect via standard Node.js libraries.
 

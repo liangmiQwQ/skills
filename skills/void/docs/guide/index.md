@@ -4,34 +4,35 @@ outline: deep
 
 # What is Void?
 
-Void adds server routes, typed data access, and deployment to Vite apps. Native Void apps run on Cloudflare Workers. You can also use Void with a [supported framework](../integrations/frameworks/overview).
+Void is a full-stack framework for Cloudflare Workers, powered by Vite. Build your UI with React, Vue, Svelte, or Solid, and write server code in the same project. Void connects routing, data access, and deployment while keeping types shared across your app.
 
-Start with the [Quickstart](./quickstart) to create an app, run it locally, and deploy it.
+Start with the [Quickstart](./quickstart.md) to create and deploy an app. If you already use a meta framework, follow its [integration guide](../integrations/frameworks/overview.md).
 
-The CLI and build tools require Node.js 24.21.0 or later.
+## Server routes and pages
+
+Files define routes. A handler in `routes/api/users.ts` serves `/api/users`; a component in `pages/users/index.tsx` renders `/users`.
+
+Each page can have a companion `.server.ts` file. Its **loader** reads data and returns typed props to the component. Its **actions** handle forms and other mutations, then update the page. Server code stays on the server; components render there initially and run in the browser for navigation and interaction.
+
+Use [Pages routing](./pages-routing/overview.md) for a full-stack UI, or keep your own client-side router and call [server routes](./server-routing.md) with [typed fetch](./typed-fetch.md). You can also build an API without a frontend.
 
 ## Resources from your code
 
-Import `db` from `void/db`, and Void provides a local database and provisions one for deployment. The same pattern applies to KV, object storage, queues, and AI. Configure resources explicitly when you need to use existing infrastructure.
+Import `db` from `void/db` to query your database. Void provides a local database during development and provisions one when you deploy. Imports also enable resources such as [KV](./kv.md), [object storage](./storage.md), and [queues](./queues.md). Use configuration when you need to connect existing resources.
 
-Your Drizzle schema defines database types. Route handlers infer return types, and the [typed fetch client](./typed-fetch.md) checks calls from the frontend. Changing a field shows you which callers need to change.
+Your Drizzle schema defines database types. Handlers infer response types, and typed fetch checks their callers. Page loaders and actions carry the same types into components and forms. Changing a field shows you which parts of the app need to change.
 
-Void connects these parts of your app:
+## From local development to production
 
-- [Server routes](./server-routing.md) and [pages](./pages-routing/overview.md) for your app's backend and UI
-- [Database](./database.md), [KV](./kv.md), and [storage](./storage.md) that work locally and in production
-- [Standard Schema](https://standardschema.dev/) validation for runtime values and TypeScript types
-- `void deploy` to build, apply migrations, provision resources, and deploy
+Vite runs your app locally with Cloudflare's runtime. `void deploy` builds it, provisions resources, applies database migrations, and publishes it. [Environment variables](./env-vars.md) use a schema, local values, and production secrets.
 
-## Deployment targets
+Deploy to [your own Cloudflare account](./deployment.md#deploy-to-cloudflare), or connect to a [Void platform](./self-hosted-platform.md) run by your team. Both use the same application APIs. A platform adds shared access, deployment history, and administration.
 
-Deploy to [your own Cloudflare account](../integrations/cloudflare.md#deploy-to-your-own-cloudflare-account) or to a [Void platform](./self-hosted-platform.md) run by your team. Both use the same SDK and CLI.
-
-[Static assets](./edge/static-assets) are cached at the edge. [Prerendering](./edge/prerendering) builds pages ahead of time, while [incremental revalidation](./edge/revalidation) caches pages rendered on demand. Database, storage, secrets, and deployment commands are available through Void.
+Void also deploys [existing frameworks and static sites](./app-types.md). Your framework keeps its routing and rendering; Void handles resources and deployment.
 
 ## Next steps
 
-- [Quickstart](./quickstart): get a running app in minutes
-- [Server Routing](./server-routing): dynamic params, middleware, and validation
-- [Pages Routing](./pages-routing/overview): full-stack pages with server loaders and actions
-- [Supported App Types](./app-types): full-stack, meta-framework, and static site modes
+- [Quickstart](./quickstart.md): create your first app
+- [Pages Routing](./pages-routing/overview.md): loaders, layouts, and forms
+- [Database](./database.md): schemas, queries, and migrations
+- [Deployment](./deployment.md): Cloudflare, team platforms, and CI

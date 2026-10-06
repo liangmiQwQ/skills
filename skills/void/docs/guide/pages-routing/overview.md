@@ -225,9 +225,9 @@ export default function PostPage() {
 
 ## Scroll Restoration
 
-Client-side navigation manages scroll position automatically:
+Void manages scroll position for Pages automatically:
 
-- **Back/forward navigation** restores the exact scroll position you were at before navigating away.
+- **Back/forward navigation and reloads** restore the saved scroll position.
 - **New navigation** scrolls to the top of the page.
 - **Hash links** (`/docs#api`) scroll to the target element. Same-page hash links (`#section`) skip the server fetch entirely.
 

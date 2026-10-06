@@ -70,6 +70,33 @@ const response = await ai
 
 **Key exports:** `ai`, `VoidAi`, provider request types. See [AI](../../guide/ai.md) for provider setup and streaming examples.
 
+### Provider keys
+
+Default secret names for `ai.provider()`. Use `apiKeyEnv` to choose another name.
+
+| Provider prefix    | Env var               |
+| ------------------ | --------------------- |
+| `openai`           | `OPENAI_API_KEY`      |
+| `anthropic`        | `ANTHROPIC_API_KEY`   |
+| `google-ai-studio` | `GOOGLE_API_KEY`      |
+| `deepseek`         | `DEEPSEEK_API_KEY`    |
+| `groq`             | `GROQ_API_KEY`        |
+| `mistral`          | `MISTRAL_API_KEY`     |
+| `grok`             | `GROK_API_KEY`        |
+| `openrouter`       | `OPENROUTER_API_KEY`  |
+| `perplexity`       | `PERPLEXITY_API_KEY`  |
+| `cohere`           | `COHERE_API_KEY`      |
+| `cerebras`         | `CEREBRAS_API_KEY`    |
+| `huggingface`      | `HUGGINGFACE_API_KEY` |
+| `replicate`        | `REPLICATE_API_KEY`   |
+| `baseten`          | `BASETEN_API_KEY`     |
+| `cartesia`         | `CARTESIA_API_KEY`    |
+| `deepgram`         | `DEEPGRAM_API_KEY`    |
+| `elevenlabs`       | `ELEVENLABS_API_KEY`  |
+| `fal`              | `FAL_API_KEY`         |
+| `ideogram`         | `IDEOGRAM_API_KEY`    |
+| `parallel`         | `PARALLEL_API_KEY`    |
+
 ## ISR {#isr}
 
 Imported from `"void/isr"`.

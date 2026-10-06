@@ -18,7 +18,7 @@ Deploying to a Void platform requires an explicit connection with `void connect 
 A saved project URL or `VOID_API_URL` alone does not establish a connection.
 In fresh CI environments, run `void connect "$VOID_API_URL" --no-login` first.
 
-On an upgraded Void platform, an accepted deployment continues if the CLI disconnects. The CLI automatically reconnects to its progress. Pressing Ctrl+C stops observation; use `void project cancel` to request cancellation and `void project status` to inspect the result. If interrupted execution requires recovery, wait for its result before deploying again.
+On a Void platform, an accepted deployment continues if the CLI disconnects. The CLI automatically reconnects to its progress. Pressing Ctrl+C stops observation; use `void project cancel` to request cancellation and `void project status` to inspect the result. If interrupted execution requires recovery, wait for its result before deploying again.
 
 The CLI reports stalled progress and automatic recovery, and waits up to 30 minutes after acceptance. If it times out, the deployment can continue; check `void project status` before trying another deployment.
 

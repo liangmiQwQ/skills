@@ -29,56 +29,11 @@ export const action = defineHandler.withValidator({
 | Nothing (void)        | Re-runs the loader, page re-renders with fresh props. |
 | `c.redirect('/path')` | Navigates to another page.                            |
 
-## Named Actions
-
-When a page needs multiple mutations, such as updating and deleting a user on the same page, export `actions` (plural) instead of `action`:
-
-```ts
-// pages/users/[id].server.ts
-import { defineHandler } from 'void';
-import { db, eq } from 'void/db';
-import { users, updateUserSchema } from '@schema';
-
-export const actions = {
-  update: defineHandler.withValidator({
-    body: updateUserSchema,
-  })(async (c, { body }) => {
-    await db
-      .update(users)
-      .set(body)
-      .where(eq(users.id, Number(c.req.param('id'))));
-  }),
-
-  delete: defineHandler(async (c) => {
-    await db.delete(users).where(eq(users.id, Number(c.req.param('id'))));
-  }),
-};
-```
-
-Named actions are dispatched via a `?actionName` suffix on the URL (e.g. `/users/42?update`). The client primitives `useForm` and `action()` handle this automatically.
-
-Use `action` or `actions` in a file, not both.
-
-You can also define an `actions.default` key for the action that runs when no name is specified (i.e. a bare POST to the page URL):
-
-```ts
-export const actions = {
-  default: defineHandler(async (c) => {
-    // runs on POST /users/edit (no ?suffix)
-  }),
-  delete: defineHandler(async (c) => {
-    // runs on POST /users/edit?delete
-  }),
-};
-```
-
 ## Form
 
-Pair `Form` with `useForm` for automatic error presentation. It preserves controlled input on failure, announces validation and action errors, and displays the message from structured quota responses. Known retry deadlines prevent premature resubmission without locking the fields. It never retries a submission automatically.
+Pair `Form` with `useForm` to submit values and display validation and action errors. Inputs stay editable when a submission fails.
 
 Import `Form` from your adapter. Pass `form` and, optionally, `method="put"`, `"patch"`, or `"delete"`; the default is `"post"`. Use `renderError` for a custom action-error renderer (a snippet in Svelte).
-
-On the server, use `limit.response({ message: 'AI is temporarily unavailable. Your draft is still editable.' })` in an AI or Sandbox operation's required `limited` handler. It supplies the status and structured metadata consumed by `Form`.
 
 ## `useForm`
 
@@ -216,6 +171,49 @@ const form = useForm('/users/:id', { name: '' }, { params: { id: '42' } });
 <Form form={form} method="put">{/* submits to /users/42 */}</Form>
 ```
 
+## Named Actions
+
+When a page needs multiple mutations, such as updating and deleting a user on the same page, export `actions` (plural) instead of `action`:
+
+```ts
+// pages/users/[id].server.ts
+import { defineHandler } from 'void';
+import { db, eq } from 'void/db';
+import { users, updateUserSchema } from '@schema';
+
+export const actions = {
+  update: defineHandler.withValidator({
+    body: updateUserSchema,
+  })(async (c, { body }) => {
+    await db
+      .update(users)
+      .set(body)
+      .where(eq(users.id, Number(c.req.param('id'))));
+  }),
+
+  delete: defineHandler(async (c) => {
+    await db.delete(users).where(eq(users.id, Number(c.req.param('id'))));
+  }),
+};
+```
+
+Named actions are dispatched via a `?actionName` suffix on the URL (e.g. `/users/42?update`). The client primitives `useForm` and `action()` handle this automatically.
+
+Use `action` or `actions` in a file, not both.
+
+You can also define an `actions.default` key for the action that runs when no name is specified (i.e. a bare POST to the page URL):
+
+```ts
+export const actions = {
+  default: defineHandler(async (c) => {
+    // runs on POST /users/edit (no ?suffix)
+  }),
+  delete: defineHandler(async (c) => {
+    // runs on POST /users/edit?delete
+  }),
+};
+```
+
 ### Named Actions with `useForm`
 
 When a page exports named actions, append `?actionName` to the URL:
@@ -258,7 +256,7 @@ Authentication errors (`401`, `403`), server errors (`500`, `502`), and unexpect
 Actions can throw `ValidationError` for custom validation logic:
 
 ```ts
-import { defineHandler, ValidationError } from 'void';
+import { defineHandler, ValidationError } from 'void/handler';
 
 export const action = defineHandler(async (c) => {
   const body = await c.req.json();
@@ -268,6 +266,10 @@ export const action = defineHandler(async (c) => {
   // ...
 });
 ```
+
+### Usage limits
+
+For [AI](../ai.md) and [Sandbox](../sandboxes.md) actions, return `limit.response({ message: 'Try again shortly. Your draft is still editable.' })` from the operation's `limited` handler. `Form` displays the message and waits until a known retry deadline before allowing resubmission. It keeps the fields editable and never retries automatically.
 
 ## Authentication and origin checks
 

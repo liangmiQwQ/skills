@@ -51,28 +51,6 @@ Following waits for the final logs before stopping, including diagnostics writte
 
 ## Checking the Platform
 
-### Migrating older deployment assets
-
-After upgrading the platform, inspect every page of its asset inventory:
-
-```sh
-void platform system asset-migrations --page 1 --limit 100
-void platform deployment migrate-assets <deployment-id> --plan
-void platform deployment migrate-assets <deployment-id> --yes
-```
-
-Migrate every deployment with a nonzero `needsMigration` count, including retained
-rollback targets and stored Worker bundles. Investigate entries marked `invalid`
-before continuing. The command verifies each copied asset, preserves originals,
-and applies successive batches. If interrupted, inspect the result and resume
-with the last successful `nextCursor` using `--cursor`; restarting without a
-cursor also verifies and reuses completed copies.
-
-Run the inventory again across all pages when finished. Existing applications
-continue serving during this migration, and the provider asset mirror remains.
-Legacy reads remain available while older platform runtimes and cached manifests
-can still reference original assets.
-
 ### Health checks
 
 Use the overview to see recent activity, or run a health check to test the platform's services and database:
@@ -87,6 +65,17 @@ Health checks use the services configured for the selected platform. An unhealth
 The dashboard’s **System Status** page refreshes health checks every 30 seconds and shows errors beside the affected service.
 
 Use `void platform upgrade`, `repair`, `disable`, and `enable` to maintain your platform. See [platform maintenance](/guide/platform/installation/maintenance#resume-repair-recover-and-upgrade).
+
+Upgrades and rollbacks run through the CLI; watching their progress is optional.
+During maintenance, navigating the admin UI automatically redirects to
+`/admin/status`. You can also open that page directly on the API origin. It
+refreshes automatically and shows saved progress and the API's traffic state
+while the API and authentication database remain reachable. If a status refresh
+fails, the last confirmed snapshot is marked as stale. Normal administrator
+changes stay paused during maintenance.
+If the CLI reports an error or a waiting state, follow its recovery instructions
+to resume the operation. See
+[Follow upgrade and rollback progress](/guide/platform/installation/maintenance#follow-upgrade-and-rollback-progress).
 
 For disaster recovery, keep a matching PostgreSQL backup, provider data backups, installation identity and complete project-encryption keyring, and immutable runtime artifacts. Keep traffic disabled while restoring data, run `discover` to reconstruct verified local metadata, and review `repair --plan` before recreating missing installer-owned infrastructure. Neither command restores backed-up data. See [Prepare for disaster recovery](/guide/platform/installation/maintenance#prepare-for-disaster-recovery) for the full sequence.
 

@@ -6,6 +6,12 @@ outline: deep
 
 Use a Cloudflare Sandbox to run commands, work with files, and connect to servers from server code. Each Sandbox ID selects an isolated container.
 
+## Requirements
+
+Cloudflare deployments require [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. Run Docker for local development and direct deployments that build an image. A team platform's runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit.
+
+## Run a command
+
 ```ts
 import { defineHandler } from 'void';
 import { getSandbox } from 'void/sandbox';
@@ -23,46 +29,7 @@ export const POST = defineHandler(async (c) => {
 });
 ```
 
-Importing from `void/sandbox` enables the required resources. Local development, native Cloudflare deployments, and Void Platform share the same runtime API.
-
-## Configuration
-
-The default environment provides Node.js 24 on Debian Trixie. Local development and native deploys need Docker running. Managed platform deploys use Cloudflare's managed Node.js image.
-
-Use `void.config.ts` when you need a custom image or container size:
-
-```ts
-import { defineConfig } from 'void/config';
-
-export default defineConfig({
-  sandbox: {
-    image: './Dockerfile.sandbox',
-    platformImage: 'registry.cloudflare.com/<account-id>/sandbox@sha256:<digest>',
-    instanceType: 'standard-1',
-  },
-});
-```
-
-| Field               | Default                     | Description                                                          |
-| ------------------- | --------------------------- | -------------------------------------------------------------------- |
-| `binding`           | `SANDBOX`                   | Binding name for local and native Cloudflare use                     |
-| `className`         | `SandboxV1`                 | Durable Object class for local and native Cloudflare use             |
-| `containerName`     | `void-sandbox-v1`           | Cloudflare container application name                                |
-| `image`             | Packaged Node.js Dockerfile | Dockerfile or digest-pinned Cloudflare registry image for native use |
-| `imageBuildContext` | Directory of `image`        | Docker build context                                                 |
-| `platformImage`     | `cloudflare/debian-trixie`  | Image used by managed platform deploys                               |
-| `instanceType`      | `lite`                      | `lite`, `standard-1`, `standard-2`, `standard-3`, or `standard-4`    |
-
-Custom images must include the helper matching Void's installed Sandbox SDK version. The SDK image supplies this binary, but is not a runnable environment itself:
-
-```dockerfile
-FROM node:24.21.0-trixie-slim
-COPY --from=docker.io/cloudflare/sandbox:1.0.0 /usr/local/bin/sandbox-shim /usr/local/bin/sandbox-shim
-WORKDIR /workspace
-CMD ["sleep", "infinity"]
-```
-
-For a managed platform, push your custom image to that platform account's Cloudflare registry and set `platformImage` to its digest-pinned reference. If `image` is already a Cloudflare registry reference, it also becomes the default `platformImage`. External registries and mutable tags are not supported. See [Cloudflare's image management guide](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry).
+Importing from `void/sandbox` enables the required resources. Local development, direct Cloudflare deployments, and team platforms share the same runtime API.
 
 ## Runtime API
 
@@ -109,14 +76,37 @@ The `limited` handler receives `resource: 'sandbox'`, a `reason` of `concurrency
 
 Files, running processes, and listening servers last only as long as the container. It can stop after inactivity, crash, or restart. Save anything you need to keep in your database, KV, or R2. Deleting a project on a Void platform removes both its Durable Objects and containers.
 
+## Configuration
+
+The default environment provides Node.js 24 on Debian Trixie. Managed platform deploys use Cloudflare's managed Node.js image.
+
+Use `void.config.ts` when you need a custom image or container size:
+
+```ts
+import { defineConfig } from 'void/config';
+
+export default defineConfig({
+  sandbox: {
+    image: './Dockerfile.sandbox',
+    platformImage: 'registry.cloudflare.com/<account-id>/sandbox@sha256:<digest>',
+    instanceType: 'standard-1',
+  },
+});
+```
+
+See the [configuration reference](../reference/config.md#sandbox) for binding names, image settings, and container sizes.
+
+Custom images must include the helper matching Void's installed Sandbox SDK version. The SDK image supplies this binary, but is not a runnable environment itself:
+
+```dockerfile
+FROM node:24.21.0-trixie-slim
+COPY --from=docker.io/cloudflare/sandbox:1.0.0 /usr/local/bin/sandbox-shim /usr/local/bin/sandbox-shim
+WORKDIR /workspace
+CMD ["sleep", "infinity"]
+```
+
+For a managed platform, push your custom image to that platform account's Cloudflare registry and set `platformImage` to its digest-pinned reference. If `image` is already a Cloudflare registry reference, it also becomes the default `platformImage`. External registries and mutable tags are not supported. See [Cloudflare's image management guide](https://developers.cloudflare.com/containers/guides/image-management/#push-images-to-the-cloudflare-registry).
+
 ## Deployment
 
-Sandboxes require [Workers Paid](https://dash.cloudflare.com/?to=/:account/workers/plans) and Containers access. A managed platform's runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit.
-
-`void deploy --platform cloudflare` builds native images and deploys the Sandbox alongside the application. `void deploy` on a connected Void Platform applies the platform's Sandbox concurrency and runtime limits. Upgrade the platform before deploying an application built with this Sandbox API.
-
-## Moving from Sandbox SDK 0.x
-
-Update string commands to argument arrays, move file calls under `.files`, and consume process output and file responses as shown above. Replace `sleepAfter` and `keepAlive` with `inactivityTimeoutMs`; remove `maxInstances` from configuration. The old `Sandbox` export, sessions, code interpreter, process-list helpers, and preview-URL helpers are no longer part of this API.
-
-Existing native 0.x Sandboxes need a new Worker configuration and namespace. Back up container files and any Durable Object data, choose a fresh `worker.name`, and remove the old Sandbox bindings, containers, and migrations from that new configuration before deploying. The new default class is `SandboxV1`; existing state does not transfer automatically. Retain the old Worker until you have validated the replacement and restored your data, then clean up its resources. See [Cloudflare's scheduling-policy migration guide](https://developers.cloudflare.com/containers/guides/migrate-to-durable-object-scheduling-policy/).
+`void deploy --platform cloudflare` builds native images and deploys the Sandbox alongside the application. `void deploy` on a connected Void Platform applies the platform's Sandbox concurrency and runtime limits.

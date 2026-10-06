@@ -16,6 +16,11 @@ void platform status [id]
 
 `use` and `status` auto-select the only configured platform; with multiple platforms they show a picker interactively and require an id or URL in non-interactive use. A project with a recorded platform URL keeps using that platform when the global default changes.
 
+For a self-hosted installation, `status <installation-id>` prints locally saved
+lifecycle progress before checking the live API. The saved checkpoint may be out
+of date. If live discovery fails during maintenance, the command still shows that
+checkpoint and exits with an error; it does not confirm current availability.
+
 ## Operator commands {#operator-commands}
 
 Use `void platform` to administer the users and apps on your selected platform. Start with the [Platform Administration guide](../../guide/platform-administration.md) for signing in, giving people access, and investigating deployments.

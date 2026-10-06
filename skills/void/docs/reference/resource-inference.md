@@ -27,7 +27,7 @@ Durable state is inferred from files in `durable-objects/`. For example, `durabl
 
 ### Standard mode
 
-When using Void's built-in routing (no meta-framework), these directories are scanned:
+Native Void apps scan these directories by default. With [`sourceDir`](./config.md#sourcedir) configured, Void scans that source tree instead:
 
 | Directory     | Contains                                    |
 | ------------- | ------------------------------------------- |
@@ -36,10 +36,12 @@ When using Void's built-in routing (no meta-framework), these directories are sc
 | `queues/`     | Queue consumers                             |
 | `pages/`      | Page components and `.server.ts` companions |
 | `crons/`      | Scheduled job handlers                      |
+| `email/`      | Inbound email handlers                      |
+| `src/`        | Application source                          |
 
 ### Framework mode
 
-When a meta-framework is detected (TanStack Start, React Router, SvelteKit, Nuxt, or Astro), a broader set of directories is scanned instead:
+For [supported meta frameworks](../integrations/frameworks/overview.md), Void scans these directories:
 
 | Directory | Contains                |
 | --------- | ----------------------- |
@@ -47,17 +49,18 @@ When a meta-framework is detected (TanStack Start, React Router, SvelteKit, Nuxt
 | `app/`    | Framework app directory |
 | `routes/` | Framework routes        |
 | `server/` | Server-side code        |
+| `pages/`  | Framework pages         |
+| `crons/`  | Scheduled job handlers  |
+| `queues/` | Queue consumers         |
 
-Framework detection checks `package.json` for `@tanstack/react-start`, `@react-router/dev`, `@sveltejs/kit`, `nuxt`, or `astro` in dependencies.
-
-For SvelteKit, Nuxt, and Astro, add `voidPlugin()` to the framework's Vite config to enable inference during dev. See [Frameworks Integration](../integrations/frameworks/overview.md) for setup details.
+Framework detection uses `package.json` dependencies and dev dependencies. Add `voidPlugin()` to your framework's Vite config to enable inference during development. The integration guides show the setup for each framework.
 
 ### Always scanned
 
 Regardless of mode, these are always checked:
 
 - **SSR entry** such as `src/main.ssr.ts`, for SSR apps that access bindings during rendering
-- **`src/`**, which is always scanned for auth imports unless it is already in the scan list for framework mode
+- **Application source** in `src/` or your configured `sourceDir`, including resource and auth imports
 - **`durable-objects/`**, which is scanned for typed Durable Object state modules in native Void apps
 
 ## Custom Scan Directories
@@ -72,7 +75,7 @@ If your project organizes code in non-standard directories, you can override whi
 }
 ```
 
-Paths are relative to the project root. When `inference.scanDirs` is set, it replaces the default directories entirely. Defaults for the current mode are not merged in. The SSR entry and `src/` auth scan still apply either way.
+Paths are relative to the project root. When `inference.scanDirs` is set, it replaces the default directories entirely. The SSR entry and application source scan still apply.
 
 ## Explicit Binding Overrides
 
@@ -95,4 +98,4 @@ Explicit values override only their named bindings. Omitted bindings continue to
 
 ## File Types
 
-Inference scans files matching `**/*.{ts,tsx,mts,js,jsx,mjs}` within each directory. Non-JS files (CSS, HTML, images) are ignored.
+Inference scans `.ts`, `.tsx`, `.mts`, `.js`, `.jsx`, `.mjs`, and Astro frontmatter. Put server resource imports in these files or a page's `.server.ts` companion; Vue and Svelte component files are not scanned directly.

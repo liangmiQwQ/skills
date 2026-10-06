@@ -42,11 +42,6 @@ secret manager to an object keyed by each exact API/proxy origin, with
 and stops if the gate still rejects its checks. Account-wide Default-Deny and
 deployed-application policies remain your responsibility.
 
-If **System Status** reports `proxy HTTP 302 (redirect)` on an older Access-protected
-installation, upgrade with `void platform upgrade <id>`. Current installations use
-a private connection for the dashboard's proxy health check. Keep the proxy's
-Access protection enabled.
-
 ### Expired administrator setup code
 
 Resume an unfinished installation with `void platform install --resume --name <id>`.
@@ -68,7 +63,7 @@ Repair recreates missing infrastructure that the installer owns. It does not res
 
 ### Upgrade the platform
 
-Keep the platform runtime current when updating the Void CLI. If a developer's CLI reports that project lookup requires an upgrade, upgrade the platform before retrying.
+Keep the platform runtime current when updating the Void CLI.
 
 Use the installed CLI's packaged runtime to upgrade:
 
@@ -92,10 +87,6 @@ manager so they can also restore a missing Worker during repair.
 
 Database migrations only move forward. Void checks compatibility before upgrading and tells you if an intermediate release is needed. If deployment fails, it attempts to restore the previous Workers against the compatible database schema. Retrying does not repeat completed migrations.
 
-Upgrades automatically enable managed Sandboxes. The platform runtime token needs Account / Containers: Edit and Account / Cloudchamber: Edit, and the Cloudflare account must use Workers Paid before its first Sandbox application deploy. The upgrade itself does not probe Containers access, so platforms that do not deploy Sandbox applications need no additional plan or permissions.
-
-When upgrading from a release that used tenant-owned Sandbox containers, the upgrade may first ask you to finish the legacy cleanup. Follow the [`sandbox-drain` instructions](../../../reference/cli/platform-operations.md#operator-system), then rerun the upgrade. Administrator login remains available during that maintenance step.
-
 After a successful upgrade, you can restore a declared-compatible earlier runtime without reversing migrations:
 
 ```sh
@@ -106,6 +97,35 @@ void platform rollback [id] --runtime /path/to/earlier/runtime
 Keep the earlier runtime files if you need rollback. If the installed version is a custom build, also pass its files with `--from-runtime /path/to/current/runtime`. Void checks that the earlier version can run against your current database and refuses incompatible rollbacks. A later `upgrade` can move forward again. See [Platform Development](/guide/platform/development/runtime#deploying-your-runtime) for working with custom builds.
 
 :::
+
+### Follow upgrade and rollback progress
+
+Watching progress is optional: a running upgrade or rollback proceeds through
+the CLI without action on the status page. During maintenance, navigating the
+admin UI automatically redirects to `/admin/status`. You can also open it
+directly on your platform API origin and sign in as an administrator.
+
+The read-only page shows the saved operation, source and target versions, and
+the traffic state reported by the API. It refreshes automatically every five
+seconds while visible. If updates fail, it keeps the last confirmed snapshot
+and marks it as out of date. Normal administrator changes remain paused.
+
+Sign-in and status remain available while the API and authentication database
+are reachable. An operation completing
+does not confirm every project's health. A disabled installation keeps traffic
+paused after an upgrade or rollback.
+
+If an operation fails or waits for DNS or Sandbox drain work, the CLI prints
+the recovery instructions and command needed to resume. Resolve the reported
+problem, then resume with the same runtime files. For a custom rollback, retain
+the source runtime files too. `void platform status <id>` also prints locally saved progress
+before checking the live API; this local checkpoint can be out of date if another
+administrator changed the installation.
+
+When application traffic is paused, visitors receive a temporary-unavailability
+page with a **Try again** link. API requests and form submissions still receive
+HTTP 503 responses. Void does not automatically replay requests; visitors who
+submitted a form should check its result before submitting it again.
 
 ### Manage an installation from another machine
 

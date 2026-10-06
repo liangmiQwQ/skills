@@ -14,7 +14,13 @@ vp run --filter @voidcloud/api db:generate
 
 Review the generated SQL and migration journal before committing them. Released migrations are append-only. An upgrade applies new migrations while the previous Workers may still serve requests, so schema changes must remain compatible with that code.
 
-`platform/packages/api/drizzle/compatibility.json` records which earlier runtimes have been verified against the new schema. Add an edge only after testing that compatibility. The runtime build checks that the migration files and recorded schema history agree. See `packages/platform/README.md` for the manifest contract.
+`platform/packages/api/drizzle/compatibility.json` records which earlier runtimes have been verified against the new schema. Add an edge only after testing that compatibility. The runtime build checks that the migration files and recorded schema history agree.
+
+## Runtime artifact contract
+
+`@void/platform` contains installation manifests, resource naming, discovery contracts, Worker configuration, and deployable bundles under the `./installer` export. Platform source lives in `platform/packages/`.
+
+Runtime artifacts include migration SQL, its journal, and a rollback compatibility manifest. Drizzle authoring snapshots remain in the source tree. Migrations are forward-only; compatibility edges in `platform/packages/api/drizzle/compatibility.json` must be tested against the earlier runtime before publication. The build verifies schema lineage and hashes the journal and SQL files.
 
 ## CI in a Fork
 

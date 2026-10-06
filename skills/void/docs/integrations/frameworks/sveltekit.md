@@ -6,6 +6,8 @@ outline: deep
 
 Use Void with [SvelteKit](https://svelte.dev/docs/kit) for resource detection, typed database queries, and migrations. SvelteKit keeps its own build and Cloudflare integration; Void plugs into its Vite configuration.
 
+Void supports SvelteKit 3 and SvelteKit 2.62 or later. The setup below uses SvelteKit 3 with `@sveltejs/adapter-cloudflare` 8.
+
 ## Setup
 
 ### 1. Create a new project
@@ -27,10 +29,8 @@ npm install -D @sveltejs/adapter-cloudflare void
 import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { voidPlugin } from 'void';
-import { withVoidTSConfig } from 'void/sveltekit';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default {
   plugins: [
     voidPlugin(),
     sveltekit({
@@ -38,15 +38,10 @@ export default defineConfig({
         config: './.void-wrangler.jsonc',
         platformProxy: { configPath: './.void-wrangler.jsonc' },
       }),
-      typescript: {
-        config: withVoidTSConfig(),
-      },
     }),
   ],
-});
+};
 ```
-
-If your project already configures SvelteKit in `svelte.config.js`, keep that file and add `typescript.config: withVoidTSConfig()` under its `kit` options instead. SvelteKit ignores `svelte.config.js` when options are passed directly to `sveltekit()`.
 
 ### 4. Create `void.config.ts`
 
@@ -66,20 +61,19 @@ export default defineConfig({
 
 ### 5. Configure `tsconfig.json`
 
-Extend SvelteKit’s generated config. The `withVoidTSConfig()` hook in the Vite config above adds Void’s types and aliases:
-
-Keep `compilerOptions.paths` out of the root config so it does not override SvelteKit’s aliases.
+Extend SvelteKit’s generated config and Void’s generated types and database aliases:
 
 ```json
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": ["$app/tsconfig", "./.void/tsconfig.json"],
   "compilerOptions": {
-    "types": ["void/env"]
-  }
+    "types": ["$app/types", "void/env"]
+  },
+  "include": ["src", "db", "crons", "queues", "*.ts"]
 }
 ```
 
-Run `void prepare` after a fresh clone or before typechecking in CI so `.void/tsconfig.json` exists before SvelteKit syncs its config.
+Run `void prepare` after a fresh clone or before typechecking in CI so `.void/tsconfig.json` exists before SvelteKit syncs its config. Use `package.json` subpath imports for aliases such as SvelteKit 3's `#lib`.
 
 ### 6. Deploy
 
@@ -116,20 +110,41 @@ Declare variables in `env.ts` and read them with `import { env } from "void/env"
 
 ## Accessing Bindings Directly
 
-You can also use SvelteKit's `platform.env` in server hooks and load functions:
-
-```ts
-// src/routes/users/+page.server.ts
-export async function load({ platform }) {
-  const { results } = await platform.env.DB.prepare('SELECT * FROM users').all();
-  return { users: results };
-}
-```
-
-Or the `cloudflare:workers` module:
+In SvelteKit 3, use the `cloudflare:workers` module in server-side code:
 
 ```ts
 import { env } from 'cloudflare:workers';
 
 const { results } = await env.DB.prepare('SELECT * FROM users').all();
 ```
+
+## Existing SvelteKit 2 apps
+
+Use SvelteKit 2.62 or later with `@sveltejs/adapter-cloudflare` 7. The Vite configuration above also works with Kit 2; add Void's tsconfig hook to the `sveltekit()` options:
+
+```ts
+import { withVoidTSConfig } from 'void/sveltekit';
+
+sveltekit({
+  adapter: adapter({
+    config: './.void-wrangler.jsonc',
+    platformProxy: { configPath: './.void-wrangler.jsonc' },
+  }),
+  typescript: {
+    config: withVoidTSConfig(),
+  },
+});
+```
+
+Keep the Kit 2 tsconfig setup:
+
+```json
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "types": ["void/env"]
+  }
+}
+```
+
+If your app uses `svelte.config.js` or `svelte.config.ts`, keep its configuration and add `typescript.config: withVoidTSConfig()` under `kit`. Kit 2's `platform.env` remains available in hooks and load functions.

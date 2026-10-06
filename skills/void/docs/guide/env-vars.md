@@ -39,7 +39,7 @@ STRIPE_KEY=sk_test_example
 VITE_API_ORIGIN=http://localhost:5173
 ```
 
-Keep `.env` out of Git. Other dotenv files, including `.env.local`, `.env.production`, `.env.example`, and Wrangler’s `.dev.vars*`, are not supported. See [Environment migration](./env-migration.md) if your app uses them.
+Keep `.env` out of Git. Other dotenv files, including `.env.local`, `.env.production`, `.env.example`, and Wrangler’s `.dev.vars*`, are not supported.
 
 Run the local check at any time:
 
@@ -105,7 +105,3 @@ Invalid-value diagnostics redact the supplied value by default. Set `VOID_ENV_UN
 ## Imports inside `env.ts`
 
 Use relative imports or package names inside `env.ts`. TypeScript path aliases and imports that need Vite transforms are not supported.
-
-## Migrating from the multi-file model
-
-See [Environment migration](/guide/env-migration) for the breaking-change checklist.

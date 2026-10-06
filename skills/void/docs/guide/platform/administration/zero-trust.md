@@ -8,10 +8,7 @@ Project Zero Trust puts Cloudflare Access in front of the hostnames of projects 
 
 This is separate from the Access login and protection for the platform API. Projects deployed directly to Cloudflare are not affected.
 
-New installations choose app access during `void platform install`. The installer
-reuses the platform policy or helps you select separate company rules, and finishes
-setup before opening traffic. Existing installations keep their settings when
-upgraded; use this page to configure app access if it has not been set up yet.
+Choose app access during `void platform install`, or configure it later using this page. The installer reuses the platform policy or helps you select separate company rules, and finishes setup before opening traffic.
 
 If you choose public apps in an account with Default-Deny, Void manages scoped
 public rules instead. New projects and custom domains remain public automatically.

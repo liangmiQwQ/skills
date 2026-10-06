@@ -202,8 +202,6 @@ Both `defineRoom()` and `defineWebSocket()` accept optional `name`. Use a static
 
 By default, the instance key includes parameter names. `/chat/:room` with `room: 'general'` uses `room=general`; a route without parameters uses `default`. Multiple parameters are joined in route order, for example `team=acme&room=general`. If a multi-parameter route has a value containing `&`, its key uses a versioned encoding to keep rooms separate.
 
-When upgrading an existing multi-parameter route with `&` in its parameter values, those rooms start with isolated storage. The previous storage is retained, but may have been shared by multiple rooms. Migrate only data whose ownership you have verified into each new room. Single-parameter rooms and multi-parameter rooms without `&` keep their existing identities.
-
 If you also rename `[room]` to `[id]`, preserve the old key explicitly:
 
 ```ts

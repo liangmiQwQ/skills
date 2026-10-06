@@ -12,6 +12,26 @@ The core platform supports GitHub, Google, generic OIDC, and Cloudflare Access l
 
 The core installation includes managed Sandboxes and an email gateway; email is enabled when you configure a shared mail domain and zone. The user dashboard, GitHub builds and webhooks, build Containers, and custom project domains aren't part of the core installation. Source-built platforms that add the optional GitHub services should follow the [isolated webhook ingress setup](/guide/platform/development/runtime#optional-github-webhook-ingress-for-access-protected-apis) when Access protects the API.
 
+## Deployment features
+
+Both targets use the same application APIs. A core platform adds shared access and retained deployment history:
+
+| Feature                                          | Direct Cloudflare                | Core self-hosted platform                     |
+| ------------------------------------------------ | -------------------------------- | --------------------------------------------- |
+| Static sites, SPAs, and native Pages SSR         | Supported                        | Supported                                     |
+| Routing rules, WebSockets, queues, cron, and ISR | Supported                        | Supported                                     |
+| D1, KV, R2, and external SQL through Hyperdrive  | Supported                        | Supported                                     |
+| Workers AI and provider requests                 | Your account and gateway         | Installation gateway and proxy                |
+| Runtime logs                                     | Live Cloudflare tail             | Retained platform logs                        |
+| Application rollback                             | Worker versions                  | Retained platform deployments                 |
+| Typed Durable State                              | Supported                        | Unavailable                                   |
+| Sandboxes                                        | Requires Workers Paid and Docker | Requires Workers Paid on the platform account |
+| Custom application domains                       | Supported                        | Unavailable in the core installation          |
+| Generated GitHub deployment workflow             | Supported                        | Use your CI with a scoped developer token     |
+| User dashboard and managed GitHub builds         | Not required                     | Not included in a standard installation       |
+
+A team platform requires Workers for Platforms and the [documented infrastructure](/guide/platform/installation/domains#cloudflare-footprint). Features depend on the installation's configuration.
+
 ## Installation Guides
 
 - [Prerequisites](/guide/platform/installation/prerequisites)

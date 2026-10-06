@@ -11,9 +11,7 @@ void platform auth login
 void platform config plans
 ```
 
-Choose a plan to inspect or edit it, copy one into a new plan, or choose the default for new accounts. Existing installations keep their plans, limits, and default until you change them. After upgrading the platform to support plan configuration, these changes require no app or platform redeploy.
-
-Inspection and previews are available immediately after a platform upgrade. Allow 15 minutes before applying changes.
+Choose a plan to inspect or edit it, copy one into a new plan, or choose the default for new accounts. Changes require no app or platform redeploy.
 
 ## Use the Dashboard
 
@@ -89,8 +87,6 @@ Advanced files can also set `"allowShortSlugs": true` to permit project slugs of
 Storage figures shown for D1, R2, and KV are informational and cannot be edited as enforced quotas. Static deployments keep their existing retention policy.
 
 The preview shows the affected account count and checks a sample for accounts already above a proposed quota. Lowering a quota can restrict existing apps, including accounts outside that sample. Usage history and billing periods are preserved, so a plan change does not reset usage. Manual administrator suspensions remain in effect.
-
-After the initial platform upgrade, request quota accounting includes unlimited plans too. For an account that was unlimited before that upgrade, its quota counter may not include earlier requests in the current billing period. Historical analytics remain available. When introducing its first cap, allow for the remaining period or wait until its next billing period.
 
 ## Archive or Remove a Plan
 

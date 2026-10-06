@@ -27,8 +27,6 @@ await kv.put('user:123', { name: 'Alice', role: 'admin' });
 
 Values, including strings, are JSON-serialized. Reads preserve their types, so a string such as `"123"` or `"null"` comes back as a string.
 
-If an older Void version stored a JSON-looking string as raw text, rewrite that key with `kv.put(key, originalString)`. Existing stored values keep their previous read behavior; Void cannot distinguish an old raw string such as `"123"` from a stored number. Use the original string or read its raw text through `c.env.KV.get(key)` when rewriting it.
-
 Add a TTL (in seconds) or absolute expiration (Unix timestamp):
 
 ```ts

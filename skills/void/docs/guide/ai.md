@@ -4,19 +4,24 @@ outline: deep
 
 # AI
 
-Void provides a typed AI client for Workers AI and Cloudflare's [AI Gateway](https://developers.cloudflare.com/ai-gateway/). Import `ai` from `void/ai` and run inference directly from your route handlers. Direct deployments use your Cloudflare account; a team platform routes requests through its installation's proxy and usage controls.
+Run Workers AI models and provider APIs from server code with `ai` from `void/ai`. Provider requests use Cloudflare's [AI Gateway](https://developers.cloudflare.com/ai-gateway/).
 
-```ts
-import { ai } from 'void/ai';
+## Local Development
+
+For a direct Cloudflare project, connect your account and start development:
+
+```sh
+void connect --platform cloudflare
+npm run dev
 ```
 
-## Handling usage limits
+When the app imports `void/ai`, Void enables a remote Workers AI binding during
+development and preview. Requests use your Cloudflare account and its allowance;
+Workers AI has no local simulator. Use your Cloudflare login or
+`CLOUDFLARE_API_TOKEN` in an automated environment.
 
-Every AI operation is lazy and must be executed with `.match({ ok, limited })`. Both handlers are required, including for provider-native requests, model listing and document conversion. Return a useful fallback from `limited`, or use `limit.response({ message: 'AI is temporarily unavailable.' })` to send a structured HTTP 429. Limits expose `resource`, `reason`, and an optional `retryAt`. Other failures still reject.
-
-Do not await the operation itself; await its `.match()` call. TypeScript checks your handlers and the resulting success/fallback union.
-
-Streaming responses end with a `void:error` SSE event if generation is interrupted after the response starts. A recognized quota interruption calls your `limited` handler and emits `void:limit`, preserving the message from `limit.response()`. `fetchStream()` throws on either terminal event so your UI can exit its generating state. This also applies to streaming provider responses and `ai.run()` with `stream: true`.
+For a team platform, use `void connect <platform-url>` and link your project.
+Development requests use that platform's account and usage limits.
 
 ## Basic Usage
 
@@ -29,15 +34,15 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  const result = await ai
+  return ai
     .run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [{ role: 'user', content: prompt }],
     })
-    .match({ ok: (result) => result, limited: (limit) => limit.response() });
-
-  return c.json(result);
+    .match({ ok: (result) => c.json(result), limited: (limit) => limit.response() });
 });
 ```
+
+Every operation runs through `.match({ ok, limited })`. Both handlers are required. Return a fallback from `limited`, or use `limit.response()` to send a structured HTTP 429. Limits include `resource`, `reason`, and an optional `retryAt`; other failures throw. Await `.match()`, rather than the operation itself.
 
 You can use any model available through Cloudflare's AI binding, including Workers AI models such as `@cf/meta/llama-3.3-70b-instruct-fp8-fast` and Cloudflare Gateway models such as `google/gemini-2.5-flash` or `openai/gpt-4.1-mini`. The input object must match the selected Cloudflare model's schema. Models that return binary data, such as generated images, are returned as a `Blob` from `ai.run()`.
 
@@ -59,6 +64,8 @@ export const POST = defineHandler(async (c) => {
     .match({ ok: (result) => result, limited: (limit) => limit.response() });
 });
 ```
+
+Streaming responses end with a `void:error` SSE event if generation is interrupted after the response starts. A recognized quota interruption calls your `limited` handler and emits `void:limit`, preserving the message from `limit.response()`. `fetchStream()` throws on either terminal event so your UI can exit its generating state. This also applies to streaming provider responses and `ai.run()` with `stream: true`.
 
 ## Listing Models
 
@@ -85,23 +92,6 @@ const result = await ai
   .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
-## Local Development
-
-For a direct Cloudflare project, connect your account and start development:
-
-```sh
-void connect --platform cloudflare
-npm run dev
-```
-
-When the app imports `void/ai`, Void enables a remote Workers AI binding during
-development and preview. Requests use your Cloudflare account and its allowance;
-Workers AI has no local simulator. Use your Cloudflare login or
-`CLOUDFLARE_API_TOKEN` in an automated environment.
-
-For a team platform, use `void connect <platform-url>` and link your project.
-Development requests use that platform's account and usage limits.
-
 ## Usage Limits
 
 Workers AI usage is measured in [neurons](https://developers.cloudflare.com/workers-ai/platform/pricing/).
@@ -127,33 +117,7 @@ const result = await ai
   .match({ ok: (result) => result, limited: (limit) => limit.response() });
 ```
 
-OpenAI-compatible models use OpenAI-style `messages`:
-
-```ts
-const result = await ai
-  .run('openai/gpt-4.1-mini', {
-    messages: [{ role: 'user', content: 'Summarize this deploy.' }],
-  })
-  .match({ ok: (result) => result, limited: (limit) => limit.response() });
-```
-
-Pass Cloudflare AI Gateway options as the third argument:
-
-```ts
-const result = await ai
-  .run(
-    'openai/gpt-4.1-mini',
-    {
-      messages: [{ role: 'user', content: 'Summarize this deploy.' }],
-    },
-    {
-      gateway: {
-        skipCache: true,
-      },
-    },
-  )
-  .match({ ok: (result) => result, limited: (limit) => limit.response() });
-```
+Pass AI Gateway options as the third argument: `ai.run(model, inputs, { gateway: { skipCache: true } })`.
 
 For provider-native requests on a direct deployment, configure [`ai.gateway`](../integrations/cloudflare.md#ai-self-host).
 
@@ -173,7 +137,7 @@ import { ai } from 'void/ai';
 export const POST = defineHandler(async (c) => {
   const { prompt } = await c.req.json();
 
-  const response = await ai
+  return ai
     .provider('openai')
     .fetch('/chat/completions', {
       body: {
@@ -183,9 +147,6 @@ export const POST = defineHandler(async (c) => {
       },
     })
     .match({ ok: (result) => result, limited: (limit) => limit.response() });
-
-  const result = await response.json();
-  return c.json(result);
 });
 ```
 
@@ -205,8 +166,6 @@ const response = await ai
     },
   })
   .match({ ok: (result) => result, limited: (limit) => limit.response() });
-
-const result = await response.json();
 ```
 
 ### Custom Providers
@@ -277,30 +236,9 @@ export const POST = defineHandler(async (c) => {
 
 ### Provider Key Convention
 
-Provider-native requests require an API key set as a project secret. The env var name is automatically derived from the provider name:
+Provider-native requests use a project secret, such as `OPENAI_API_KEY` for OpenAI or `GOOGLE_API_KEY` for Google AI Studio.
 
-| Provider prefix    | Env var               |
-| ------------------ | --------------------- |
-| `openai`           | `OPENAI_API_KEY`      |
-| `anthropic`        | `ANTHROPIC_API_KEY`   |
-| `google-ai-studio` | `GOOGLE_API_KEY`      |
-| `deepseek`         | `DEEPSEEK_API_KEY`    |
-| `groq`             | `GROQ_API_KEY`        |
-| `mistral`          | `MISTRAL_API_KEY`     |
-| `grok`             | `GROK_API_KEY`        |
-| `openrouter`       | `OPENROUTER_API_KEY`  |
-| `perplexity`       | `PERPLEXITY_API_KEY`  |
-| `cohere`           | `COHERE_API_KEY`      |
-| `cerebras`         | `CEREBRAS_API_KEY`    |
-| `huggingface`      | `HUGGINGFACE_API_KEY` |
-| `replicate`        | `REPLICATE_API_KEY`   |
-| `baseten`          | `BASETEN_API_KEY`     |
-| `cartesia`         | `CARTESIA_API_KEY`    |
-| `deepgram`         | `DEEPGRAM_API_KEY`    |
-| `elevenlabs`       | `ELEVENLABS_API_KEY`  |
-| `fal`              | `FAL_API_KEY`         |
-| `ideogram`         | `IDEOGRAM_API_KEY`    |
-| `parallel`         | `PARALLEL_API_KEY`    |
+See the [provider key reference](../reference/api/resources.md#provider-keys) for supported providers and their secret names.
 
 OpenAI-style providers use `Authorization: Bearer <key>`. Google AI Studio uses `x-goog-api-key`. Use `apiKeyHeader` and `apiKeyPrefix` for custom providers.
 

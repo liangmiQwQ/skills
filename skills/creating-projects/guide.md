@@ -45,14 +45,18 @@ At the end, `diff` each generated file against its template. This catches the ch
 - Good: what the project is, who it is for, where things live, gotchas a newcomer can't see in the code (for example, that lint config only works in the root `vite.config.ts`).
 - Bad: the current state of the scaffold ("the entry point is empty", "no tests yet", "remove this flag later"), tool versions ("use the 0.6 API", "pnpm 12.9.1"), and anything a tool already enforces.
 
-Keep the fixed text of the templates word for word, and only write where a placeholder is. When you merge `*.part.md` files into `{{toolchain}}` and `{{setup}}`, a part may bring its own `## Rules` section. Move those paragraphs into the template's existing `## Rules` section, above the common rules, instead of creating a second heading with the same name.
+Keep the fixed text of the templates word for word, and only write where a placeholder is. The headings are the whole structure: a project rule goes into the existing `## Rules` section, above the common rules, never into a new `## Scope` or `## Working conventions` section. `AGENTS.md` doesn't repeat what `CONTRIBUTING.md` already says about installing and running checks.
+
+When you merge `*.part.md` files into `{{toolchain}}` and `{{setup}}`, a part may bring its own `## Rules` section. Move those paragraphs into the template's existing `## Rules` section, above the common rules, instead of creating a second heading with the same name.
 
 ## Placeholder code and tests
 
 The project code is a placeholder, but it must still pass every check, so CI is green from the first commit and stays meaningful:
 
 - Export one small function that throws `Not implemented yet` (or `todo!()` in Rust).
-- Write one test that calls it and expects the throw.
+- Write one test that calls it and expects the throw. A CLI has no exported function, so its template test runs the built binary instead, which is why CI builds before it tests.
+
+JavaScript tests import `expect` and `it` from `vite-plus/test`. Vitest isn't a dependency of its own, and the lint rules want `it`, not `test`.
 
 Don't make an empty suite pass with `--passWithNoTests`, and don't silence lint with an `oxlint-disable` comment on an empty file. Both hide the infrastructure you were asked to set up, and someone has to remember to undo them later.
 
@@ -78,23 +82,39 @@ There is no workspace template, because a workspace is just the stack's files ar
 
 Vite+ only reads `lint` and `fmt` from the root `vite.config.ts`, so `$use-vp-config` puts the root config there and package configs only set `pack`, `test` and `run`. Mention this in the project's `AGENTS.md`, since it surprises people.
 
+## Swapping a tool
+
+Sometimes the request names a tool the templates don't use, like gunshi instead of cac for commands, or [uppt](https://github.com/danielroe/uppt) instead of bumpp for releases. Swap only what that tool owns, and take its setup from the tool's own documentation instead of writing a variant from memory. A release workflow you wrote yourself will be subtly wrong, and nobody will know until the first release fails.
+
+For uppt that means:
+
+- `release.yml` is the starter workflow from uppt's README, with all four jobs (`pr`, `release`, `pack`, `publish`). The project still publishes to npm. Don't trim the workflow to validation only; that is a project that can never release.
+- There is no `release` script and no `bumpp`, because uppt bumps the version in its release PR. The version stays `0.0.0`, and uppt picks the first one from the commits.
+- uppt packs with `--ignore-scripts` and skips `prepublishOnly`, so the build moves to `prepack`.
+- The GitHub repo needs an `npm` environment and the npm package needs a trusted publisher. Create the environment and tell the user what is left on the npm side.
+
+Everything the tool doesn't own stays as the template has it: the CI workflow, the docs, the package fields. One line in the `## Toolchain` section of `AGENTS.md` is enough to record the swap.
+
 ## When nothing fits
 
-Websites, napi-rs projects, mixed languages: some requests have no template. Start from the closest stack and keep its shape, its rules and its infrastructure. Build only the missing part by hand, and look at Liang's existing projects (`$global-projects`) for how they did it. If you can't decide something that changes the project's shape, like whether it publishes or what the packages are, ask.
+Websites, napi-rs projects, mixed languages: some requests have no template. Start from the closest stack and keep its shape, its rules and its infrastructure, so the project still gets everything a template gives: toolchain, CI, release or deploy, license and README, editor settings, tool versions, repo settings, `AGENTS.md` and funding. Build only the missing part by hand, and look at Liang's existing projects (`$global-projects`) for how they did it. If you can't decide something that changes the project's shape, like whether it publishes or what the packages are, ask.
 
 Never drop the templates because one part doesn't fit. That turns one unknown into a whole project of guesses.
 
-## A worked example
+## Mistakes seen in real scaffolds
 
-The request "create a project called oxlint-flat-config, private, typescript workspace" once produced a broken repo. Here is what went wrong, and what each step should have been:
+Two requests, "create oxlint-flat-config, private, typescript workspace" and "create goodfaith, a private CLI, with gunshi and uppt", produced broken repos. Here is what went wrong, and what each step should have been:
 
-| The agent did                                                        | It should have                                                                |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Read "private" as "no publishing" and made every package private     | Made the GitHub repo private and kept the package publishable                 |
-| Had no description, so wrote "Private TypeScript workspace"          | Asked what the project does                                                   |
-| Found no workspace template and wrote every file from scratch        | Applied `js-lib` in two levels, as described in [Workspaces](#workspaces)     |
-| Cut `CONTRIBUTING.md` to 3 lines, replaced the `AGENTS.md` rules      | Kept the template text and only filled placeholders                           |
-| Merged CI into one Linux job, removed npm publishing from releases   | Kept both workflows unchanged                                                 |
-| Wrote "entry point is empty", "remove `--passWithNoTests` later"     | Wrote a throwing placeholder and a test for it, and only lasting facts        |
+| The agent did                                                                     | It should have                                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Read "private" as "no publishing": `private: true`, no `publishConfig`            | Made the GitHub repo private and kept the package publishable             |
+| Had no description, so wrote "Private TypeScript workspace"                       | Asked what the project does                                               |
+| Found no workspace template and wrote every file from scratch                     | Applied `js-lib` in two levels, as described in [Workspaces](#workspaces) |
+| Cut `CONTRIBUTING.md` to 3 lines, added `## Scope` and `## Working conventions`   | Kept the template text and only filled placeholders                       |
+| Added Status, Development and Releases sections to `README.md`                    | Written one paragraph on what the project does                            |
+| Merged CI into one Linux job, or added `--help` steps and a `types:` filter to it | Left `ci.yml` unchanged and tested the binary in `tests/`                 |
+| Wrote a `release.yml` by hand that only validated and never published             | Copied uppt's starter workflow and moved the build to `prepack`           |
+| Wrote "entry point is empty", "remove `--passWithNoTests` later"                  | Wrote a throwing placeholder and a test for it, and only lasting facts    |
+| Set the version to `0.1.0` with an invented reason about uppt                     | Left `0.0.0`                                                              |
 
-Each mistake was a reasonable local decision. Together they produced a repo that looked complete but didn't do what Liang's projects do. Following the templates, and asking about the two unclear words, avoids all of them.
+Each mistake was a reasonable local decision. Together they produced a repo that looked complete but didn't do what Liang's projects do. Following the templates, and asking about the unclear words, avoids all of them.

@@ -45,7 +45,7 @@ Add `voidPlugin()` to the framework's Vite config to get binding inference, type
 
 Any project that produces static files, whether that is an SPA, a static site, or a plain directory. Void serves the assets without requiring application code.
 
-**SPAs** (client-side single-page apps) fall back all non-file paths to `index.html` with a 200 status, so client-side routing works out of the box. Detected when `vite` is a dependency and no backend files exist.
+**SPAs** (client-side single-page apps) serve `index.html` with a 200 status for paths that match no file, so client-side routing works out of the box. On a Void platform, missing files under the hashed assets folder (`/assets/`) return 404 instead. Detected when `vite` is a dependency and no backend files exist.
 
 **Static sites** (static site generators like VitePress, Docusaurus, or any pre-built directory) produce per-page HTML files. Detected when a known SSG is a dependency, or when using the `--dir` flag.
 

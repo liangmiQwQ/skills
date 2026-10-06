@@ -27,6 +27,6 @@
     "prepare": "vp config",
     "prepublishOnly": "vp run build",
     "release": "bumpp",
-    "test": "vp run ctest --passWithNoTests"
+    "test": "vp run ctest"
   }
 }

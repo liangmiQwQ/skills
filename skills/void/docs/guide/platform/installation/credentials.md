@@ -8,7 +8,7 @@ Keep one password-manager entry for this platform. Paste the saved values into t
 
 ## Cloudflare API Tokens {#runtime-token-permissions}
 
-For a domain installation or Cloudflare Access setup, the installer guides you through creating separate management and runtime tokens using Cloudflare's [API token setup](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/). Its links preselect the permissions and suggest names based on your platform's display name. Scope the tokens to your selected account and, when using a domain, its zone, save them in your password manager, and paste them into the masked CLI prompts.
+For a domain installation or Cloudflare Access setup, the installer guides you through creating separate management and runtime tokens using Cloudflare's [API token setup](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/). Its links preselect the permissions and suggest names based on your platform's display name, but Cloudflare's form cannot preselect a zone: for a domain installation, change the zone policy from **All Domains** to **Specified Domains** and select your zone. If Void will create the zone, keep **All Domains** on both tokens: the zone does not exist yet, and the runtime token needs it to purge cache. Save the tokens in your password manager and paste them into the masked CLI prompts.
 
 For workers.dev testing with the default API hostname, browser login can authorize
 infrastructure setup. Void also checks account-wide Access requirements; if the
@@ -21,7 +21,7 @@ Browser login does not grant AI Gateway access. Include **Account → AI Gateway
 
 The management token lets your CLI install and maintain the platform. The runtime token is stored as a Worker secret so the platform can deploy apps after you close your terminal. They are separate credentials.
 
-Compare each token's form with the permission checklist below, and select the indicated account and zone for a domain installation. The installer saves a management token entered at the prompt in this installation’s encrypted local checkpoint and reuses it on resume. Upgrades, repairs, and other lifecycle maintenance also use that saved management token. During installation, a rejected token can be replaced at the prompt. An explicit `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN` takes precedence. Keep your password-manager copy for maintenance or another machine; scripts supply it through `CLOUDFLARE_API_TOKEN`.
+Compare each token's form with the permission checklist below. The installer saves a management token entered at the prompt in this installation’s encrypted local checkpoint and reuses it on resume. Upgrades, repairs, and other lifecycle maintenance also use that saved management token. During installation, a rejected token can be replaced at the prompt. An explicit `CLOUDFLARE_API_TOKEN` or `CF_API_TOKEN` takes precedence. Keep your password-manager copy for maintenance or another machine; scripts supply it through `CLOUDFLARE_API_TOKEN`.
 
 ::: details Permissions to select for each token
 

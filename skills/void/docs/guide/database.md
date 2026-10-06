@@ -361,6 +361,21 @@ npm install arktype
 
 See the [CLI reference](../reference/cli/database.md#database) for connection setup, SQL execution, Studio, exports, and other commands.
 
+## Hand-written migrations {#hand-written-migrations}
+
+Deploy compares your Drizzle schema with the snapshots in `db/migrations/meta/`. If you have SQL migrations without this metadata, running `void db generate` would create another migration for the same tables.
+
+To keep an existing migration history:
+
+1. Make your Drizzle schema match the tables your SQL migrations create.
+2. In a scratch copy of the project, remove `db/migrations/` and run `void db generate`.
+3. Copy the generated `meta/` folder into your original migration directory. In `_journal.json`, replace `entries` with an entry for each existing SQL file in order. Use consecutive `idx` values starting at `0`, the file name without `.sql` as `tag`, increasing timestamps as `when`, and the generated entry's `version`. Set `breakpoints` to whether the file uses `--> statement-breakpoint` lines.
+4. Rename the generated snapshot to `<prefix>_snapshot.json`, where `<prefix>` is the part of the last migration tag before its first `_`. For `001_create_users.sql`, use `001_snapshot.json`.
+
+Review and commit the metadata, then run `void deploy` again. If no database has applied the SQL yet, you can instead replace it with migrations from `void db generate`.
+
+For D1 migrations containing triggers, add a `--> statement-breakpoint` line after each complete SQL statement, including the trigger's closing `END;`. Keep the trigger body together.
+
 ## Scaffolding
 
 The `void gen model` command generates dialect-appropriate `sqliteTable`, `pgTable`, or `mysqlTable` definitions.

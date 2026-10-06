@@ -51,24 +51,21 @@ Typed AI client for Cloudflare AI models and provider-native AI Gateway requests
 ```ts
 import { ai } from 'void/ai';
 
-const result = await ai
-  .run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-    messages: [{ role: 'user', content: 'Summarize this release note.' }],
-  })
-  .match({ ok: (result) => result, limited: (limit) => limit.response() });
+const result = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+  messages: [{ role: 'user', content: 'Summarize this release note.' }],
+});
 
-const response = await ai
-  .provider('openai')
-  .fetch('/chat/completions', {
-    body: {
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: 'Summarize this release note.' }],
-    },
-  })
-  .match({ ok: (result) => result, limited: (limit) => limit.response() });
+const response = await ai.provider('openai').fetch('/chat/completions', {
+  body: {
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: 'Summarize this release note.' }],
+  },
+});
 ```
 
 **Key exports:** `ai`, `VoidAi`, provider request types. See [AI](../../guide/ai.md) for provider setup and streaming examples.
+
+AI methods return promises and reject usage limits with `UsageLimit` from `void/limits`. Void routes and Pages actions return a structured HTTP 429 for uncaught limits. See [usage limits](../../guide/ai.md#usage-limits) for optional `instanceof UsageLimit` handling.
 
 ### Provider keys
 

@@ -6,7 +6,7 @@ outline: deep
 
 ## Resume, repair, recover, and upgrade
 
-You can omit an installation ID when only one is configured. With several installations, choose one interactively or pass its ID in CI.
+Run `void platform list` to find the installation slug beside its name. Lifecycle commands accept this slug, an installation ID, or a saved connection ID. You can omit the selector when only one installation is configured. With several installations, choose one interactively or pass its slug or ID in CI.
 
 ### Resume an installation
 
@@ -73,6 +73,8 @@ void platform upgrade [id]
 ```
 
 An upgrade validates the runtime, applies supported pending migrations, deploys the Workers, and checks their health. Existing Worker secrets are preserved.
+
+Before starting, Void checks access to the installation's Cloudflare account, Workers, and existing R2 buckets. If credentials are rejected, set `CLOUDFLARE_API_TOKEN` to a management token scoped to that account and retry. This overrides the installation's saved management token.
 
 ::: details Migration safety, credential rotation, and interrupted upgrades
 

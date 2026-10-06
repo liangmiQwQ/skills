@@ -18,13 +18,10 @@ import { getSandbox } from 'void/sandbox';
 
 export const POST = defineHandler(async (c) => {
   const sandbox = await getSandbox('default');
-  return sandbox.run(['node', '--version']).match({
-    ok: (result) =>
-      c.json({
-        exitCode: result.exitCode,
-        stdout: new TextDecoder().decode(result.stdout),
-      }),
-    limited: (limit) => limit.response({ message: 'Execution is temporarily unavailable.' }),
+  const result = await sandbox.run(['node', '--version']);
+  return c.json({
+    exitCode: result.exitCode,
+    stdout: new TextDecoder().decode(result.stdout),
   });
 });
 ```
@@ -42,33 +39,55 @@ const sandbox = await getSandbox(`user-${user.id}`, {
   inactivityTimeoutMs: 10 * 60 * 1000,
   enableInternet: false,
 });
-const response = await sandbox
-  .run(['node', '--version'], {
-    signal: AbortSignal.timeout(5_000),
-  })
-  .match({
-    ok: (result) => Response.json({ exitCode: result.exitCode }),
-    limited: (limit) => limit.response(),
-  });
+const result = await sandbox.run(['node', '--version'], {
+  signal: AbortSignal.timeout(5_000),
+});
 ```
 
 Commands take an executable and arguments as an array. For shell syntax, explicitly run `['sh', '-c', command]`. Execution options include `cwd` (default `/workspace`), `env`, `user`, `signal`, `pty`, `stdin`, `stdout`, and `stderr`.
 
-`run()` collects command output and handles limits throughout execution with one required `.match({ ok, limited })`. Both handlers are required. Other failures still reject.
+Sandbox operations return promises. `run()` resolves with `stdout` and `stderr` as `ArrayBuffer`s and the command's exit code. Usage limits reject with [`UsageLimit`](#usage-limits); other failures reject normally.
 
-`exec()` returns a lazy operation yielding a process through its `ok` handler. Use `output()` to collect `stdout` and `stderr` as `ArrayBuffer`s with the exit code, or read the streams and match `exitCode`. Both `output()` and `exitCode` require their own `.match({ ok, limited })`. Matching `exitCode` keeps a long command active during pauses in its output; unattended background commands can stop when the Sandbox becomes idle.
+`exec()` resolves with a process. Await `process.output()` to collect its output and exit code, or read the streams and await `process.exitCode`. Waiting for completion keeps a long command active during pauses in its output; unattended background commands can stop when the Sandbox becomes idle. A runtime limit can reject completion after a command has successfully started.
 
 Use `stdin: 'pipe'` for a writable input stream. `kill(signal?)` stops a process, and `resize(cols, rows)` resizes its terminal.
 
-File operations live under `sandbox.files`: `readFile`, `writeFile`, `stat`, `lstat`, `readDirectory`, `mkdir`, `rename`, and `remove`. Each file operation requires `.match({ ok, limited })`. `readFile()` yields a streaming `Response` to `ok`; use `.text()`, `.arrayBuffer()`, or `.body`. `writeFile()` accepts text, binary data, or a byte stream. Relative file paths require an explicit `cwd` option.
+File operations live under `sandbox.files`: `readFile`, `writeFile`, `stat`, `lstat`, `readDirectory`, `mkdir`, `rename`, and `remove`. Await `readFile()` to receive a streaming `Response`, then use `.text()`, `.arrayBuffer()`, or `.body`. `writeFile()` accepts text, binary data, or a byte stream. Relative file paths require an explicit `cwd` option.
 
-To reach a server inside the container, call `sandbox.fetch(port, new Request(url)).match({ ok, limited })`. `sandbox.running()` checks whether the container is running; `sandbox.destroy()` stops it.
+To reach a server inside the container, await `sandbox.fetch(port, new Request(url))`. `sandbox.running()` checks whether the container is running; `sandbox.destroy()` stops it.
 
 `getSandbox()` options include `inactivityTimeoutMs` (default ten minutes, maximum six hours), `enableInternet` (default `false`), and string `labels`. Internet access and labels take effect on the next container start. `binding` selects a custom native binding; managed platforms use the configured binding.
 
 For code that runs on both deployment targets, use `getSandbox()`. Direct access through `c.env.SANDBOX` is available only on local and native Cloudflare deployments.
 
-The `limited` handler receives `resource: 'sandbox'`, a `reason` of `concurrency` or `runtime_budget`, and `response({ message })` for a structured HTTP 429. Keep user input available so it can be retried. Resolving a Sandbox, checking `running()`, stopping a process, and `destroy()` do not need a quota handler; cleanup remains available after a limit.
+## Usage limits
+
+Sandbox limits reject with `SandboxLimitError`, which extends `UsageLimit` from `void/limits`. The error includes `resource: 'sandbox'` and a `reason` of `concurrency` or `runtime_budget`. Void route handlers and Pages actions automatically send a structured HTTP 429 when the error is left uncaught.
+
+Use `instanceof UsageLimit` to optionally handle both AI and Sandbox limits, or `instanceof SandboxLimitError` for Sandbox-specific handling:
+
+```ts
+import { defineHandler } from 'void';
+import { UsageLimit } from 'void/limits';
+import { getSandbox } from 'void/sandbox';
+
+export const POST = defineHandler(async (c) => {
+  const sandbox = await getSandbox('default');
+  try {
+    const result = await sandbox.run(['node', 'task.mjs']);
+    return c.json({ exitCode: result.exitCode });
+  } catch (error) {
+    if (error instanceof UsageLimit) {
+      return error.response({
+        message: 'Execution is temporarily unavailable. Try again shortly.',
+      });
+    }
+    throw error;
+  }
+});
+```
+
+Keep user input available so it can be retried. Checking `running()`, stopping a process, and `destroy()` remain available after a usage limit.
 
 ## State persistence
 

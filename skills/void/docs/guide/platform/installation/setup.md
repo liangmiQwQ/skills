@@ -12,7 +12,7 @@ For workers.dev testing, start the interactive install and choose your login met
 void platform install --workers-dev
 ```
 
-For a domain installation or Access setup, Void guides you to create a management API token and paste it into a masked prompt. Browser login can preview DNS, but cannot change it or configure Access. The token-creation link preselects the permissions for your choices; scope the token to your account and, when using a domain, its zone. No shell environment variable is needed for interactive installation.
+For a domain installation or Access setup, Void guides you to create a management API token and paste it into a masked prompt. Browser login can preview DNS, but cannot change it or configure Access. The token-creation link preselects the permissions for your choices. When using an existing domain, change the zone policy from **All Domains** to **Specified Domains** and select your zone, as the CLI prompt describes. No shell environment variable is needed for interactive installation.
 
 ::: details Use an existing management token from the shell
 

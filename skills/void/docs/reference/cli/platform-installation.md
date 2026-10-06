@@ -101,12 +101,12 @@ void platform rollback [id] --runtime <earlier-path> [--from-runtime <current-pa
 void platform repair [id] [--runtime <path>] [--dashboard-url <origin>] [--plan] [--yes]
 void platform disable [id] [--plan] [--yes]
 void platform enable [id] [--runtime <path>] [--plan] [--yes]
-void platform uninstall [id] [--plan] [--purge-data] [--keep-zone] [--yes]
+void platform uninstall [id] [--plan] [--purge-data | --purge-resources] [--keep-zone] [--yes]
 ```
 
 `discover --installation` limits recovery and endpoint verification to one installation in a shared Cloudflare account.
 
-Omit `id` when only one installation is configured, or choose from the interactive picker. Non-interactive commands need an ID when several installations exist. Commands that make changes also require `--yes`; `--plan` only previews changes.
+Use the installation slug shown beside its name in `void platform list`. Installation IDs and saved connection IDs also work. Lifecycle commands require local installation records; use `discover` to restore them on another machine. Omit `id` when only one installation is configured, or choose from the interactive picker. Non-interactive commands need a slug or ID when several installations exist. Commands that make changes also require `--yes`; `--plan` only previews changes.
 
 To add or explicitly change a separately deployed dashboard after installation,
 use `repair --dashboard-url <origin>` or `upgrade --dashboard-url <origin>`.
@@ -115,15 +115,15 @@ dashboard origin before maintenance can proceed. See [Optional Dashboard](../../
 
 After discovery on another machine, set `VOID_PLATFORM_DATABASE_URL`. An upgrade that preserves every deployed Worker also preserves its secrets. For an email-enabled installation without its encrypted recovery file, restore `VOID_PLATFORM_EMAIL_SIGNING_SECRET`; recreating only the email gateway needs that key and does not need the Cloudflare runtime token or JWT signing key. Recreating the API or proxy also requires the email key when email is enabled, in addition to their normal secrets. Recreating the API requires its original runtime-token, GitHub, R2, JWT, and project-encryption values; recreating the proxy requires the runtime token and JWT signing key.
 
-| Command     | Behavior                                                                                      |
-| ----------- | --------------------------------------------------------------------------------------------- |
-| `discover`  | Verifies remote ownership and restores local installation records without downloading secrets |
-| `repair`    | Recreates missing resources owned by the installer                                            |
-| `upgrade`   | Deploys the selected runtime and supported pending migrations                                 |
-| `rollback`  | Restores a declared-compatible earlier runtime without reversing PostgreSQL migrations        |
-| `disable`   | Blocks platform traffic through routing storage without removing data                         |
-| `enable`    | Restores traffic after checking the platform                                                  |
-| `uninstall` | Blocks traffic and removes eligible resources, retaining data by default                      |
+| Command     | Behavior                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `discover`  | Verifies remote ownership and restores local installation records without downloading secrets               |
+| `repair`    | Recreates missing resources owned by the installer                                                          |
+| `upgrade`   | Deploys the selected runtime and supported pending migrations                                               |
+| `rollback`  | Restores a declared-compatible earlier runtime without reversing PostgreSQL migrations                      |
+| `disable`   | Blocks app traffic and the platform API without removing data; only admin status and sign-in stay available |
+| `enable`    | Redeploys and verifies the platform Workers, then restores traffic                                          |
+| `uninstall` | Blocks traffic and removes eligible resources, retaining data by default                                    |
 
 Repair and upgrade preserve disabled state. New, resumed, and previously disabled installations block user traffic until all target Workers pass verification; the installer's health probes can still run. Routes and custom domains remain attached.
 
@@ -137,6 +137,8 @@ An upgrade completes after the new Workers pass health checks. If rollout fails,
 
 `platform rollback` restores a compatible earlier runtime without reversing database migrations. Pass its files with `--runtime`; if the installed version is custom, also supply that version with `--from-runtime`. Void refuses incompatible targets.
 
-Uninstall verifies remote ownership before removing anything. Data resources are retained unless you pass `--purge-data`. Workers, the Queues they use, R2, AI Gateway, DNS records, routes, custom domains, adopted resources, external PostgreSQL, and zones are always retained for manual review.
+Uninstall verifies remote ownership before removing anything. Data resources are retained unless you pass `--purge-data`. Workers, the Queues they use, R2, AI Gateway, DNS records, routes, custom domains, adopted resources, external PostgreSQL, and zones are retained for manual review.
+
+`--purge-resources` includes `--purge-data` and also deletes every other resource the installation created, including Workers, Queues, R2, AI Gateway, the platform DNS record, routes, custom domains, and installer-created Access resources. It removes only the Email Routing rules that send mail to the platform email gateway, and keeps zones, adopted resources, external PostgreSQL, other Email Routing settings, and API tokens. A route, custom domain, DNS record, or Access resource that no longer matches the installation's record is kept and listed. It refuses before any change while projects remain or resource reads are denied. Use the Edit permissions listed by `--plan`; read checks cannot verify them, so a denied deletion can stop uninstall after changes have begun. Rerun the same command to continue after an interruption, or after a plain or `--purge-data` uninstall stopped.
 
 See [Disable and Uninstall](../../guide/platform/installation/uninstall.md#remove-retained-resources) for the full removal policy and the cleanup order.

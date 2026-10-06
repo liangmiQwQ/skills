@@ -20,7 +20,7 @@ void platform config plans default <plan-id>
 void platform config plans sync
 ```
 
-Use `--plan` to preview changes and affected accounts; scripted mutations require `--yes`. Every command supports `--connection <registered-id-or-url>` and `--json`. `show` reports the effective limits, default, assignments, and pending account updates. `reset` restores a built-in plan's original limits and build instance size. Archived plans keep their existing accounts but cannot receive new assignments; change the default before archiving it. `remove` requires a replacement for a plan that has accounts or is the default. Changing the default affects only new accounts.
+Use `--plan` to preview changes and affected accounts; scripted mutations require `--yes`. Every command supports `--connection <slug-or-url>` and `--json`. `show` reports the effective limits, default, assignments, and pending account updates. `reset` restores a built-in plan's original limits and build instance size. Archived plans keep their existing accounts but cannot receive new assignments; change the default before archiving it. `remove` requires a replacement for a plan that has accounts or is the default. Changing the default affects only new accounts.
 
 For `add` and `set`, `--file` reads a JSON object with optional `name`, `limits`, `buildInstanceType`, and boolean `allowShortSlugs`. `limits` is a partial object of nonnegative whole numbers; `0` means unlimited by the plan. Build timeouts remain capped at the platform maximum of 60 minutes; `0` uses that maximum. Omitted settings keep their current values or the copied plan's values. `buildInstanceType` is `standard-3` or `standard-4`. `allowShortSlugs` permits future assignments of project slugs of five characters or fewer; existing URLs remain available. Storage quotas are not editable. See [Plans and Limits](../../guide/platform/administration/plans.md) for supported limits and examples.
 
@@ -60,7 +60,7 @@ alternative; the last method cannot be disabled. Disabling revokes human session
 created through that method, including operator sessions. Scoped deployment tokens
 remain valid; a human login token used as `VOID_TOKEN` is still revoked.
 
-Commands accept `--connection <registered-id-or-url>` and `--json`. Changes accept
+Commands accept `--connection <slug-or-url>` and `--json`. Changes accept
 `--plan` or `--yes`. For scripted configuration, use `--file <path>` for the
 nonsecret fields and `--client-secret-env <name>` for the environment variable
 containing the secret. Omit the secret when editing to retain its saved value.

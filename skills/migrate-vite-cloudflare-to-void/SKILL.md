@@ -9,7 +9,10 @@ Read the app's package manifest, Vite config, Worker entry, Cloudflare config,
 and migrations. Identify its framework, endpoints, bindings, and deployed Worker
 before changing them.
 
-Use the bundled guides under `../void/docs/`:
+Use the bundled guides under `node_modules/void/docs/`. Without a local Void
+installation, use `../../docs/` relative to this skill's real directory in the
+Void package, following any symlink. If the skill was copied without the package,
+use the guides at [https://void.cloud](https://void.cloud) instead:
 
 - `integrations/cloudflare.md` for existing Worker handoff and configuration.
 - `integrations/frameworks/overview.md` and the matching framework guide when

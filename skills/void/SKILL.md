@@ -5,9 +5,12 @@ description: Build Void apps and use the Void CLI by loading the relevant bundle
 
 # Void
 
-Read only the guides needed for the user's task. The bundled documentation lives
-under `docs/` beside this skill; in an installed project it is available at
-`node_modules/void/skills/void/docs/`.
+Read only the guides needed for the user's task. Prefer the app's installed
+documentation at `node_modules/void/docs/` so it matches the app's Void version.
+All `docs/` paths below are relative to that package's root. When using this
+skill globally without a local Void installation, follow the skill's symlink to
+its real directory and use `../../docs/` in the same Void package. If the skill
+was copied without the package, use the guides at [https://void.cloud](https://void.cloud) instead.
 
 Before running a Void command, find its group in `docs/reference/cli.md`, then
 read the matching page under `docs/reference/cli/` for syntax, options, and
@@ -19,8 +22,9 @@ Use `void` and `@void/*` in imports, examples, and package manifests. Follow the
 project's existing framework and deployment destination. Deploying to a Void
 platform requires an explicit `void connect <url>` first; never infer a platform
 from old examples, tokens, or project IDs.
-Platform hostnames passed to `void connect` default to HTTPS; include `http://`
-explicitly when connecting to a local HTTP platform.
+Platform hostnames passed to `void connect` default to HTTPS. Loopback hosts
+(`localhost`, `127.0.0.1`, and `[::1]`) default to HTTP: `void connect localhost:8787`.
+An explicit scheme overrides the default.
 For a one-time deployment elsewhere, connect to that platform, then set
 `VOID_API_URL` for the deploy command and pass `--project <slug>`. This preserves
 the app's existing saved destination, including when the target project is new.

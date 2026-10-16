@@ -80,7 +80,7 @@ the app's existing saved destination, including when the target project is new.
 - Read the relevant guide before changing configuration, persistent resources,
   authentication, or deployment workflows. The guides define current behavior;
   avoid copying a second set of instructions into this skill.
-- Before moving deployed Durable State or WebSocket definitions, read their
+- Before moving deployed Durable State, native Durable Object, or WebSocket definitions, read their
   guides and use `void info` to preserve resource names and instance keys.
 - Declare application environment keys in `env.ts` and access them through
   `void/env`; follow `docs/guide/env-vars.md` for local and production values.

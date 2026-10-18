@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - '@liangmi/vp-config@1.0.0'

@@ -125,7 +125,7 @@
       "source": "liangmiQwQ/vp-config",
       "sourceType": "github",
       "skillPath": "skills/use-vp-config/SKILL.md",
-      "computedHash": "c885c94c045304a62876acbddc99ae9f17543394dd2795725c746ea7c3ba4a23"
+      "computedHash": "dfae789671cdd83c2bc22606f611df78dc2a46dcebd8a412fac5169bcacde64d"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
@@ -161,7 +161,7 @@
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-best-practices/SKILL.md",
-      "computedHash": "3df585ad31aec78fe55c56c1411262737e6b231677a3153dec512a882fde80cd"
+      "computedHash": "4147a729067271c2743723c2b2d5b19999b3ce05eae059bbf988fb31411ea7d6"
     },
     "vue-debug-guides": {
       "source": "vuejs-ai/skills",

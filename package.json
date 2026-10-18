@@ -1,14 +1,16 @@
 {
   "private": true,
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "fmt": "oxfmt",
+    "fmt": "vp run cfmt",
+    "prepare": "vp config",
     "skills": "skills -y -a claude-code add ",
-    "sync": "bash sync.sh",
-    "prepare": "echo '#!/usr/bin/env sh\nnpx oxfmt' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+    "sync": "bash sync.sh"
   },
   "devDependencies": {
-    "oxfmt": "latest",
-    "skills": "latest"
+    "@liangmi/vp-config": "1.0.0",
+    "skills": "latest",
+    "vite-plus": "1.3.0"
   }
 }

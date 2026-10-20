@@ -161,13 +161,13 @@
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-best-practices/SKILL.md",
-      "computedHash": "4147a729067271c2743723c2b2d5b19999b3ce05eae059bbf988fb31411ea7d6"
+      "computedHash": "70a50d6ee12edf24e0be9a79f59ea55a581961e8a38de2a20b96c7ae766ce3ef"
     },
     "vue-debug-guides": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-debug-guides/SKILL.md",
-      "computedHash": "fa7b31c32a6717ae47cd2ea208773e27536225ad053a564effe656bf927fe9ef"
+      "computedHash": "29e3785d80245a64ead02602062d859f6e6553b506614ac75a1ead7f1e1529da"
     },
     "vue-jsx-best-practices": {
       "source": "vuejs-ai/skills",

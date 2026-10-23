@@ -19,6 +19,12 @@
       "skillPath": "skills/antfu-design/SKILL.md",
       "computedHash": "597125f7a45ba7328cd877a68b525611862bd230cf542ab3c343ace8fde3f30a"
     },
+    "antfu-issue-triage": {
+      "source": "antfu/skills",
+      "sourceType": "github",
+      "skillPath": "skills/antfu-issue-triage/SKILL.md",
+      "computedHash": "a6604cd24a1e341d49b783145b82f847f8b5c534b6be719066ddee3a74c9ff87"
+    },
     "choosing-tools": {
       "source": "liangmiQwQ/new",
       "sourceType": "github",

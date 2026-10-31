@@ -26,6 +26,7 @@ ska yetone/kill-ai-slop
 ska zerob13/skills --skill test-doctor
 ska antfu/design
 ska typesafe-ai/skills --skill typesafe-ai
+ska cloudflare/security-audit-skill
 sh void.sh
 
 # In `antfu/skills`, `antfu-create-pr` conflicts with our own `creating-pr` skill

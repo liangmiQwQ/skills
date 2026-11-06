@@ -23,7 +23,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-issue-triage/SKILL.md",
-      "computedHash": "efba543cad37aebdcfe00422cce3db46a232d470bc7f54781cc4b96351ce0cd9"
+      "computedHash": "34f50f30effac696d1bc4111c7cb21dc46da76aee1732b24207b930899e6acfa"
     },
     "antfu-query": {
       "source": "antfu/skills",
@@ -101,7 +101,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/nuxt/SKILL.md",
-      "computedHash": "03fc229d7c6a300b2ded6d9f984b45d8a554c2c991199c54760893e627c91371"
+      "computedHash": "c752b7c2ea40bbc4f4b9c07415128985eb613be46391441f5d282b24621e17f2"
     },
     "pinia": {
       "source": "antfu/skills",
@@ -113,7 +113,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/pnpm/SKILL.md",
-      "computedHash": "d1bd6f4fd38ff1ba33b857223c58a832d1cd5b488163ba0d389db449be472603"
+      "computedHash": "71fd67de7ced43ff8eab87b46183fa10f09428bb3d9ae44418b506bac858583e"
     },
     "security-audit": {
       "source": "cloudflare/security-audit-skill",
@@ -125,7 +125,7 @@
       "source": "slidevjs/slidev",
       "sourceType": "github",
       "skillPath": "skills/slidev/SKILL.md",
-      "computedHash": "745f8fbe6bd26c17699efff608548560e6d4b5ca65dbcff70d394f9d6f6374aa"
+      "computedHash": "bd437b2aadeb76032cd4c0c1fb0bf25971f925a77ba14f7a6a9aa0b77979581f"
     },
     "test-doctor": {
       "source": "zerob13/skills",
@@ -161,7 +161,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vite/SKILL.md",
-      "computedHash": "88ee465fd10f711efecc76e91e96accae2b229dda371614dcf219099c264a486"
+      "computedHash": "2dc52cad867c2673ab37f83fe992c25610d19f60587a308a262d091d0f36c1ad"
     },
     "vitepress": {
       "source": "antfu/skills",

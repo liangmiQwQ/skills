@@ -1,233 +1,233 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "antfu": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu/SKILL.md",
-      "computedHash": "46935e4dc837849a1df6fa968c3ec32c647bd0faecf34f7a3577503f85d7bc52"
+      "computedHash": "f4f1d301472e7623d7eaac7e5a72cbf35c00fd28439675a5ccff202a5dbe1110"
     },
     "antfu-create-pr": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-create-pr/SKILL.md",
-      "computedHash": "878fb679c379970a3bc7e6184ae8771fee5bf99f2d09a52884979666275fe7fe"
+      "computedHash": "1286bbd459327bafccb27f8d08ff3d69b67e50f86faf0958ebe6bb81688b0a7d"
     },
     "antfu-design": {
       "source": "antfu/design",
       "sourceType": "github",
       "skillPath": "skills/antfu-design/SKILL.md",
-      "computedHash": "597125f7a45ba7328cd877a68b525611862bd230cf542ab3c343ace8fde3f30a"
+      "computedHash": "7e56d325ccb6f2b2e2a43010102a92b1eb21c552a1f75949c6371a9a021575b9"
     },
     "antfu-issue-triage": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-issue-triage/SKILL.md",
-      "computedHash": "34f50f30effac696d1bc4111c7cb21dc46da76aee1732b24207b930899e6acfa"
+      "computedHash": "e5eb44deabce64be8b90017420590a9f30bd5a7497b30ca6a4fe7edbc28db4ed"
     },
     "antfu-query": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-query/SKILL.md",
-      "computedHash": "e01b67f821ba83de48b00bf0a3fe930239ba7bc9c075665cd4435d944c466b9b"
+      "computedHash": "754eaf1acedebcbc72e126e0db6a0212ed5a4f1ec57c5295e063aeaa39bec5ed"
     },
     "antfu-simplify": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-simplify/SKILL.md",
-      "computedHash": "d48dc27f87a7e1027ad2a8a5aa9cb9c171e3f5f31fa83deb71cfed242407c478"
+      "computedHash": "36a684783c6cafa65cd81a35c5c0952d849ba6d69981e01b84c6d2e935638b12"
     },
     "choosing-tools": {
       "source": "liangmiQwQ/new",
       "sourceType": "github",
       "skillPath": "skills/choosing-tools/SKILL.md",
-      "computedHash": "4294b888c3e4df0ebc31ea56dda0767832b5884f266e520cee380f36ebe7d6d1"
+      "computedHash": "f5742b8a303243be34fddf55cd08e8dada54eb2105ae9b3a61ff9bc99f8d63a0"
     },
     "create-adaptable-composable": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/create-adaptable-composable/SKILL.md",
-      "computedHash": "2f215126499d29a733be980ef9ce8f4ffb5f25a8831aec965d86c0cd21b2c5d2"
+      "computedHash": "7e2a1f90dc400bfee0067e0c9fb74180be650765a93088918456cd9fdedad635"
     },
     "creating-projects": {
       "source": "liangmiQwQ/new",
       "sourceType": "github",
       "skillPath": "skills/creating-projects/SKILL.md",
-      "computedHash": "789aa3b21e7a202fbc416f7db41e79d7b77fdd44a5b635b071aaaa13c875d518"
+      "computedHash": "fe3cdf9d8f50d62562b44683c63c534521364628c54cff8a0777ea1a16129bc9"
     },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "skillPath": "skills/find-skills/SKILL.md",
-      "computedHash": "913b9d37d0d54047dd65222bb8c67b2bf04e3cb87dcad1729068d7a8b2c8c396"
+      "computedHash": "7bc223e2aafbdbf6e50ea243ba6ef67fe432bb069ab439fea0390795dac0bf7f"
     },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
     },
     "global-projects": {
       "source": "liangmiQwQ/mo",
       "sourceType": "github",
       "skillPath": "skills/global-projects/SKILL.md",
-      "computedHash": "83720214eac4fa85c9cd5afa6a16e7c807fc5d2ab70d1332dcf559d5c53e1a89"
+      "computedHash": "8939723cdc2c56cc89962275b48108278b217006d6c3e629ef4ef43d2af74586"
     },
     "ielts-reading": {
       "source": "liangmiQwQ/language-learning",
       "sourceType": "github",
       "skillPath": "skills/ielts-reading/SKILL.md",
-      "computedHash": "d76ed85c1f308fdec40e543e996d4bc42957b9fba9d8dac7222435b1d394aee7"
+      "computedHash": "a9fa248d9ef1d73d21735efa07a9508c028119aa44fbd8825ad6397feaacd935"
     },
     "japanese-learning": {
       "source": "liangmiQwQ/language-learning",
       "sourceType": "github",
       "skillPath": "skills/japanese-learning/SKILL.md",
-      "computedHash": "d0beae2b55ec9d85efd7af00c3f7e490e5a5e1f4a5252358e7f998950979b5e3"
+      "computedHash": "991d5a9ff66119439f19bfc4096bd213185ce5f2762e304075afa23893700870"
     },
     "kill-ai-slop": {
       "source": "yetone/kill-ai-slop",
       "sourceType": "github",
       "skillPath": "skill/SKILL.md",
-      "computedHash": "459c60c76a498a08096117c9735ee5b1dccfaa72838b8de58c18cb667abdd2c0"
+      "computedHash": "ce756db3f65e106c76bc690a4442422f0bc2858ad3b7a1539610e7629dc11ed3"
     },
     "nitro": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/nitro/SKILL.md",
-      "computedHash": "ab59b74e7ca03aa5565f810f7a162f31522648ba5252c3ab6ad1c6ad0d8d3c95"
+      "computedHash": "ace89f8710836f13c59b7c6b1a272fa8039a0bf0b48c13322c382c68e6b77b7b"
     },
     "nuxt": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/nuxt/SKILL.md",
-      "computedHash": "c752b7c2ea40bbc4f4b9c07415128985eb613be46391441f5d282b24621e17f2"
+      "computedHash": "4c10d4e793c1d7f4308a3b66930d55d6531224ea887ae29d9bcc946cea2c8081"
     },
     "pinia": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/pinia/SKILL.md",
-      "computedHash": "b02c9f6c2e1ec051be0ca5025804d8262815221fd7f5020734b5a9ad87f15617"
+      "computedHash": "4aaaee39fcaa853a2bcdd6105cf22f4237ff0ad56899f53d59fca5b8e39f9058"
     },
     "pnpm": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/pnpm/SKILL.md",
-      "computedHash": "71fd67de7ced43ff8eab87b46183fa10f09428bb3d9ae44418b506bac858583e"
+      "computedHash": "fb4c2b0f98b1e651fb217f2070e3782f2fa58fd7d9fb2745e9fefaf945b8c60e"
     },
     "security-audit": {
       "source": "cloudflare/security-audit-skill",
       "sourceType": "github",
       "skillPath": "skills/security-audit/SKILL.md",
-      "computedHash": "98b97aad2873b3b9a8e064007c25e7827b493ba27fda8bfbdb41dab586767973"
+      "computedHash": "8513eb3b2c39b8d05ef4f47b32ef4d18280b93a5efb91d8df6272f7435034af5"
     },
     "slidev": {
       "source": "slidevjs/slidev",
       "sourceType": "github",
       "skillPath": "skills/slidev/SKILL.md",
-      "computedHash": "bd437b2aadeb76032cd4c0c1fb0bf25971f925a77ba14f7a6a9aa0b77979581f"
+      "computedHash": "5009e1e90efa148395212686d36e72c5318914a21851031f027865ac31eea519"
     },
     "test-doctor": {
       "source": "zerob13/skills",
       "sourceType": "github",
       "skillPath": "skills/test-doctor/SKILL.md",
-      "computedHash": "b0206973c6b0b5335431f750cd89fd62f7b542e4ccf65bc511ed34707e7299dc"
+      "computedHash": "6d4257d5fce74229bc822d879efce9f3f417fdb361ea5b02b2998162a03d1b56"
     },
     "typesafe-ai": {
       "source": "typesafe-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/typesafe-ai/SKILL.md",
-      "computedHash": "15e077333436b1e63e526c7c7559202816f4848dabefd3aa3d4c91988fd181b5"
+      "computedHash": "a6d55f954bdee91ffcb208c42fe31cfba71594bc4d6bf63c0fed22bdb81df3d9"
     },
     "unocss": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/unocss/SKILL.md",
-      "computedHash": "923725d71da1ab6bdb3ad2cb6808dd09aa51a88236d3b4bd19c325d1b73a3cfb"
+      "computedHash": "fa1fc7017b1c0021febc4892d1ae82b95b65d263ccd3b516af5cfce712c503df"
     },
     "use-vp-config": {
       "source": "liangmiQwQ/vp-config",
       "sourceType": "github",
       "skillPath": "skills/use-vp-config/SKILL.md",
-      "computedHash": "bea5b8921e3777c3948ab3588a42dd44ac6ca6be51153c40718387218963182e"
+      "computedHash": "4cbdd54ed18d5bf857efab0ce79fc596062edbc3122f779b85ba5a0788b8f45e"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/react-best-practices/SKILL.md",
-      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
+      "computedHash": "7991ed4fbecdac23f47c1a40c243e00a212a9e7f3604db93959b3ae11dffe299"
     },
     "vite": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vite/SKILL.md",
-      "computedHash": "2dc52cad867c2673ab37f83fe992c25610d19f60587a308a262d091d0f36c1ad"
+      "computedHash": "db9eea82d8bf6ce0f60a4a1d94a626c718df7d97160b5f1d5b150647e0c401b3"
     },
     "vitepress": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vitepress/SKILL.md",
-      "computedHash": "b7fd97083e6b963b478b430552861cf1514f39b8e3e7fdf0a348e86d76ecf418"
+      "computedHash": "2a3929e4623d827a084c90d33d1ce32a6a8467e97fe39236207a32f78313a2c2"
     },
     "vitest": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vitest/SKILL.md",
-      "computedHash": "90f1cee9326269c91b46a601b3a575491505d8e771009dacff01329381d45291"
+      "computedHash": "bd95e41d66d76da9008893c9bc48c30f0a68f352cd2b00017767f5e4c129501d"
     },
     "vue": {
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/vue/SKILL.md",
-      "computedHash": "29ad402cf2ff868b3b43160883fbc42e135223655a41d16092d0d205f2c1ed31"
+      "computedHash": "973126c2d026d971177def462808c99b65965b3f88e6769282aa300c214af66f"
     },
     "vue-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-best-practices/SKILL.md",
-      "computedHash": "2f4da0a95f19b225e784981413f727ff03bfdec7818a1e5bb0a477aab633095e"
+      "computedHash": "2b4ee45c8b9d77d99896c510ca1c0ecb56914b7bdda84dcbd872f3941d3b9f54"
     },
     "vue-debug-guides": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-debug-guides/SKILL.md",
-      "computedHash": "29e3785d80245a64ead02602062d859f6e6553b506614ac75a1ead7f1e1529da"
+      "computedHash": "ede183882859cc9abf9425590a8adc66823879dd70484d0ea197cfcf6b3fbba4"
     },
     "vue-jsx-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-jsx-best-practices/SKILL.md",
-      "computedHash": "f78720a9904eb748af26cff651aaf8c0c8e6a72f9ee30e6f0626fc45e33cfd9a"
+      "computedHash": "517d9776075b40a2d3e0b5100d712310bc1aab7071341860a0f406d2ba2cf496"
     },
     "vue-options-api-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-options-api-best-practices/SKILL.md",
-      "computedHash": "b35263a402e34a93e089cdf6d2e714d2dc1670a1f834ce67215552c4a70a864c"
+      "computedHash": "8700f2d8b4c0751a707d2a74000ab6c58087f455a90c5d86e00af0e1fca0961c"
     },
     "vue-pinia-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-pinia-best-practices/SKILL.md",
-      "computedHash": "d4ba913bec21910b8e37b2115cd964df2dc43ad62346b981c7b88d4ddc8cf792"
+      "computedHash": "3f7ab354e80570361571e9dbb6d90b9495d2d214c15fca788da6b8a181cd1cff"
     },
     "vue-router-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-router-best-practices/SKILL.md",
-      "computedHash": "f0745ed318c113e592ab4a9ded57ceadd0db2edab00cdb46b216c83f5ce0799e"
+      "computedHash": "6618c4b95765c4777de9d1d6500b372836c73ecc5ad0f4134ac65f71fb06513f"
     },
     "vue-testing-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "github",
       "skillPath": "skills/vue-testing-best-practices/SKILL.md",
-      "computedHash": "58d365899f54be9e5fa2c2e455093f9567620600578ae92aaa2f31d9b19a59ad"
+      "computedHash": "f4dc766acbf3883e5840669dbc347d519b084f559db6704ea6257b8e2443cdec"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+      "computedHash": "4f68ae07187fb0d1fb78c88b503d089da4cf5a9d9625d1f2e425b1590bf96d92"
     }
   }
 }

@@ -12,11 +12,9 @@ ska() {
 
 # ====== SKILLS ADDING AREA BEGIN =======
 
-ska vercel-labs/agent-skills --skill vercel-react-best-practices
 ska anthropics/skills --skill frontend-design
-ska vuejs-ai/skills --skill vue-best-practices
 ska slidevjs/slidev
-ska antfu/skills --skill antfu antfu-issue-triage nitro nuxt pinia pnpm unocss vite vitepress vitest
+ska antfu/skills --skill antfu-issue-triage nitro nuxt pinia pnpm unocss vite vitepress vitest
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/new
 ska liangmiQwQ/vp-config

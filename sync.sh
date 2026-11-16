@@ -12,24 +12,19 @@ ska() {
 
 # ====== SKILLS ADDING AREA BEGIN =======
 
-ska vercel-labs/agent-skills --skill web-design-guidelines vercel-react-best-practices
+ska vercel-labs/agent-skills --skill vercel-react-best-practices
 ska anthropics/skills --skill frontend-design
-ska vuejs-ai/skills --skill vue-router-best-practices
+ska vuejs-ai/skills --skill vue-best-practices
 ska slidevjs/slidev
-ska antfu/skills
+ska antfu/skills --skill antfu antfu-issue-triage nitro nuxt pinia pnpm unocss vite vitepress vitest
 ska liangmiQwQ/mo --skill global-projects
 ska liangmiQwQ/new
 ska liangmiQwQ/vp-config
 ska liangmiQwQ/language-learning
 ska yetone/kill-ai-slop
 ska zerob13/skills --skill test-doctor
-ska antfu/design
-ska typesafe-ai/skills --skill typesafe-ai
 ska cloudflare/security-audit-skill
 sh void.sh
-
-# In `antfu/skills`, `antfu-create-pr` conflicts with our own `creating-pr` skill
-rm -rf .claude/skills/antfu-create-pr
 
 # ====== SKILLS ADDING AREA ENDED =======
 

@@ -1,0 +1,145 @@
+{
+  "version": 2,
+  "skills": {
+    "antfu-issue-triage": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/antfu-issue-triage/SKILL.md",
+      "computedHash": "e5eb44deabce64be8b90017420590a9f30bd5a7497b30ca6a4fe7edbc28db4ed"
+    },
+    "choosing-tools": {
+      "source": "liangmiQwQ/new",
+      "commit": "f09939e8bb1c6fb3f7d94125ef4fb8413a2b1b85",
+      "sourceType": "github",
+      "skillPath": "skills/choosing-tools/SKILL.md",
+      "computedHash": "f5742b8a303243be34fddf55cd08e8dada54eb2105ae9b3a61ff9bc99f8d63a0"
+    },
+    "creating-projects": {
+      "source": "liangmiQwQ/new",
+      "commit": "f09939e8bb1c6fb3f7d94125ef4fb8413a2b1b85",
+      "sourceType": "github",
+      "skillPath": "skills/creating-projects/SKILL.md",
+      "computedHash": "fe3cdf9d8f50d62562b44683c63c534521364628c54cff8a0777ea1a16129bc9"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
+    },
+    "global-projects": {
+      "source": "liangmiQwQ/mo",
+      "commit": "6c769c5115f3f5c2f67a87deedd1337939fed01f",
+      "sourceType": "github",
+      "skillPath": "skills/global-projects/SKILL.md",
+      "computedHash": "8939723cdc2c56cc89962275b48108278b217006d6c3e629ef4ef43d2af74586"
+    },
+    "ielts-reading": {
+      "source": "liangmiQwQ/language-learning",
+      "commit": "69e7d80e76aa8dcf1c0c12096580147b54bb44c4",
+      "sourceType": "github",
+      "skillPath": "skills/ielts-reading/SKILL.md",
+      "computedHash": "a9fa248d9ef1d73d21735efa07a9508c028119aa44fbd8825ad6397feaacd935"
+    },
+    "japanese-learning": {
+      "source": "liangmiQwQ/language-learning",
+      "commit": "69e7d80e76aa8dcf1c0c12096580147b54bb44c4",
+      "sourceType": "github",
+      "skillPath": "skills/japanese-learning/SKILL.md",
+      "computedHash": "991d5a9ff66119439f19bfc4096bd213185ce5f2762e304075afa23893700870"
+    },
+    "kill-ai-slop": {
+      "source": "yetone/kill-ai-slop",
+      "commit": "f6e2ae32b30443ec7bd0da4da971ee18d8f8ffcb",
+      "sourceType": "github",
+      "skillPath": "skill/SKILL.md",
+      "computedHash": "ce756db3f65e106c76bc690a4442422f0bc2858ad3b7a1539610e7629dc11ed3"
+    },
+    "nitro": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/nitro/SKILL.md",
+      "computedHash": "ace89f8710836f13c59b7c6b1a272fa8039a0bf0b48c13322c382c68e6b77b7b"
+    },
+    "nuxt": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/nuxt/SKILL.md",
+      "computedHash": "4c10d4e793c1d7f4308a3b66930d55d6531224ea887ae29d9bcc946cea2c8081"
+    },
+    "pinia": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/pinia/SKILL.md",
+      "computedHash": "4aaaee39fcaa853a2bcdd6105cf22f4237ff0ad56899f53d59fca5b8e39f9058"
+    },
+    "pnpm": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/pnpm/SKILL.md",
+      "computedHash": "fb4c2b0f98b1e651fb217f2070e3782f2fa58fd7d9fb2745e9fefaf945b8c60e"
+    },
+    "security-audit": {
+      "source": "cloudflare/security-audit-skill",
+      "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+      "sourceType": "github",
+      "skillPath": "skills/security-audit/SKILL.md",
+      "computedHash": "8513eb3b2c39b8d05ef4f47b32ef4d18280b93a5efb91d8df6272f7435034af5"
+    },
+    "slidev": {
+      "source": "slidevjs/slidev",
+      "commit": "437f139ccd4c8482a193b217922e7800a5b3baec",
+      "sourceType": "github",
+      "skillPath": "skills/slidev/SKILL.md",
+      "computedHash": "5009e1e90efa148395212686d36e72c5318914a21851031f027865ac31eea519"
+    },
+    "test-doctor": {
+      "source": "zerob13/skills",
+      "commit": "c5e943fe2b2be768405fb1f891e897fa3072fd6c",
+      "sourceType": "github",
+      "skillPath": "skills/test-doctor/SKILL.md",
+      "computedHash": "6d4257d5fce74229bc822d879efce9f3f417fdb361ea5b02b2998162a03d1b56"
+    },
+    "unocss": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/unocss/SKILL.md",
+      "computedHash": "fa1fc7017b1c0021febc4892d1ae82b95b65d263ccd3b516af5cfce712c503df"
+    },
+    "use-vp-config": {
+      "source": "liangmiQwQ/vp-config",
+      "commit": "36c13aa8fd642ec325613a5a323fd54aab7e47f6",
+      "sourceType": "github",
+      "skillPath": "skills/use-vp-config/SKILL.md",
+      "computedHash": "4cbdd54ed18d5bf857efab0ce79fc596062edbc3122f779b85ba5a0788b8f45e"
+    },
+    "vite": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/vite/SKILL.md",
+      "computedHash": "db9eea82d8bf6ce0f60a4a1d94a626c718df7d97160b5f1d5b150647e0c401b3"
+    },
+    "vitepress": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/vitepress/SKILL.md",
+      "computedHash": "2a3929e4623d827a084c90d33d1ce32a6a8467e97fe39236207a32f78313a2c2"
+    },
+    "vitest": {
+      "source": "antfu/skills",
+      "commit": "4a6bb39e7b45e26402eb215393c51ccf5df1ca4c",
+      "sourceType": "github",
+      "skillPath": "skills/vitest/SKILL.md",
+      "computedHash": "bd95e41d66d76da9008893c9bc48c30f0a68f352cd2b00017767f5e4c129501d"
+    }
+  }
+}

@@ -11,7 +11,7 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "skillPath": "skills/antfu-create-pr/SKILL.md",
-      "computedHash": "1286bbd459327bafccb27f8d08ff3d69b67e50f86faf0958ebe6bb81688b0a7d"
+      "computedHash": "494a3fe8253dc8510aaf526aef6d6a7474a6060975073838de7377ac76bbd7d6"
     },
     "antfu-design": {
       "source": "antfu/design",

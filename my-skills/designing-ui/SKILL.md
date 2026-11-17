@@ -41,5 +41,5 @@ Default to a flat, border-defined layout. Avoid decorative depth unless explicit
 ### 5. Typography: Load the Right Font for the Context
 
 - For **hero / landing sections**: load an expressive or display font freely — don't default to system fonts
-- For **application UI**: prefer a clean **sans-serif** (Inter, Geist, etc.)
+- For **application UI**: prefer a clean **sans-serif** that fits the project, not the default Inter look
 - Avoid mixing more than two font families in one view

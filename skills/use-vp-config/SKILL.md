@@ -53,7 +53,7 @@ Passing `lint` or `fmt` in a member config, or chaining lint methods there, thro
    - Drop `fmt` options, lint rules, `test.environment`, and `pack` defaults that the preset already sets. Keep options that really differ, and tell the user which ones you kept.
    - Convert an existing `lint` object to flat config entries (see [Lint](#lint)), not a top-level object.
    - Keep `vite`, `server`, `plugins` and other app config unchanged. `liangmi()` passes them through.
-5. **Update scripts** to the cached tasks, for example `"build": "vp run cpack"`, `"test": "vp run ctest"`, `"check": "vp run ccheck"`. Add `"prepare": "vp config"` so the commit hook is installed. Remove separate `tsc --noEmit` steps, because lint type checking already covers them.
+5. **Update scripts** to the cached tasks, for example `"build": "vp run cpack"`, `"test": "vp run ctest"`, `"check": "vp run ccheck"`. Add `"prepare": "vp config"` to install the Git hook dispatcher. For automatic staged checks, include `vp staged` in `.vite-hooks/pre-commit` and commit that file. Remove separate `tsc --noEmit` steps, because lint type checking already covers them.
 6. **Run `vp check`** and fix what it reports. See [Fixing lint errors](#fixing-lint-errors).
 7. **Run `vp test`** and `vp pack` / `vp build` for projects that have them.
 
@@ -123,7 +123,6 @@ In a workspace, member entries include the path, like `liangmi/packages/cli/reac
 The preset is strict, and `denyWarnings` is on, so warnings fail too. A migration usually brings a wave of new reports. Fix the code first. Don't turn rules off in bulk without asking the user.
 
 - Many reports are fixable. Run `vp check --fix` first, then fix the rest by hand.
-- Relative imports need file extensions (`./util.ts`). TypeScript projects need `allowImportingTsExtensions` (with `noEmit`) or `rewriteRelativeImportExtensions` in `tsconfig.json`.
 - Classes are an error (`max-classes-per-file: 0`). Prefer functions and plain objects.
 - `console` is an error, except in `cli` projects and script files. `**/*.config.ts` files allow default exports but not `console`.
 - Test files must be named `*.test.ts`. `*.spec.ts` files are linted as tests, but reported for their name.

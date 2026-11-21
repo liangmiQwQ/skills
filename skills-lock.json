@@ -115,10 +115,10 @@
     },
     "use-vp-config": {
       "source": "liangmiQwQ/vp-config",
-      "commit": "36c13aa8fd642ec325613a5a323fd54aab7e47f6",
+      "commit": "bd45716b465596af1379e32934941994e74de801",
       "sourceType": "github",
       "skillPath": "skills/use-vp-config/SKILL.md",
-      "computedHash": "4cbdd54ed18d5bf857efab0ce79fc596062edbc3122f779b85ba5a0788b8f45e"
+      "computedHash": "b6345688e806cb6ff9f0cc6e25591ebb1112e6963e2d309f1e872a3a7ef9fbb1"
     },
     "vite": {
       "source": "antfu/skills",
